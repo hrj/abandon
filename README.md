@@ -50,7 +50,7 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 * Cross-platform. This was a major consideration to be able to collaborate with external auditors, accountants, etc. While, in theory, the existing implementations of Ledger are cross-platform, they need to compiled / packaged separately for each platform.
 * Simpler and more regular syntax. Some of the simplicity is because many features haven't been implemented yet. But, in general, I want to cut the flab and keep things simple and regular.
   For examle, identifiers can have numbers in them. Although this might sound trivial, the language has to be carefully designed for this. In `ledger`, this doesn't work because it messes up with the syntax for currencies.
-* An interactive GUI for viewing reports.
+* An interactive GUI for viewing reports. The GUI watches for changes in input files and automatically refreshes when it detects a change.
 
 ## Installation
 * Make sure you have installed *Oracle Java 7*.
