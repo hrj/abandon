@@ -1,10 +1,8 @@
 ## About
 
-_abandon_
+> **abandon** _noun_: freedom from inhibitions, restraint, concern, or worry.
 
-   n: freedom from inhibitions, restraint, concern, or worry.
-
-Abandon is a text based, double-entry accounting system. It is heavily inspired by [Ledger](http://http://www.ledger-cli.org/), another similar system.
+Abandon is a text based, double-entry accounting system. It is heavily inspired by [Ledger](http://http://www.ledger-cli.org/) but leans towards simplicity.
 
 Example entry:
 ```
@@ -21,8 +19,7 @@ Example entry:
 * Reporting: supports both textual and interactive, graphical reports.
 
 ## Differences from Ledger
-
-(why yet another fork)
+(or why yet another fork)
 * Cross-platform. This was a major consideration to be able to collaborate with external auditors, accountants, etc. While, in theory, the existing implementations of Ledger are cross-platform, they need to compiled / packaged separately for each platform.
 * Simpler and more regular syntax. Some of the simplicity is because many features haven't been implemented yet. But, in general, I want to cut the flab and keep things simple and regular.
   For examle, identifiers can have numbers in them. Although this might sound trivial, the language has to be carefully designed for this. In `ledger`, this doesn't work because it messes up with the syntax for currencies.
@@ -30,7 +27,7 @@ Example entry:
 
 ## Roadmap
 
-Many basic features are still missing. Upto version 0.5 the focus will be on adding basic features such as:
+Many features are still missing. Until version 0.5 the focus will be on adding basic features such as:
 
 * Support for currencies
 * Reporting options (sorting, grouping, time limits, etc)
