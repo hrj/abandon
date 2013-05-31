@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 
 object HelloBuild extends Build {
-    lazy val root = Project(id = "abandon", base = file(".")) aggregate(base, cli, gui)
+    lazy val root = Project(id = "abandon", base = file(".")) dependsOn(cli, gui)
 
     lazy val base:Project = Project(id = "base", base = file("base"))
 
