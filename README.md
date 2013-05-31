@@ -11,7 +11,7 @@ Example entry:
     Assets:Cash
 ```
 
-The above will subtract `200` from the account `Expense:Food` and (automatically) balance the transaction by add `200` to the account `Assets:Cash`.
+The above will subtract `200` from the account `Expense:Food` and (automatically) balance the transaction by adding `200` to the account `Assets:Cash`.
 
 `Expense:Food` will become an account nested under the account `Expense`. If we add another transaction like this:
 ```
@@ -53,7 +53,23 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 * An interactive GUI for viewing reports.
 
 ## Installation
-TODO
+* Make sure you have installed *Oracle Java 7*.
+  As of today, OpenJDK won't work, nor will Oracle Java 6 since this app requires JavaFX (an upcoming technology).
+* Download and extract the archive from [here](https://www.dropbox.com/sh/6qsgvd7ldw58q76/c3CWrPgoE-)
+* Use the `*.sh` files to run on `*nix` or the `*.bat` files to run on Windows.
+
+## Running
+
+The command line options are:
+```
+   -c <config-file-path>        Specifies the path to a config file
+   -i <input-file-path>         Specifies the path to an input file
+```
+
+The config file can specify which reports to generate and the report's settings. Eventually all of these options would be
+exposed as command line parameters too.
+
+As of now, the preferred way of running the program is by specifying a config file. Look at `testCases/complete.conf` for an example config file.
 
 ## Roadmap
 
