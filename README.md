@@ -44,7 +44,7 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 * Input is through plain-text files. The syntax is well defined and yet human friendly, just like `ledger`'s.
 * Portable across various operating systems; based on the Java platform.
 * Reporting: supports both textual and interactive, graphical reports.
-  The GUI watches for changes in input files and automatically refreshes when it detects a change. [Screenshots](http://imgur.com/a/GLhV5#0)
+  The GUI watches for changes in input files and automatically refreshes when it detects a change. ([Screenshots](http://imgur.com/a/GLhV5#0))
 
 
 ## Differences from Ledger
@@ -53,6 +53,7 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 * Simpler and more regular syntax. Some of the simplicity is because many features haven't been implemented yet. But, in general, I want to cut the flab and keep things simple and regular.
   For examle, identifiers can have numbers in them. Although this might sound trivial, the language has to be carefully designed for this. In `ledger`, this doesn't work because it messes up with the syntax for currencies.
 * An interactive GUI for viewing reports. 
+
 ## Installation
 * Make sure you have installed *Oracle Java 7*.
   As of today, OpenJDK won't work, nor will Oracle Java 6 since this app requires JavaFX (an upcoming technology).
