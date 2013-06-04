@@ -4,14 +4,19 @@
 
 Abandon is a text based, double-entry accounting system. It is heavily inspired by [Ledger](http://http://www.ledger-cli.org/) but leans towards simplicity.
 
-Example entry:
+![Abandon Screenshot](http://i.imgur.com/NjsTssB.png)
+
+[(Screenshot Gallery)](http://imgur.com/a/GLhV5#0)
+
+## Example Input / Output
+If we enter this into a text file:
 ```
 2013/1/1
     Expense:Food                -200
     Assets:Cash
 ```
 
-The above will subtract `200` from the account `Expense:Food` and (automatically) balance the transaction by adding `200` to the account `Assets:Cash`.
+... and run it through `abandon`, the program will subtract `200` from the account `Expense:Food` and (automatically) balance the transaction by adding `200` to the account `Assets:Cash`.
 
 `Expense:Food` will become an account nested under the account `Expense`. If we add another transaction like this:
 ```
@@ -38,13 +43,14 @@ The last line shows the total of the top level accounts, which in this case is `
 
 Note: The second `0.00` is for accounts that get printed on right. In this simple example there is nothing to show on the right side of the report.
 
+
 ## Features at a glance
 
 * Double entry accounting
 * Input is through plain-text files. The syntax is well defined and yet human friendly, just like `ledger`'s.
 * Portable across various operating systems; based on the Java platform.
 * Reporting: supports both textual and interactive, graphical reports.
-  The GUI watches for changes in input files and automatically refreshes when it detects a change. ([Screenshots](http://imgur.com/a/GLhV5#0))
+  The GUI watches for changes in input files and automatically refreshes when it detects a change.
 
 
 ## Differences from Ledger
