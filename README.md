@@ -1,5 +1,3 @@
-## About
-
 > **abandon** _noun_: freedom from inhibitions, restraint, concern, or worry.
 
 Abandon is a text based, double-entry accounting system. It can generate both textual and graphical interactive reports. It is heavily inspired by [Ledger](http://http://www.ledger-cli.org/) but leans towards simplicity.
