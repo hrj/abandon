@@ -2,10 +2,10 @@
 
 **Abandon** is a text based, double-entry accounting system. It can generate both textual and graphical interactive reports. It is heavily inspired by [Ledger](http://http://www.ledger-cli.org/) but leans towards simplicity.
 
-### Sample Text report
+#### Sample Text report
 ![Abandon Text output Screenshot](http://i.imgur.com/3mks4uv.png)
 
-### Sample Graphical report
+#### Sample Graphical report
 ![Abandon Screenshot](http://i.imgur.com/NjsTssB.png)
 
 [(Screenshot Gallery)](http://imgur.com/a/GLhV5#0)
