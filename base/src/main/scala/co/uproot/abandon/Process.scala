@@ -134,8 +134,11 @@ object Processor {
       path
     } else {
       val parentFilePath = new java.io.File(parentFile).getParent()
-      val basePath = if (parentFilePath == null) "" else parentFilePath
-      basePath + java.io.File.separator + path
+      if (parentFilePath == null) {
+        path
+      } else {
+        parentFilePath + java.io.File.separator + path
+      }
     }
   }
 
