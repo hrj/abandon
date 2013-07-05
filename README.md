@@ -65,8 +65,8 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 ## Installation
 * Make sure you have installed *Oracle Java 7*.
   As of today, OpenJDK won't work, nor will Oracle Java 6 since this app requires JavaFX (an upcoming technology).
-* Download and extract the archive from [here](https://www.dropbox.com/sh/6qsgvd7ldw58q76/c3CWrPgoE-)
-* Use the `*.sh` files to run on `*nix` or the `*.bat` files to run on Windows.
+* Download and extract the archive from [here](https://github.com/hrj/abandon/releases)
+* Use the `*.sh` files to run on `*nix` and `Mac` or the `*.bat` files to run on `Windows`.
 
 ## Running
 
