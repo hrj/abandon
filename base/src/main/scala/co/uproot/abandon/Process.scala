@@ -10,7 +10,7 @@ class TxnGroup(_children:Seq[DetailedTransaction], _groupComment: Option[String]
   val children = _children.map(_.copy(parent = Some(this)))
   val groupComment = _groupComment
 }
-case class DetailedTransaction(name: AccountName, delta: BigDecimal, date: Date, parent:Option[TxnGroup] = None) {
+case class DetailedTransaction(name: AccountName, delta: BigDecimal, date: Date, commentOpt: Option[String], parent:Option[TxnGroup] = None) {
 }
 
 class AccountState(initAmounts: Map[AccountName, BigDecimal], initTxns: Seq[DetailedTransaction]) {
@@ -166,12 +166,12 @@ object Processor {
       txWithAmount foreach { t =>
         val delta = t.amount.get.evaluate(evaluationContext)
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date)
+        detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date, t.commentOpt)
       }
       txNoAmount foreach { t =>
         val delta = -txTotal
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date)
+        detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date, t.commentOpt)
       }
       accState.updateAmounts(new TxnGroup(detailedTxns, tx.comment))
       assert(txTotal equals Zero, "Transactions do not balance")

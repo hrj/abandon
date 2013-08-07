@@ -96,7 +96,7 @@ object CurrReports {
         val dateLabel = new Label(t.date.formatYYYYMMDD) {style="-fx-font-weight:bold"}
         val grpCommentLabel = grp.groupComment.map(c => new Label("  ;"+c) {style="-fx-font-weight:bold"})
         val childLabels = grp.children.map(c=>
-          ("  %-"+maxNameLength+"s %20.2f") format (c.name, c.delta)
+          ("  %-"+maxNameLength+"s %20.2f %s") format (c.name, c.delta, c.commentOpt.map("  ; " + _).getOrElse(""))
         ).map(new Label(_))
         padding = Insets(10, 10, 10, 10)
         content = (dateLabel +: grpCommentLabel.toSeq) ++ childLabels

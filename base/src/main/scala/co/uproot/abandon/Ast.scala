@@ -21,7 +21,7 @@ case class AccountName(fullPath:Seq[String]) {
   val depth = fullPath.length
 }
 
-case class SingleTransaction(accName:AccountName, amount:Option[NumericExpr])
+case class SingleTransaction(accName:AccountName, amount:Option[NumericExpr], commentOpt:Option[String])
 
 sealed class ASTEntry
 

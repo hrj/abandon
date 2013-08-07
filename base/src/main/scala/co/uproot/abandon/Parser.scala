@@ -179,7 +179,9 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   }
   private lazy val code = (("(" ~> numericExpr) <~ ")")
   private lazy val payee = ((allButEOL)+) ^^ {case x => x.mkString(" ")}
-  private lazy val txDetails:PackratParser[SingleTransaction] = line(accountName ~ opt(numericExpr)) ^^ { case name ~ amount => SingleTransaction(name, amount) }
+  private lazy val txDetails:PackratParser[SingleTransaction] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
+    case name ~ amount ~ commentOpt => SingleTransaction(name, amount, commentOpt)
+  }
   private lazy val accountName = rep1sep(ident, ":") ^^ { case path => AccountName(path) }
 
   private lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
