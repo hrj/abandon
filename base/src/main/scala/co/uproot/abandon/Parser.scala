@@ -19,7 +19,7 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
       | '-' ~> number ^^ { case num => NumericLit("-" + num) }
       | number ^^ NumericLit
       | eol ^^^ EOL
-      | comment ^^^ Comment
+      | comment ^^ { case commentContents => CommentToken(commentContents.toString)}
       | EofCh ^^^ EOF
       | delim
       | '\"' ~> failure("Unterminated string")
@@ -30,8 +30,8 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
   case object EOL extends Token {
     def chars = "<eol>"
   }
-  case object Comment extends Token {
-    def chars = "<comment>"
+  case class CommentToken(commentContents : String) extends Token {
+    def chars = commentContents
   }
 
   def checkKeyword(xs: List[Any]) = {
@@ -40,7 +40,7 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
   }
 
   def eol = elem("eol", _ == '\n')
-  override def comment = ';' ~ rep(chrExcept(EofCh, '\n'))
+  override def comment = ';' ~> rep(chrExcept(EofCh, '\n')) ^^ {case chars => chars.mkString}
 
   /**
    * A string is a collection of zero or more Unicode characters, wrapped in
@@ -116,7 +116,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val integer = numericLit ^^ { case x => x.toInt }
   private lazy val number:PackratParser[BigDecimal] = accept("number", { case lexical.NumericLit(n) => BigDecimal(n) })
   private lazy val eol = accept("<eol>", { case lexical.EOL => })
-  private lazy val comment = accept("<comment>", { case lexical.Comment => })
+  private lazy val comment = accept("<comment>", { case lexical.CommentToken(c) => c})
   private lazy val anyEol = ((comment?) ~ eol)
   private lazy val allButEOL:PackratParser[String] = accept("any", {
     case t:lexical.Token if !t.isInstanceOf[lexical.EOL.type] && !t.isInstanceOf[lexical.ErrorToken] => t.chars
@@ -127,6 +127,9 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val fragSeparators = anyEol*
   private def line[T](p: Parser[T]): Parser[T] = p <~ (((comment?)~eol)*)
 
+  // End of line commment
+  private def eolComment  = (comment?)<~eol
+
   lazy val abandon:Parser[Seq[ASTEntry]] = phrase((fragSeparators ~> rep1sep(fragment, fragSeparators)) <~ fragSeparators)
   lazy val abandonxyz = phrase(numericExpr)
 
@@ -134,7 +137,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val includeFrag = (includeKeyword ~> fileName) ^^ {case name => IncludeDirective(name)}
   private lazy val payeeDefFrag = (payeeKeyword ~> stringOrAllUntilEOL) ^^ {case payee => PayeeDef(payee.mkString(""))}
   private lazy val tagDefFrag = (tagKeyword ~> stringOrAllUntilEOL) ^^ {case tag => TagDef(tag.mkString(""))}
-  
+   
   private lazy val fileName = stringOrAllUntilEOL
 
   private lazy val accountDefFrag = ((accountKeyword ~> accountName) <~ anyEol) ~ accountDefDetails ^^ {
@@ -171,8 +174,8 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val booleanExpression:PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
 
-  private lazy val txFrag = line(dateFrag ~ (code?) ~ (payee?)) ~ (txDetails+) ^^ {
-    case date ~ optAnnotation ~ optPayee ~ transactions => Transaction(date, transactions, optPayee)
+  private lazy val txFrag = ((dateFrag ~ (code?) ~ (payee?)) <~ eol) ~ (eolComment?) ~ (txDetails+) ^^ {
+    case date ~ optAnnotation ~ optPayee ~ optComment ~ transactions => Transaction(date, transactions, optPayee, optComment.flatten)
   }
   private lazy val code = (("(" ~> numericExpr) <~ ")")
   private lazy val payee = ((allButEOL)+) ^^ {case x => x.mkString(" ")}
