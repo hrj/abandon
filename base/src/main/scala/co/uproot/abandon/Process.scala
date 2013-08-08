@@ -6,9 +6,9 @@ import scala.collection.immutable.PagedSeq
 
 case class AppState(accState: AccountState, accDeclarations: Seq[AccountDeclaration])
 
-class TxnGroup(_children:Seq[DetailedTransaction], _groupComment: Option[String]) {
+class TxnGroup(_children:Seq[DetailedTransaction], _groupComments: List[String]) {
   val children = _children.map(_.copy(parent = Some(this)))
-  val groupComment = _groupComment
+  val groupComments = _groupComments
 }
 case class DetailedTransaction(name: AccountName, delta: BigDecimal, date: Date, commentOpt: Option[String], parent:Option[TxnGroup] = None) {
 }
@@ -158,7 +158,6 @@ object Processor {
     val transactions = filterByType[Transaction](entries)
     val accState = new AccountState(Map(), Nil)
     transactions foreach { tx =>
-      println("Processing", tx)
       val (txWithAmount, txNoAmount) = tx.transactions.partition(t => t.amount.isDefined)
       assert(txNoAmount.length <= 1, "More than one account with unspecified amount: " + txNoAmount)
       var txTotal = Zero
@@ -173,7 +172,7 @@ object Processor {
         txTotal += delta
         detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date, t.commentOpt)
       }
-      accState.updateAmounts(new TxnGroup(detailedTxns, tx.comment))
+      accState.updateAmounts(new TxnGroup(detailedTxns, tx.comments))
       assert(txTotal equals Zero, "Transactions do not balance")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)

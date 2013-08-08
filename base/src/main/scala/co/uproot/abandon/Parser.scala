@@ -174,7 +174,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val booleanExpression:PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
 
-  private lazy val txFrag = ((dateFrag ~ (code?) ~ (payee?)) <~ eol) ~ (eolComment?) ~ (txDetails+) ^^ {
+  private lazy val txFrag = ((dateFrag ~ (code?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (txDetails+) ^^ {
     case date ~ optAnnotation ~ optPayee ~ optComment ~ transactions => Transaction(date, transactions, optPayee, optComment.flatten)
   }
   private lazy val code = (("(" ~> numericExpr) <~ ")")
