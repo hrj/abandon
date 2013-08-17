@@ -93,7 +93,7 @@ object CurrReports {
       val maxNameLength = maxElseZero(txns.flatMap(_.parent.get.children.map(_.name.fullPathStr.length)))
       content = txns.map(t => new VBox {
         val grp = t.parent.get
-        val dateLabel = new Label(t.date.formatYYYYMMDD) {style="-fx-font-weight:bold"}
+        val dateLabel = new Label(s"""${t.date.formatYYYYMMDD} ${grp.payeeOpt.getOrElse("")}""") {style="-fx-font-weight:bold"}
         val grpCommentLabels = grp.groupComments.map(c => new Label("  ;"+c) {style="-fx-font-weight:bold"})
         val childLabels = grp.children.map(c=>
           ("  %-"+maxNameLength+"s %20.2f %s") format (c.name, c.delta, c.commentOpt.map("  ; " + _).getOrElse(""))
