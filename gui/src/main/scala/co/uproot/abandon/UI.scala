@@ -50,11 +50,15 @@ object AbandonUI extends JFXApp {
     new Tab {
       text = "Info"
       closable = false
-      content = new Label("TODO: Show info about inputs, etc") {
+      content = new Label("Please Wait: Processing input files") {
         alignmentInParent = Pos.CENTER
         style = "-fx-font:16 Sans;"
       }
     }
+
+  def updateInfo(appState: AppState, settings: Settings, processedFiles: Set[String]) = {
+    infoTab.content = new Label("Processed files:\n" + processedFiles.mkString("\n"))
+  }
 
   val tabPane = new TabPane {
     def addTab(t: Tab): Unit = {
@@ -131,11 +135,13 @@ object AbandonUI extends JFXApp {
       } else {
         CurrReports.updateAll(appState, settings)
       }
+      updateInfo(appState, settings, processedFiles)
     } else {
       // TODO Show error
     }
     processedFiles
   }
+
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(parameters.raw)
     settingsResult match {
