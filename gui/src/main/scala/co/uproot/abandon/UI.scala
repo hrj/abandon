@@ -105,10 +105,7 @@ object AbandonUI extends JFXApp {
 
   val mainPane =
     new BorderPane {
-      top = new Label("Menu")
       center = tabPane
-      // center = new Label("Center") 
-      // bottom = new Label("Footer") 
       bottom = StatusBar
     }
 
