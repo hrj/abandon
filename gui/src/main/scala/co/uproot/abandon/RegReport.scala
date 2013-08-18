@@ -26,17 +26,22 @@ object RegReport extends Report {
     new TreeView(reportRoot) {
       style = fontStyle
       onKeyTyped = { e: KeyEvent =>
-        // println(e)
-        val txStage = new Stage() {
-          scene = new Scene(800, 500) {
-            root = new ScrollPane {
-              content = TxnReport.mkTxnView(selectionModel().getSelectedItems().head.getValue.txns)
+        if (e.character equals "\r") {
+          val selectedItemOpt = selectionModel().getSelectedItems().headOption
+          selectedItemOpt foreach { selectedItem =>
+            // println(e)
+            val txStage = new Stage() {
+              scene = new Scene(800, 500) {
+                root = new ScrollPane {
+                  content = TxnReport.mkTxnView(selectedItem.getValue.txns)
+                }
+              }
+              initModality(Modality.APPLICATION_MODAL)
+              title = "Transactions"
             }
+            txStage.show
           }
-          initModality(Modality.APPLICATION_MODAL)
-          title = "Transactions"
         }
-        txStage.show
       }
       cellFactory = { v =>
         val delegate = new javafx.scene.control.TreeCell[RegisterReportEntry]() {
