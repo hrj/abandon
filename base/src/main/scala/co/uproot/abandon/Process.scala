@@ -6,10 +6,14 @@ import scala.collection.immutable.PagedSeq
 
 case class AppState(accState: AccountState, accDeclarations: Seq[AccountDeclaration])
 
-class TxnGroup(_children:Seq[DetailedTransaction], val payeeOpt: Option[String], val groupComments: List[String]) {
+class TxnGroup(
+  _children: Seq[DetailedTransaction],
+  val annotationOpt: Option[String],
+  val payeeOpt: Option[String],
+  val groupComments: List[String]) {
   val children = _children.map(_.copy(parent = Some(this)))
 }
-case class DetailedTransaction(name: AccountName, delta: BigDecimal, date: Date, commentOpt: Option[String], parent:Option[TxnGroup] = None) {
+case class DetailedTransaction(name: AccountName, delta: BigDecimal, date: Date, commentOpt: Option[String], parent: Option[TxnGroup] = None) {
 }
 
 class AccountState(initAmounts: Map[AccountName, BigDecimal], initTxns: Seq[DetailedTransaction]) {
@@ -20,8 +24,8 @@ class AccountState(initAmounts: Map[AccountName, BigDecimal], initTxns: Seq[Deta
   def amounts = _amounts
   def txns = _txns
 
-  def updateAmounts(txnGroup:TxnGroup) = {
-    txnGroup.children foreach {txn =>
+  def updateAmounts(txnGroup: TxnGroup) = {
+    txnGroup.children foreach { txn =>
       updateAmount(txn.name, txn.delta, txn.date)
       _txns :+= txn
     }
@@ -114,9 +118,9 @@ object Processor {
     (parseError, astEntries, processedFiles.toSet)
   }
 
-  def getSource(fileName: String):io.Source = {
+  def getSource(fileName: String): io.Source = {
     var retryCount = 0
-    var source : io.Source = null
+    var source: io.Source = null
     while (retryCount < 10) {
       try {
         source = io.Source.fromFile(fileName)
@@ -171,7 +175,7 @@ object Processor {
         txTotal += delta
         detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date, t.commentOpt)
       }
-      accState.updateAmounts(new TxnGroup(detailedTxns, tx.payeeOpt, tx.comments))
+      accState.updateAmounts(new TxnGroup(detailedTxns, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, "Transactions do not balance")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)

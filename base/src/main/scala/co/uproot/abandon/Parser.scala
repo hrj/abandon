@@ -174,10 +174,12 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val booleanExpression:PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
 
-  private lazy val txFrag = ((dateFrag ~ (code?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (txDetails+) ^^ {
-    case date ~ optAnnotation ~ optPayee ~ optComment ~ transactions => Transaction(date, transactions, optPayee, optComment.flatten)
+  private lazy val txFrag = ((dateFrag ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (txDetails+) ^^ {
+    case date ~ annotationOpt ~ optPayee ~ optComment ~ transactions =>
+      val annotationStrOpt = annotationOpt.map(_.mkString(""))
+      Transaction(date, transactions, annotationStrOpt, optPayee, optComment.flatten)
   }
-  private lazy val code = (("(" ~> numericExpr) <~ ")")
+  private lazy val annotation = (("(" ~> (ident|numericLit)+) <~ ")")
   private lazy val payee = ((allButEOL)+) ^^ {case x => x.mkString(" ")}
   private lazy val txDetails:PackratParser[SingleTransaction] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
     case name ~ amount ~ commentOpt => SingleTransaction(name, amount, commentOpt)
@@ -204,7 +206,6 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
     getIndexOf(months, monthStr).orElse(getIndexOf(shortMonths, monthStr))
   }
 
-  // TODO: catch exception from joda date constructor instead of checking manually
   private def isValidDate(y: Int, m: Int, d: Int) = {
     try {
       new LocalDate(y, m, d)

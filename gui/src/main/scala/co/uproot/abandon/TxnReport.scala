@@ -14,11 +14,14 @@ object TxnReport extends Report {
       val maxNameLength = maxElseZero(txns.flatMap(_.parent.get.children.map(_.name.fullPathStr.length)))
       content = txns.map(t => new VBox {
         val grp = t.parent.get
-        val grpLabel =
+        val grpLabel = {
+          val annotationStr = grp.annotationOpt.map(" ("+_+")").getOrElse("")
+          val payeeStr = grp.payeeOpt.map(" " + _).getOrElse("")
           new Label(
-            s"""${t.date.formatYYYYMMDD} ${grp.payeeOpt.getOrElse("")}""") {
+            s"${t.date.formatYYYYMMDD}$annotationStr$payeeStr") {
             style = "-fx-font-weight:bold"
           }
+        }
         val grpCommentLabels = grp.groupComments.map(
           c => new Label("  ;" + c) {
             style = "-fx-font-weight:bold" 
