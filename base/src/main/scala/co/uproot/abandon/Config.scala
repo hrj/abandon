@@ -35,7 +35,7 @@ object SettingsHelper {
         makeSettings(configFileName)
       case _ =>
         val inputs = cliConf.inputs.get.getOrElse(Nil)
-        val allReport = BalanceReportSettings("All Balances", None)
+        val allReport = BalanceReportSettings("All Balances", None, true)
         Right(Settings(inputs, Seq(allReport), ReportOptions(Nil)))
     }
   }
@@ -63,8 +63,11 @@ object SettingsHelper {
     val reportType = config.getString("type")
     val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
     reportType match {
-      case "balance" => BalanceReportSettings(title, accountMatch)
-      case "register" => RegisterReportSettings(title, accountMatch)
+      case "balance" =>
+        val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") {_.getBoolean(_)}.getOrElse(false)
+        BalanceReportSettings(title, accountMatch, showZeroAmountAccounts)
+      case "register" =>
+        RegisterReportSettings(title, accountMatch)
     }
   }
 }
@@ -77,7 +80,10 @@ abstract class ReportSettings(val title:String, val accountMatch: Option[Seq[Str
   }
 }
 
-case class BalanceReportSettings(_title: String, _accountMatch: Option[Seq[String]]) extends ReportSettings(_title, _accountMatch) {
+case class BalanceReportSettings(
+  _title: String,
+  _accountMatch: Option[Seq[String]],
+  showZeroAmountAccounts: Boolean) extends ReportSettings(_title, _accountMatch) {
 }
 
 case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[String]]) extends ReportSettings(_title, _accountMatch) {

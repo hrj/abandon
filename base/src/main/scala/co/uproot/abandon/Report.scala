@@ -11,8 +11,9 @@ object Reports {
     def show(width: Int, a: AccountTreeState, maxNameLength: Int, treePrefix: String = "", isLastChild: Boolean = false, isParentLastChild: Boolean = false, prefix: Option[String] = None, forceIndent: Option[Int] = None): Seq[BalanceReportEntry] = {
       val indent = forceIndent.getOrElse(a.name.depth)
       val amountIsZero = a.amount equals Zero
+      val hideAccount = (!reportSettings.showZeroAmountAccounts) && amountIsZero
       val renderableChildren = a.childrenNonZero
-      val onlyChildren = (renderableChildren == 1) && amountIsZero
+      val onlyChildren = (renderableChildren == 1) && hideAccount
 
       val myPrefix = treePrefix + (
         if (indent <= 1) {
@@ -53,7 +54,7 @@ object Reports {
         )
       )
       if (renderableChildren == 0) {
-        if (amountIsZero) {
+        if (hideAccount) {
           Nil
         } else {
           Seq(selfRender)
