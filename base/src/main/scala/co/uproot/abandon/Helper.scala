@@ -19,4 +19,25 @@ object Helper {
       prev
     }
   }
+
+  private val months = List("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+  private val shortMonths = List("Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec")
+
+  private def getIndexOf[T](l: Seq[T], e: T) = {
+    val index = l.indexOf(e)
+    if (index >= 0) {
+      Some(index + 1)
+    } else {
+      None
+    }
+  }
+
+  def getMonthNumber(monthStr: String) = {
+    getIndexOf(months, monthStr).orElse(getIndexOf(shortMonths, monthStr))
+  }
+
+  def getShortMonth(monthNumber:Int) = {
+    shortMonths(monthNumber - 1)
+  }
+
 }

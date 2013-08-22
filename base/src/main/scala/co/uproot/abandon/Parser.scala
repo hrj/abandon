@@ -187,24 +187,11 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val accountName = rep1sep(ident, ":") ^^ { case path => AccountName(path) }
 
   private lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
-    case y ~ (m: Int) ~ d if (isValidDate(y, m, d)) => Date(y, m, d)
-    case y ~ (m: String) ~ d if (getMonthNumber(m).isDefined && isValidDate(y, getMonthNumber(m).get, d)) => Date(y, getMonthNumber(m).get, d)
+    case y ~ (m: Int) ~ d if (isValidDate(y, m, d)) =>
+      Date(y, m, d)
+    case y ~ (m: String) ~ d if (Helper.getMonthNumber(m).isDefined && isValidDate(y, Helper.getMonthNumber(m).get, d)) =>
+      Date(y, Helper.getMonthNumber(m).get, d)
   }, { case y ~ m ~ d => List(y, m, d).mkString("/") + " is not a valid calendar date" })
-
-  private val months = List("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-  private val shortMonths = List("Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec")
-  private def getIndexOf[T](l: Seq[T], e: T) = {
-    val index = l.indexOf(e)
-    if (index >= 0) {
-      Some(index + 1)
-    } else {
-      None
-    }
-  }
-
-  private def getMonthNumber(monthStr: String) = {
-    getIndexOf(months, monthStr).orElse(getIndexOf(shortMonths, monthStr))
-  }
 
   private def isValidDate(y: Int, m: Int, d: Int) = {
     try {
