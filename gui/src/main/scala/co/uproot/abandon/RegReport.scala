@@ -11,12 +11,16 @@ import scalafx.scene.control.ScrollPane
 import scalafx.stage.Modality
 
 object RegReport extends Report {
+  private def getNestedTxns(item: TreeItem[RegisterReportEntry]):Seq[DetailedTransaction] = {
+    item.getValue.txns ++ item.children.flatMap(getNestedTxns(_))
+  }
 
   def mkRegisterReport(appState: AppState, reportSettings: RegisterReportSettings) = {
     val registers = Reports.registerReport(appState, reportSettings)
     val registerItems = registers.map { r =>
       new TreeItem(RegisterReportEntry(Nil, r._1)) {
         children = r._2.map(new TreeItem(_))
+        expanded = true
       }
     }
     val reportRoot = new TreeItem(RegisterReportEntry(Nil, "Register report (account, delta, total)")) {
@@ -31,9 +35,9 @@ object RegReport extends Report {
           selectedItemOpt foreach { selectedItem =>
             // println(e)
             val txStage = new Stage() {
-              scene = new Scene(800, 500) {
+              scene = new Scene(800, 600) {
                 root = new ScrollPane {
-                  content = TxnReport.mkTxnView(selectedItem.getValue.txns)
+                  content = TxnReport.mkTxnView(getNestedTxns(selectedItem))
                 }
               }
               initModality(Modality.APPLICATION_MODAL)
