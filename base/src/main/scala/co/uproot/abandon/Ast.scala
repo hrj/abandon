@@ -12,6 +12,10 @@ case class Date(year: Int, month: Int, day: Int) {
   def formatYYYYMMDD = {
     f"$year%4d / $month%d / $day%d"
   }
+
+  def formatYYYYMMMDD = {
+    f"$year%4d ${Helper.getShortMonth(month)} $day%d"
+  }
 }
 
 case class AccountName(fullPath:Seq[String]) {

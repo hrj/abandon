@@ -46,7 +46,7 @@ object BalanceReport extends Report {
     new HBox {
       def getWidth = width
       hgrow = Priority.ALWAYS
-      style = fontStyle
+      styleClass += styleClassName
       content = Seq(
         new BalanceView(left),
         new BalanceView(right)

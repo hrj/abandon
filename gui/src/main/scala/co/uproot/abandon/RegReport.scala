@@ -28,7 +28,7 @@ object RegReport extends Report {
       expanded = true
     }
     new TreeView(reportRoot) {
-      style = fontStyle
+      styleClass += styleClassName
       onKeyTyped = { e: KeyEvent =>
         if (e.character equals "\r") {
           val selectedItemOpt = selectionModel().getSelectedItems().headOption
@@ -39,6 +39,7 @@ object RegReport extends Report {
                 root = new ScrollPane {
                   content = TxnReport.mkTxnView(getNestedTxns(selectedItem))
                 }
+                stylesheets += "default_theme.css"
               }
               initModality(Modality.APPLICATION_MODAL)
               title = "Transactions"

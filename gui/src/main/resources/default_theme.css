@@ -1,0 +1,13 @@
+.report {
+  -fx-font-family:Monospace;
+  -fx-font-size:15pt;
+}
+
+.txn-date-line {
+  -fx-font-weight: bold;
+  -fx-text-fill: #555;
+}
+.txn-comment {
+  -fx-font-weight: bold;
+  -fx-text-fill: #4169e1;
+}

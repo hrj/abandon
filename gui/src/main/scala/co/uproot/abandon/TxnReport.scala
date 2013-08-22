@@ -10,24 +10,23 @@ object TxnReport extends Report {
 
   def mkTxnView(txns: Seq[DetailedTransaction]) = {
     new VBox {
-      style = fontStyle
+      styleClass += styleClassName
       val maxNameLength = maxElseZero(txns.flatMap(_.parent.get.children.map(_.name.fullPathStr.length)))
       content = txns.map(t => new VBox {
         val grp = t.parent.get
         val grpLabel = {
-          val annotationStr = grp.annotationOpt.map(" ("+_+")").getOrElse("")
+          val annotationStr = grp.annotationOpt.map(" (" + _ + ")").getOrElse("")
           val payeeStr = grp.payeeOpt.map(" " + _).getOrElse("")
           new Label(
-            s"${t.date.formatYYYYMMDD}$annotationStr$payeeStr") {
-            style = "-fx-font-weight:bold"
+            s"${t.date.formatYYYYMMMDD}$annotationStr$payeeStr") {
+            styleClass += "txn-date-line"
           }
         }
         val grpCommentLabels = grp.groupComments.map(
           c => new Label("  ;" + c) {
-            style = "-fx-font-weight:bold" 
-          }
-        )
-        val childLabels = grp.children.map{c =>
+            styleClass += "txn-comment"
+          })
+        val childLabels = grp.children.map { c =>
           val commentStr = c.commentOpt.map("  ; " + _).getOrElse("")
           ("  %-" + maxNameLength + "s %20.2f %s") format (c.name, c.delta, commentStr)
         }.map(new Label(_))

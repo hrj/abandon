@@ -14,7 +14,7 @@ import collection.JavaConverters._
 import scalafx.geometry.Pos
 
 trait Report {
-  protected val fontStyle = "-fx-font:15 Monospace;"
+  protected val styleClassName = "report"
 }
 
 object CurrReports {
@@ -113,6 +113,7 @@ object AbandonUI extends JFXApp {
     title = "Abandon"
     scene = new Scene(1000, 600) {
       root = mainPane
+      stylesheets += "default_theme.css"
     }
     onCloseRequest = new EventHandler[WindowEvent] {
       def handle(e: WindowEvent) = {
