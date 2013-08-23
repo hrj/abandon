@@ -106,20 +106,17 @@ object Reports {
     val groupedTxns = filteredState.txns.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
 
     var reportGroups = Seq[RegisterReportGroup]()
-    var amounts = Map[AccountName, BigDecimal]()
-    var groupState = new AccountState(amounts, Nil)
+    var groupState = new AccountState(Map[AccountName, BigDecimal](), Nil)
 
     groupedTxns.foreach {
       case (month, txns) =>
-        val prevAmounts = amounts
         txns foreach { txn =>
           groupState.updateAmount(txn.name, txn.delta, txn.date)
         }
-        amounts = groupState.amounts
+        val amounts = groupState.amounts
 
         val matchingAmounts = amounts.filter { case (accountName, amount) =>
-          val prevOpt = prevAmounts.get(accountName)
-          prevOpt.map(_ != amount).getOrElse(true)
+          txns.exists(_.name == accountName)
         }
 
         val diff = matchingAmounts.map { case (accountName, amount) =>
