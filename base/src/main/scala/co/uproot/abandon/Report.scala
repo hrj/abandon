@@ -109,18 +109,18 @@ object Reports {
     var groupState = new AccountState(Map[AccountName, BigDecimal](), Nil)
 
     groupedTxns.foreach {
-      case (month, txns) =>
-        txns foreach { txn =>
+      case (month, groupTxns) =>
+        groupTxns foreach { txn =>
           groupState.updateAmount(txn.name, txn.delta, txn.date)
         }
         val amounts = groupState.amounts
 
         val matchingAmounts = amounts.filter { case (accountName, amount) =>
-          txns.exists(_.name == accountName)
+          groupTxns.exists(_.name == accountName)
         }
 
         val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
-          val myTxns = txns.filter(_.name equals accountName)
+          val myTxns = groupTxns.filter(_.name equals accountName)
           val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
           (accountName, myTxns, render)
         }
