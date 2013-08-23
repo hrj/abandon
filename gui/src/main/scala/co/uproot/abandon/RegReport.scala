@@ -17,9 +17,9 @@ object RegReport extends Report {
 
   def mkRegisterReport(appState: AppState, reportSettings: RegisterReportSettings) = {
     val registers = Reports.registerReport(appState, reportSettings)
-    val registerItems = registers.map { r =>
-      new TreeItem(RegisterReportEntry(Nil, r._1)) {
-        children = r._2.map(new TreeItem(_))
+    val registerItems = registers.map { rg =>
+      new TreeItem(RegisterReportEntry(Nil, rg.groupTitle)) {
+        children = rg.entries.map(new TreeItem(_))
         expanded = true
       }
     }

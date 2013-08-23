@@ -4,6 +4,7 @@ import Helper.{ Zero, maxElseZero }
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
 case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
+case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
 
 object Reports {
 
@@ -99,18 +100,19 @@ object Reports {
     s"$year / ${Helper.monthLabels(month - 1)}"
   }
 
-  def registerReport(state: AppState, reportSettings: RegisterReportSettings) = {
+  def registerReport(state: AppState, reportSettings: RegisterReportSettings) : Seq[RegisterReportGroup] = {
     val filteredState = state.accState.filterAndClone(reportSettings.isAccountMatching)
-
-    var amounts = Map[AccountName, BigDecimal]()
-    var groupState = new AccountState(amounts, Nil)
 
     val groupedTxns = filteredState.txns.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
 
-    groupedTxns.map {
-      case (month, txnGroup) =>
+    var reportGroups = Seq[RegisterReportGroup]()
+    var amounts = Map[AccountName, BigDecimal]()
+    var groupState = new AccountState(amounts, Nil)
+
+    groupedTxns.foreach {
+      case (month, txns) =>
         val prevAmounts = amounts
-        txnGroup foreach { txn =>
+        txns foreach { txn =>
           groupState.updateAmount(txn.name, txn.delta, txn.date)
         }
         amounts = groupState.amounts
@@ -121,18 +123,19 @@ object Reports {
         }
 
         val diff = matchingAmounts.map { case (accountName, amount) =>
-          val txns = txnGroup.filter(_.name equals accountName)
-          val render = "%-50s %20.2f %20.2f" format (accountName, txns.foldLeft(Zero)(_ + _.delta), amount)
-          (accountName, txns, render)
+          val myTxns = txns.filter(_.name equals accountName)
+          val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
+          (accountName, myTxns, render)
         }
 
         val sortedDiff = diff.toSeq.sortBy(_._1.toString)
 
-        (
+        reportGroups :+= RegisterReportGroup(
           formatMonth(month),
           sortedDiff.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
         )
     }
+    reportGroups
   }
 
 }
