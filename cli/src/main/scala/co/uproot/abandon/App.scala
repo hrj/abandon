@@ -33,10 +33,9 @@ object AbandonApp extends App {
                 println(totalLine)
               case regSettings: RegisterReportSettings =>
                 val regReport = Reports.registerReport(appState, regSettings)
-                regReport foreach {
-                  case RegisterReportGroup(groupTitle, entries) =>
-                    println(groupTitle)
-                    entries.map(_.render) foreach { e => println("   " + e) }
+                regReport foreach {reportGroup =>
+                    println(reportGroup.groupTitle)
+                    reportGroup.entries.map(_.render) foreach { e => println("   " + e) }
                 }
             }
           }
