@@ -8,6 +8,7 @@ case class AppState(accState: AccountState, accDeclarations: Seq[AccountDeclarat
 
 class TxnGroup(
   _children: Seq[DetailedTransaction],
+  val date: Date,
   val annotationOpt: Option[String],
   val payeeOpt: Option[String],
   val groupComments: List[String]) {
@@ -175,7 +176,7 @@ object Processor {
         txTotal += delta
         detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date, t.commentOpt)
       }
-      accState.updateAmounts(new TxnGroup(detailedTxns, tx.annotationOpt, tx.payeeOpt, tx.comments))
+      accState.updateAmounts(new TxnGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, "Transactions do not balance")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)

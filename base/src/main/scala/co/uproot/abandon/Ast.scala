@@ -8,13 +8,23 @@ class InputError(msg: String) extends RuntimeException(msg)
 
 import ASTHelper._
 
-case class Date(year: Int, month: Int, day: Int) {
+case class Date(year: Int, month: Int, day: Int){
   def formatYYYYMMDD = {
     f"$year%4d / $month%d / $day%d"
   }
 
   def formatYYYYMMMDD = {
     f"$year%4d ${Helper.getShortMonth(month)} $day%d"
+  }
+
+  def toInt = {
+    year * 400 + month * 40 + day
+  }
+}
+
+object DateOrdering extends Ordering[Date] {
+  def compare(x:Date, y:Date) = {
+    x.toInt - y.toInt
   }
 }
 
