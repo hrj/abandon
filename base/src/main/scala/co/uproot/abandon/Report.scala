@@ -112,17 +112,23 @@ object Reports {
           groupState.updateAmount(txn.name, txn.delta, txn.date)
         }
         amounts = groupState.amounts
-        val diff = amounts.filter { a =>
-          val prevOpt = prevAmounts.get(a._1)
-          prevOpt.map(_ != a._2).getOrElse(true)
-        }.map { d =>
-          val txns = txnGroup.filter(_.name equals d._1)
-          (d._1, txns.foldLeft(Zero)(_ + _.delta), d._2, txns)
+
+        val matchingAmounts = amounts.filter { case (accountName, amount) =>
+          val prevOpt = prevAmounts.get(accountName)
+          prevOpt.map(_ != amount).getOrElse(true)
         }
+
+        val diff = matchingAmounts.map { case (accountName, amount) =>
+          val txns = txnGroup.filter(_.name equals accountName)
+          val render = "%-50s %20.2f %20.2f" format (accountName, txns.foldLeft(Zero)(_ + _.delta), amount)
+          (accountName, txns, render)
+        }
+
         val sortedDiff = diff.toSeq.sortBy(_._1.toString)
+
         (
           formatMonth(month),
-          sortedDiff.map(d => RegisterReportEntry(d._4, "%-50s %20.2f %20.2f" format (d._1, d._2, d._3)))
+          sortedDiff.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
         )
     }
   }
