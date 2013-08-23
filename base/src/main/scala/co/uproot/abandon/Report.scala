@@ -119,17 +119,17 @@ object Reports {
           txns.exists(_.name == accountName)
         }
 
-        val diff = matchingAmounts.map { case (accountName, amount) =>
+        val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
           val myTxns = txns.filter(_.name equals accountName)
           val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
           (accountName, myTxns, render)
         }
 
-        val sortedDiff = diff.toSeq.sortBy(_._1.toString)
+        val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
 
         reportGroups :+= RegisterReportGroup(
           formatMonth(month),
-          sortedDiff.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
+          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
         )
     }
     reportGroups
