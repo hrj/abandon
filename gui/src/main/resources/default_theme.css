@@ -5,7 +5,7 @@
 
 .txn-date-line {
   -fx-font-weight: bold;
-  -fx-text-fill: #555;
+  -fx-text-fill: #444;
 }
 .txn-comment {
   -fx-font-weight: bold;
