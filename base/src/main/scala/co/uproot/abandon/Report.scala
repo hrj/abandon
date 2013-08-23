@@ -105,7 +105,9 @@ object Reports {
     var amounts = Map[AccountName, BigDecimal]()
     var groupState = new AccountState(amounts, Nil)
 
-    filteredState.txns.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1).map {
+    val groupedTxns = filteredState.txns.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+
+    groupedTxns.map {
       case (month, txnGroup) =>
         val prevAmounts = amounts
         txnGroup foreach { txn =>
