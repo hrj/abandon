@@ -1,6 +1,13 @@
 > **abandon** _noun_: freedom from inhibitions, restraint, concern, or worry.
 
-**Abandon** is a text based, double-entry accounting system. It can generate both textual and graphical interactive reports. It is heavily inspired by [Ledger](http://http://www.ledger-cli.org/) but leans towards simplicity.
+**Abandon** is a text based, double-entry accounting system. Transactions are entered in plain text files. You can use your
+favorite text editor to edit these files, and can use your favorite SCM to version control them.
+
+From these input text files, Abandon can present textual reports
+or graphical reports. The graphical reports are useful when you need to interactively explore the data.
+
+Abandon is inspired by [Ledger](http://http://www.ledger-cli.org/) but is simpler to use, has a more regular syntax, has a GUI
+and is cross-platform. Abandon tries to maintain syntax compatibility with Ledger whenever possible.
 
 #### Sample Text report
 ![Abandon Text output Screenshot](http://i.imgur.com/3mks4uv.png)
