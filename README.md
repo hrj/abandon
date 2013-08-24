@@ -64,8 +64,8 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 
 ## Differences from Ledger
 (or why yet another fork)
-* Cross-platform. This was a major consideration to be able to collaborate with external auditors, accountants, etc. While, in theory, the existing implementations of Ledger are cross-platform, they need to compiled / packaged separately for each platform.
-* Simpler and more regular syntax. Some of the simplicity is because many features haven't been implemented yet. But, in general, I want to cut the flab and keep things simple and regular.
+* Cross-platform. This was a major consideration to be able to collaborate with external auditors, accountants, etc. While, in theory, the existing implementations of Ledger are cross-platform, they need to be compiled and packaged separately for each platform.
+* Simpler and more regular syntax. Some of the simplicity is because of missing features. But, in general, I want to cut the flab and keep things simple and regular.
   For example, identifiers can have numbers in them. Although this might sound trivial, the language has to be carefully designed for this. In `ledger`, this doesn't work because it messes up with the syntax for currencies.
 * An interactive GUI for viewing reports. 
 
