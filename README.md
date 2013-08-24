@@ -18,7 +18,7 @@ and is cross-platform. Abandon tries to maintain syntax compatibility with Ledge
 
 [(Screenshot Gallery)](http://imgur.com/a/GLhV5#0)
 
-### Example Input / Output
+### Quick start
 If we enter this into a text file:
 ```
 2013/1/1
