@@ -17,7 +17,7 @@ and is cross-platform. Abandon tries to maintain syntax compatibility with Ledge
 
 [(Screenshot Gallery)](http://imgur.com/a/GLhV5#0)
 
-## Example Input / Output
+### Example Input / Output
 If we enter this into a text file:
 ```
 2013/1/1
@@ -53,7 +53,7 @@ The last line shows the total of the top level accounts, which in this case is `
 Note: The second `0.00` is for accounts that get printed on right. In this simple example there is nothing to show on the right side of the report.
 
 
-## Features at a glance
+### Features at a glance
 
 * Double entry accounting
 * Input is through plain-text files. The syntax is well defined and yet human friendly, just like `ledger`'s.
@@ -62,20 +62,20 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
   The GUI watches for changes in input files and automatically refreshes when it detects a change.
 
 
-## Differences from Ledger
+### Differences from Ledger
 (or why yet another fork)
 * Cross-platform. This was a major consideration to be able to collaborate with external auditors, accountants, etc. While, in theory, the existing implementations of Ledger are cross-platform, they need to be compiled and packaged separately for each platform.
 * Simpler and more regular syntax. Some of the simplicity is because of missing features. But, in general, I want to cut the flab and keep things simple and regular.
   For example, identifiers can have numbers in them. Although this might sound trivial, the language has to be carefully designed for this. In `ledger`, this doesn't work because it messes up with the syntax for currencies.
 * An interactive GUI for viewing reports. 
 
-## Installation
+### Installation
 * Make sure you have installed *Oracle Java 7*.
   As of today, OpenJDK won't work, nor will Oracle Java 6 since this app requires JavaFX (an upcoming technology).
 * Download and extract the archive from [here](https://github.com/hrj/abandon/releases)
 * Use the `*.sh` files to run on `*nix` and `Mac` or the `*.bat` files to run on `Windows`.
 
-## Running
+### Running
 
 The command line options are:
 ```
@@ -88,13 +88,13 @@ exposed as command line parameters too.
 
 As of now, the preferred way of running the program is by specifying a config file. Look at `testCases/complete.conf` for an example config file.
 
-## Roadmap
+### Roadmap
 
 Many features are still missing. Until version 0.5 the focus will be on adding basic features such as:
 
 * Support for currencies
 * Reporting options (sorting, grouping, time limits, etc)
 
-## License
+### License
 Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 (that is free to use, share, modify, but attribution is required)
