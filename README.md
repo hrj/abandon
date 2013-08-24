@@ -1,7 +1,8 @@
 > **abandon** _noun_: freedom from inhibitions, restraint, concern, or worry.
 
 **Abandon** is a text based, double-entry accounting system. Transactions are entered in plain text files. You can use your
-favorite text editor to edit these files, and can use your favorite SCM to version control them.
+favorite text editor to edit these files, and can use your favorite [VCS](http://en.wikipedia.org/wiki/Revision_control) for versioning
+and collaboration.
 
 From these input text files, Abandon can present textual reports
 or graphical reports. The graphical reports are useful when you need to interactively explore the data.
