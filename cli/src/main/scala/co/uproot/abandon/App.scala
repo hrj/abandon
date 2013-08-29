@@ -19,11 +19,11 @@ object AbandonApp extends App {
 
     println(bookReportSettings.account)
 
+    val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))))
     bookReport foreach { reportGroup =>
       println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
 
-        val maxNameLength = maxElseZero(e.txns.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))
         e.txns foreach { txn =>
           val parent = txn.parentOpt.get
           println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
