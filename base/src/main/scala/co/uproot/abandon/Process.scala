@@ -12,9 +12,17 @@ class TxnGroup(
   val annotationOpt: Option[String],
   val payeeOpt: Option[String],
   val groupComments: List[String]) {
-  val children = _children.map(_.copy(parent = Some(this)))
+  val children = _children.map(_.copy(parentOpt = Some(this)))
+
+  def dateLineStr = {
+    val annotationStr = annotationOpt.map(" (" + _ + ")").getOrElse("")
+    val payeeStr = payeeOpt.map(" " + _).getOrElse("")
+    s"${date.formatYYYYMMMDD}$annotationStr$payeeStr"
+  }
 }
-case class DetailedTransaction(name: AccountName, delta: BigDecimal, date: Date, commentOpt: Option[String], parent: Option[TxnGroup] = None) {
+case class DetailedTransaction(name: AccountName, delta: BigDecimal, commentOpt: Option[String], parentOpt: Option[TxnGroup] = None) {
+  def date = parentOpt.get.date
+  var resultAmount = Zero
 }
 
 class AccountState(initAmounts: Map[AccountName, BigDecimal], initTxns: Seq[DetailedTransaction]) {
@@ -27,13 +35,17 @@ class AccountState(initAmounts: Map[AccountName, BigDecimal], initTxns: Seq[Deta
 
   def updateAmounts(txnGroup: TxnGroup) = {
     txnGroup.children foreach { txn =>
-      updateAmount(txn.name, txn.delta, txn.date)
+      val updatedAmount = updateAmount(txn.name, txn.delta, txn.date)
+      txn.resultAmount = updatedAmount
       _txns :+= txn
     }
   }
+
   def updateAmount(name: AccountName, delta: BigDecimal, date: Date) = {
     val origAmount = _amounts.get(name).getOrElse(Zero)
-    _amounts += (name -> (origAmount + delta))
+    val updatedAmount = (origAmount + delta)
+    _amounts += (name -> updatedAmount)
+    updatedAmount
   }
 
   def mkTree = {
@@ -160,8 +172,9 @@ object Processor {
     val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
 
     val transactions = filterByType[Transaction](entries)
+    val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
     val accState = new AccountState(Map(), Nil)
-    transactions foreach { tx =>
+    sortedTxns foreach { tx =>
       val (txWithAmount, txNoAmount) = tx.transactions.partition(t => t.amount.isDefined)
       assert(txNoAmount.length <= 1, "More than one account with unspecified amount: " + txNoAmount)
       var txTotal = Zero
@@ -169,12 +182,12 @@ object Processor {
       txWithAmount foreach { t =>
         val delta = t.amount.get.evaluate(evaluationContext)
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(t.accName, delta, t.commentOpt)
       }
       txNoAmount foreach { t =>
         val delta = -txTotal
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, tx.date, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(t.accName, delta, t.commentOpt)
       }
       accState.updateAmounts(new TxnGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, "Transactions do not balance")
