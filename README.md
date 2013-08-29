@@ -57,8 +57,9 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 ### Features at a glance
 
 * Double entry accounting
+* Infinite precision arithmetic
 * Input is through plain-text files. The syntax is well defined and yet human friendly, just like `ledger`'s.
-* Portable across various operating systems; based on the Java platform.
+* Portable across many operating systems; based on the Java platform.
 * Reporting: supports both textual and interactive, graphical reports.
   The GUI watches for changes in input files and automatically refreshes when it detects a change.
 
