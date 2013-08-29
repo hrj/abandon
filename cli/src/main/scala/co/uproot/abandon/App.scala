@@ -10,6 +10,18 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val filePaths = outFiles.filterNot(_ equals "-").map(settings.getConfigRelativePath(_))
   val fileWriters = filePaths.map(path => new FileWriter(path))
 
+  def startCodeBlock() = {
+    fileWriters foreach { fileWriter =>
+      fileWriter.write("```\n")
+    }
+  }
+
+  def endCodeBlock() = {
+    fileWriters foreach { fileWriter =>
+      fileWriter.write("```\n")
+    }
+  }
+
   def printHeading(head: String) = {
     fileWriters foreach { fileWriter =>
       fileWriter.write(head + "\n\n")
@@ -57,7 +69,7 @@ object AbandonApp extends App {
     reportWriter.println("Account Name: " + bookReportSettings.account + "\n")
 
     val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))))
-    reportWriter.println("```")
+    reportWriter.startCodeBlock()
 
     bookReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
@@ -79,7 +91,7 @@ object AbandonApp extends App {
         }
       }
     }
-    reportWriter.println("```")
+    reportWriter.endCodeBlock()
   }
 
   try {
