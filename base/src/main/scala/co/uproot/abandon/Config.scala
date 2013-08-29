@@ -35,23 +35,24 @@ object SettingsHelper {
         makeSettings(configFileName)
       case _ =>
         val inputs = cliConf.inputs.get.getOrElse(Nil)
-        val allReport = BalanceReportSettings("All Balances", None, true)
-        Right(Settings(inputs, Seq(allReport), ReportOptions(Nil)))
+        val allReport = BalanceReportSettings("All Balances", None, Nil, true)
+        Right(Settings(inputs, Seq(allReport), ReportOptions(Nil), None))
     }
   }
 
   def makeSettings(configFileName: String) = {
     val file = new java.io.File(configFileName)
     if (file.exists) {
-      val config = ConfigFactory.parseFile(file).resolve()
       try {
+        val config = ConfigFactory.parseFile(file).resolve()
         val inputs = config.getStringList("inputs").asScala.map(Processor.mkRelativeFileName(_, configFileName))
         val reports = config.getConfigList("reports").asScala.map(makeReportSettings(_))
         val reportOptions = config.optional("reportOptions") { _.getConfig(_) }
         val isRight = reportOptions.map(_.optional("isRight") { _.getStringList(_).asScala }).flatten.getOrElse(Nil)
-        Right(Settings(inputs, reports, ReportOptions(isRight)))
+        Right(Settings(inputs, reports, ReportOptions(isRight), Some(file)))
       } catch {
         case e: ConfigException.Missing => Left(e.getMessage)
+        case e: ConfigException.Parse => Left(e.getMessage)
       }
     } else {
       Left("Config file not found: " + configFileName)
@@ -62,22 +63,27 @@ object SettingsHelper {
     val title = config.getString("title")
     val reportType = config.getString("type")
     val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+    val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
     reportType match {
       case "balance" =>
         val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") {_.getBoolean(_)}.getOrElse(false)
-        BalanceReportSettings(title, accountMatch, showZeroAmountAccounts)
+        BalanceReportSettings(title, accountMatch, outFiles, showZeroAmountAccounts)
       case "register" =>
-        RegisterReportSettings(title, accountMatch)
+        RegisterReportSettings(title, accountMatch, outFiles)
       case "book" =>
         val account = config.getString("account")
-        BookReportSettings(title, account)
+        BookReportSettings(title, account, outFiles)
     }
   }
 }
 
-case class Settings(inputs: Seq[String], reports: Seq[ReportSettings], reportOptions: ReportOptions)
+case class Settings(inputs: Seq[String], reports: Seq[ReportSettings], reportOptions: ReportOptions, configFileOpt: Option[java.io.File]) {
+  def getConfigRelativePath(path:String) = {
+    configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
+  }
+}
 
-abstract class ReportSettings(val title:String, val accountMatch: Option[Seq[String]]) {
+abstract class ReportSettings(val title:String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) {
   def isAccountMatching(name: String) = {
     accountMatch.map(patterns => patterns.exists(name matches _)).getOrElse(true)
   }
@@ -86,13 +92,14 @@ abstract class ReportSettings(val title:String, val accountMatch: Option[Seq[Str
 case class BalanceReportSettings(
   _title: String,
   _accountMatch: Option[Seq[String]],
-  showZeroAmountAccounts: Boolean) extends ReportSettings(_title, _accountMatch) {
+  _outFiles: Seq[String],
+  showZeroAmountAccounts: Boolean) extends ReportSettings(_title, _accountMatch, _outFiles) {
 }
 
-case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[String]]) extends ReportSettings(_title, _accountMatch) {
+case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ReportSettings(_title, _accountMatch, _outFiles) {
 }
 
-case class BookReportSettings(_title: String, account: String) extends ReportSettings(_title, Some(Seq(account))) {
+case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
 case class ReportOptions(isRight: Seq[String])

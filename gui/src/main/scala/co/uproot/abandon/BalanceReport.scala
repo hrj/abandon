@@ -27,7 +27,8 @@ object BalanceReport extends Report {
           val regSettings =
             RegisterReportSettings(
               selectedAccountNames.map(_.fullPathStr).mkString(","),
-              Some(selectedAccountPatterns)
+              Some(selectedAccountPatterns),
+              Nil
             )
           CurrReports.addReport(appState, settings, regSettings, canClose = true)
         }
