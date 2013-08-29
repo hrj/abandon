@@ -41,3 +41,18 @@ object Helper {
   }
 
 }
+
+// The sole purpose of this class is to ensure that equality is checked using references
+final class RefWrap[T <: AnyRef](val t: T) {
+  override def hashCode() = {
+    t.hashCode
+  }
+
+  override def equals(that:Any) = {
+    that match {
+      case thatGroup: RefWrap[_]  =>
+        t eq thatGroup.t
+      case _ => false
+    }
+  }
+}

@@ -68,6 +68,9 @@ object SettingsHelper {
         BalanceReportSettings(title, accountMatch, showZeroAmountAccounts)
       case "register" =>
         RegisterReportSettings(title, accountMatch)
+      case "book" =>
+        val account = config.getString("account")
+        BookReportSettings(title, account)
     }
   }
 }
@@ -87,6 +90,9 @@ case class BalanceReportSettings(
 }
 
 case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[String]]) extends ReportSettings(_title, _accountMatch) {
+}
+
+case class BookReportSettings(_title: String, account: String) extends ReportSettings(_title, Some(Seq(account))) {
 }
 
 case class ReportOptions(isRight: Seq[String])

@@ -135,4 +135,39 @@ object Reports {
     reportGroups
   }
 
+  def bookReport(state: AppState, reportSettings: BookReportSettings) : Seq[RegisterReportGroup] = {
+    val filteredState = state.accState.filterAndClone(reportSettings.isAccountMatching)
+
+    val groupedTxns = filteredState.txns.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+
+    var reportGroups = Seq[RegisterReportGroup]()
+    var groupState = new AccountState(Map[AccountName, BigDecimal](), Nil)
+
+    groupedTxns.foreach {
+      case (month, groupTxns) =>
+        groupTxns foreach { txn =>
+          groupState.updateAmount(txn.name, txn.delta, txn.date)
+        }
+        val amounts = groupState.amounts
+
+        val matchingAmounts = amounts.filter { case (accountName, amount) =>
+          groupTxns.exists(_.name == accountName)
+        }
+
+        val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
+          val myTxns = groupTxns.filter(_.name equals accountName)
+          val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
+          (accountName, myTxns, render)
+        }
+
+        val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
+
+        reportGroups :+= RegisterReportGroup(
+          formatMonth(month),
+          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
+        )
+    }
+    reportGroups
+  }
+
 }

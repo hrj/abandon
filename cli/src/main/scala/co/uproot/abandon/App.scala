@@ -4,6 +4,44 @@ import org.rogach.scallop.{ ScallopConf, stringListConverter }
 import Helper.{ Zero, filterByType, maxElseZero }
 
 object AbandonApp extends App {
+  def printRegReport(regReport: Seq[RegisterReportGroup]) = {
+    regReport foreach { reportGroup =>
+      println(reportGroup.groupTitle)
+      reportGroup.entries foreach { e =>
+        println("   " + e.render)
+
+      }
+    }
+  }
+
+  def printBookReport(bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
+    val txnIndent = " " * 49
+
+    println(bookReportSettings.account)
+
+    bookReport foreach { reportGroup =>
+      println(reportGroup.groupTitle)
+      reportGroup.entries foreach { e =>
+
+        val maxNameLength = maxElseZero(e.txns.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))
+        e.txns foreach { txn =>
+          val parent = txn.parentOpt.get
+          println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
+          // println(txnIndent + parent.dateLineStr)
+          val otherTxns = parent.children.filterNot(_.name equals txn.name)
+          parent.groupComments.foreach { groupComment =>
+            println(txnIndent + "  ; " + groupComment)
+          }
+          otherTxns.foreach { otherTxn =>
+            val commentStr = otherTxn.commentOpt.map("  ; " + _).getOrElse("")
+            println((txnIndent + "  %-" + maxNameLength + "s %20.2f %s") format (otherTxn.name, otherTxn.delta, commentStr))
+          }
+          println()
+        }
+      }
+    }
+  }
+
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
@@ -33,10 +71,10 @@ object AbandonApp extends App {
                 println(totalLine)
               case regSettings: RegisterReportSettings =>
                 val regReport = Reports.registerReport(appState, regSettings)
-                regReport foreach {reportGroup =>
-                    println(reportGroup.groupTitle)
-                    reportGroup.entries.map(_.render) foreach { e => println("   " + e) }
-                }
+                printRegReport(regReport)
+              case bookSettings: BookReportSettings =>
+                val bookReport = Reports.bookReport(appState, bookSettings)
+                printBookReport(bookSettings, bookReport)
             }
           }
         }
