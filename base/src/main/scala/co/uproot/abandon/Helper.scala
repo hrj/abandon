@@ -21,7 +21,7 @@ object Helper {
   }
 
   private val months = List("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-  private val shortMonths = List("Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec")
+  private val shortMonths = List("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
   private def getIndexOf[T](l: Seq[T], e: T) = {
     val index = l.indexOf(e)
