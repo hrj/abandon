@@ -68,7 +68,7 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _)) =>
+                  case List(SingleTransaction(acc1, expr1, None), SingleTransaction(acc2, expr2, None), SingleTransaction(acc3, expr3, None)) =>
                     acc1 should be (AccountName(Seq("Expense")))
                     acc2 should be (AccountName(Seq("Cash")))
                     acc3 should be (AccountName(Seq("Bank")))
@@ -87,14 +87,19 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
       Expense       200
       Cash          -100
       Bank
+
+    2013/Jun/1
+      Expense       200
+      Cash              ; Comment
+      Bank
     """
     val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(reader(testInput)))
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
         inside(result) {
-          case List(txnGroup) =>
-            inside(txnGroup) {
+          case List(txnGroup1, txnGroup2) =>
+            inside(txnGroup1) {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
                 inside(txns) {
@@ -105,6 +110,20 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
                     expr1 should be (Some(NumericLiteralExpr(200)))
                     expr2 should be (Some(NumericLiteralExpr(-100)))
                     expr3 should be (None)
+                }
+            }
+            inside(txnGroup2) {
+              case Transaction(date, txns, None, None, Nil) =>
+                date should be(Date(2013, 6, 1))
+                inside(txns) {
+                  case List(SingleTransaction(acc1, expr1, None), SingleTransaction(acc2, expr2, Some(comment)), SingleTransaction(acc3, expr3, None)) =>
+                    acc1 should be (AccountName(Seq("Expense")))
+                    acc2 should be (AccountName(Seq("Cash")))
+                    acc3 should be (AccountName(Seq("Bank")))
+                    expr1 should be (Some(NumericLiteralExpr(200)))
+                    expr2 should be (None)
+                    expr3 should be (None)
+                    comment should be (" Comment")
                 }
             }
         }
