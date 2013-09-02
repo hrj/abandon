@@ -130,8 +130,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   // End of line commment
   private def eolComment  = (comment?)<~eol
 
-  lazy val abandon:Parser[Seq[ASTEntry]] = phrase((fragSeparators ~> rep1sep(fragment, fragSeparators)) <~ fragSeparators)
-  lazy val abandonxyz = phrase(numericExpr)
+  lazy val abandon:Parser[Seq[ASTEntry]] = phrase((fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators)
 
   private lazy val fragment:Parser[ASTEntry] = (txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
   private lazy val includeFrag = (includeKeyword ~> fileName) ^^ {case name => IncludeDirective(name)}
