@@ -5,3 +5,4 @@ libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
 
 libraryDependencies += "com.typesafe" % "config" % "1.0.2"
 
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
