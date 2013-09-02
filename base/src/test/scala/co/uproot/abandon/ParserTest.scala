@@ -11,11 +11,13 @@ import org.scalatest.Inside
 
 class ParserTest extends FlatSpec with ShouldMatchers with Inside {
 
-  def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
+  private def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
+  private def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
+  private def scanner(s: String) = mkScanner(reader(s))
 
   "parser" should "parse empty file" in {
     val testInput = ""
-    val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(reader(testInput)))
+    val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
         result should be('empty)
@@ -28,7 +30,7 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
       Expense       200
       Cash          -200
     """
-    val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(reader(testInput)))
+    val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
@@ -56,7 +58,7 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
       Cash          -100
       Bank          -100
     """
-    val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(reader(testInput)))
+    val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
