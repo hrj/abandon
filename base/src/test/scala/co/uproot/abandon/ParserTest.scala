@@ -1,19 +1,21 @@
 package co.uproot.abandon
 
 import org.scalatest.FlatSpec
-import org.scalatest.exceptions.TestFailedException
-import org.scalatest.matchers.MatchResult
 import org.scalatest.matchers.Matcher
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import scala.util.parsing.input.PagedSeqReader
 import scala.collection.immutable.PagedSeq
 import org.scalatest.Inside
 
-class ParserTest extends FlatSpec with ShouldMatchers with Inside {
+class ParserTest extends FlatSpec with Matchers with Inside {
 
   private def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
   private def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
   private def scanner(s: String) = mkScanner(reader(s))
+
+  private val expenseAccount = AccountName(Seq("Expense"))
+  private val cashAccount = AccountName(Seq("Cash"))
+  private val bankAccount = AccountName(Seq("Bank"))
 
   "parser" should "parse empty file" in {
     val testInput = ""
@@ -41,8 +43,8 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
                 date should be(Date(2013, 1, 1))
                 inside(txns) {
                   case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _)) =>
-                    acc1 should be (AccountName(Seq("Expense")))
-                    acc2 should be (AccountName(Seq("Cash")))
+                    acc1 should be (expenseAccount)
+                    acc2 should be (cashAccount)
                     expr1 should be (Some(NumericLiteralExpr(200)))
                     expr2 should be (Some(NumericLiteralExpr(-200)))
                 }
@@ -69,9 +71,9 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
                 date should be(Date(2013, 3, 1))
                 inside(txns) {
                   case List(SingleTransaction(acc1, expr1, None), SingleTransaction(acc2, expr2, None), SingleTransaction(acc3, expr3, None)) =>
-                    acc1 should be (AccountName(Seq("Expense")))
-                    acc2 should be (AccountName(Seq("Cash")))
-                    acc3 should be (AccountName(Seq("Bank")))
+                    acc1 should be (expenseAccount)
+                    acc2 should be (cashAccount)
+                    acc3 should be (bankAccount)
                     expr1 should be (Some(NumericLiteralExpr(200)))
                     expr2 should be (Some(NumericLiteralExpr(-100)))
                     expr3 should be (Some(NumericLiteralExpr(-100)))
@@ -104,9 +106,9 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
                 date should be(Date(2013, 3, 1))
                 inside(txns) {
                   case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _)) =>
-                    acc1 should be (AccountName(Seq("Expense")))
-                    acc2 should be (AccountName(Seq("Cash")))
-                    acc3 should be (AccountName(Seq("Bank")))
+                    acc1 should be (expenseAccount)
+                    acc2 should be (cashAccount)
+                    acc3 should be (bankAccount)
                     expr1 should be (Some(NumericLiteralExpr(200)))
                     expr2 should be (Some(NumericLiteralExpr(-100)))
                     expr3 should be (None)
@@ -117,9 +119,9 @@ class ParserTest extends FlatSpec with ShouldMatchers with Inside {
                 date should be(Date(2013, 6, 1))
                 inside(txns) {
                   case List(SingleTransaction(acc1, expr1, None), SingleTransaction(acc2, expr2, Some(comment)), SingleTransaction(acc3, expr3, None)) =>
-                    acc1 should be (AccountName(Seq("Expense")))
-                    acc2 should be (AccountName(Seq("Cash")))
-                    acc3 should be (AccountName(Seq("Bank")))
+                    acc1 should be (expenseAccount)
+                    acc2 should be (cashAccount)
+                    acc3 should be (bankAccount)
                     expr1 should be (Some(NumericLiteralExpr(200)))
                     expr2 should be (None)
                     expr3 should be (None)

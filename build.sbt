@@ -18,6 +18,6 @@ version := "0.1.5"
 
 scalaVersion in ThisBuild := "2.10.2"
 
-scalacOptions in ThisBuild := List("-feature")
+scalacOptions in ThisBuild := List("-deprecation")
 
 fork in run := true
