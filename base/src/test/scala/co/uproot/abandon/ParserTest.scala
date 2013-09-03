@@ -15,7 +15,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   private val expenseAccount = AccountName(Seq("Expense"))
   private val cashAccount = AccountName(Seq("Cash"))
-  private val bankAccount = AccountName(Seq("Bank"))
+  private val bankAccount = AccountName(Seq("Bank", "Current"))
 
   "parser" should "parse empty file" in {
     val testInput = ""
@@ -58,7 +58,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     2013/March/1
       Expense       200
       Cash          -100
-      Bank          -100
+      Bank:Current  -100
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
 
@@ -88,12 +88,12 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     2013/Mar/1
       Expense       200
       Cash          -100
-      Bank
+      Bank:Current
 
     2013/Jun/1
       Expense       200
       Cash              ; Comment
-      Bank
+      Bank:Current
     """
     val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(reader(testInput)))
 
