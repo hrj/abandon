@@ -16,7 +16,7 @@ name := "abandon"
 
 version := "0.1.5"
 
-scalaVersion in ThisBuild := "2.10.2"
+scalaVersion in ThisBuild := "2.10.3"
 
 scalacOptions in ThisBuild := List("-deprecation")
 
