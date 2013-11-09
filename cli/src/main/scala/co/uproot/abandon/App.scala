@@ -44,6 +44,21 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
   }
 
+  def printXml(x: xml.Node) = {
+    val sb = new StringBuilder
+    val pp = new xml.PrettyPrinter(120, 2)
+    pp.format(x, sb)
+    val res = sb.toArray
+
+    fileWriters foreach { fileWriter =>
+      fileWriter.write(res)
+    }
+
+    if (writesToScreen) {
+      println(sb.toString)
+    }
+  }
+
   def close = {
     fileWriters foreach { fileWriter =>
       fileWriter.close
@@ -103,6 +118,13 @@ object AbandonApp extends App {
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
           val appState = Processor.process(astEntries)
+          settings.exports.foreach { exportSettings =>
+            val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
+            val xmlData = Reports.xmlExport(appState, exportSettings)
+            reportWriter.printXml(xmlData)
+            reportWriter.close
+          }
+
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
 

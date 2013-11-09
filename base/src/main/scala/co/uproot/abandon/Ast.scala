@@ -20,6 +20,10 @@ case class Date(year: Int, month: Int, day: Int){
   def toInt = {
     year * 400 + month * 40 + day
   }
+
+  def formatCompact = {
+    s"$year,$month,$day"
+  }
 }
 
 object DateOrdering extends Ordering[Date] {

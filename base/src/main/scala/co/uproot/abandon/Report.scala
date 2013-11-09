@@ -170,4 +170,31 @@ object Reports {
     reportGroups
   }
 
+  def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {
+    val filteredState = state.accState.filterAndClone(exportSettings.isAccountMatching)
+
+    val sortedTxns = filteredState.txns.sortBy(t => t.date.toInt)
+
+    <abandon>
+      <transactions> {
+       sortedTxns.map {txn =>
+         val otherTxns = txn.parentOpt.get.children.filterNot(_.name equals txn.name)
+         <txn
+           date={txn.date.formatCompact}
+           name={txn.name.fullPathStr}
+           delta={txn.delta.toString}
+         >
+           <other_txns>{
+             otherTxns.map{ot =>
+               <txn
+                 name={ot.name.fullPathStr}
+                 delta={ot.delta.toString}
+               />
+             }
+           }</other_txns>
+         </txn>
+       }
+      } </transactions>
+    </abandon>
+  }
 }
