@@ -178,23 +178,33 @@ object Reports {
     <abandon>
       <transactions> {
        sortedTxns.map {txn =>
-         val otherTxns = txn.parentOpt.get.children.filterNot(_.name equals txn.name)
+         val parent = txn.parentOpt.get
+         val otherTxns = parent.children.filterNot(_.name equals txn.name)
          <txn
            date={txn.date.formatCompact}
            name={txn.name.fullPathStr}
            delta={txn.delta.toString}
-         >
+         >{
+         txn.commentOpt.map{comment => <comment>{comment}</comment>}.getOrElse(xml.Null)
+         }
+         <group>
+           { parent.payeeOpt.map(payee => <payee>{payee}</payee>).getOrElse(xml.Null)}
+           { parent.annotationOpt.map(annotation => <annotation>{annotation}</annotation>).getOrElse(xml.Null)}
+           { parent.groupComments.map{comment => <comment>{comment}</comment>} }
            <other_txns>{
              otherTxns.map{ot =>
                <txn
                  name={ot.name.fullPathStr}
                  delta={ot.delta.toString}
-               />
+               >{
+                 ot.commentOpt.map{comment => <comment>{comment}</comment>}.getOrElse(xml.Null)
+               }</txn>
              }
            }</other_txns>
-         </txn>
+         </group>
+       </txn>
        }
-      } </transactions>
+      }</transactions>
     </abandon>
   }
 }

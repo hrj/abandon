@@ -118,6 +118,7 @@ object AbandonApp extends App {
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
           val appState = Processor.process(astEntries)
+          Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
             val xmlData = Reports.xmlExport(appState, exportSettings)
@@ -164,8 +165,13 @@ object AbandonApp extends App {
         }
     }
   } catch {
-    case a: AssertionError => println("Error: " + a.getMessage)
-    case i: InputError     => println("Input error: " + i.getMessage)
+    case a: AssertionError => printErr("Error: " + a.getMessage)
+    case i: InputError     => printErr("Input error: " + i.getMessage)
+    case i: ConstraintError=> printErr("Constraint Failed: " + i.getMessage)
   }
 
+  def printErr(msg:String) = {
+    println(Console.RED + Console.BOLD + msg + Console.RESET)
+    
+  }
 }

@@ -5,9 +5,23 @@ object ASTHelper {
 }
 
 class InputError(msg: String) extends RuntimeException(msg)
+class ConstraintError(msg: String) extends RuntimeException(msg)
 
 import ASTHelper._
 
+object Date {
+  val yearMultiplier = 10000
+  val monthMultiplier = 100
+
+  def fromInt(i:Int) = {
+    val year = i / yearMultiplier
+    val yearComponent = year * yearMultiplier
+    val month = (i - yearComponent) / monthMultiplier
+    val monthComponent = month * monthMultiplier
+    val day = i - yearComponent - monthComponent
+    Date(year, month, day)
+  }
+}
 case class Date(year: Int, month: Int, day: Int){
   def formatYYYYMMDD = {
     f"$year%4d / $month%d / $day%d"
@@ -18,7 +32,7 @@ case class Date(year: Int, month: Int, day: Int){
   }
 
   def toInt = {
-    year * 400 + month * 40 + day
+    year * Date.yearMultiplier + month * Date.monthMultiplier + day
   }
 
   def formatCompact = {

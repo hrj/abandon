@@ -36,7 +36,19 @@ object SettingsHelper {
       case _ =>
         val inputs = cliConf.inputs.get.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Seq(allReport), ReportOptions(Nil), Nil, None))
+        Right(Settings(inputs, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
+    }
+  }
+
+  implicit class ConfigHelper2(val config:Config) {
+    def optConfig(name:String) = {
+        config.optional(name) { _.getConfig(_) }
+    }
+    def optConfigList(name:String) = {
+        config.optional(name) { _.getConfigList(_).asScala }
+    }
+    def optStringList(name:String) = {
+        config.optional(name) { _.getStringList(_).asScala }
     }
   }
 
@@ -47,17 +59,27 @@ object SettingsHelper {
         val config = ConfigFactory.parseFile(file).resolve()
         val inputs = config.getStringList("inputs").asScala.map(Processor.mkRelativeFileName(_, configFileName))
         val reports = config.getConfigList("reports").asScala.map(makeReportSettings(_))
-        val reportOptions = config.optional("reportOptions") { _.getConfig(_) }
-        val isRight = reportOptions.map(_.optional("isRight") { _.getStringList(_).asScala }).flatten.getOrElse(Nil)
-        val exportConfigs = config.optional("exports"){_.getConfigList(_).asScala}.getOrElse(Nil)
+        val reportOptions = config.optConfig("reportOptions")
+        val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
+        val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
         val exports = exportConfigs.map(makeExportSettings)
-        Right(Settings(inputs, reports, ReportOptions(isRight), exports, Some(file)))
+        val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
+        Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
         case e: ConfigException.Missing => Left(e.getMessage)
         case e: ConfigException.Parse   => Left(e.getMessage)
       }
     } else {
       Left("Config file not found: " + configFileName)
+    }
+  }
+
+  // For now we only support simple constraints
+  def makeEodConstraints(config: Config) = {
+    val accName = config.getString("expr")
+    config.getString("constraint") match {
+      case "positive" => PositiveConstraint(accName)
+      case "negative" => NegativeConstraint(accName)
     }
   }
 
@@ -85,8 +107,44 @@ object SettingsHelper {
   }
 }
 
+abstract class Constraint {
+  def check(appState:AppState):Boolean
+}
+
+trait SignChecker {
+  val accName:String
+  val signStr:String
+  val correctSign: (BigDecimal) => Boolean
+
+  def check(appState:AppState) = {
+    val txns = appState.accState.filterAndClone(_ == accName).txns
+    val dailyDeltas = txns.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
+
+    var acc = Helper.Zero
+    dailyDeltas.toSeq.sortBy(_._1).foreach {case (dayInt, delta) =>
+      acc += delta
+      if (!correctSign(acc)) {
+        throw new ConstraintError(s"$accName was not $signStr on ${Date.fromInt(dayInt)}. Was $acc")
+      }
+    }
+    true
+  }
+
+}
+
+case class PositiveConstraint(val accName: String) extends Constraint with SignChecker {
+  val correctSign = (x : BigDecimal) => x >= Helper.Zero
+  val signStr = "positive"
+}
+
+case class NegativeConstraint(val accName: String) extends Constraint with SignChecker {
+  val correctSign = (x : BigDecimal) => x <= Helper.Zero
+  val signStr = "negative"
+}
+
 case class Settings(
   inputs: Seq[String],
+  eodConstraints: Seq[Constraint],
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
