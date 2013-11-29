@@ -14,7 +14,7 @@ ProguardKeys.options in Proguard += ProguardOptions.keepMain("co.uproot.abandon.
 
 name := "abandon"
 
-version := "0.1.6"
+version := "0.1.7"
 
 scalaVersion in ThisBuild := "2.10.3"
 
