@@ -7,7 +7,7 @@ and collaboration.
 From these input text files, Abandon can present textual reports
 or graphical reports. The graphical reports are useful when you need to interactively explore the data.
 
-Abandon is inspired by [Ledger](http://http://www.ledger-cli.org/) but is simpler to use, has a more regular syntax, has a GUI
+Abandon is inspired by [Ledger](http://ledger-cli.org/) but is simpler to use, has a more regular syntax, has a GUI
 and is cross-platform. Abandon tries to maintain syntax compatibility with Ledger whenever possible.
 
 #### Sample Text report
