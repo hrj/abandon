@@ -11,10 +11,10 @@ Abandon is inspired by [Ledger](http://ledger-cli.org/) but is simpler to use, h
 and is cross-platform. Abandon tries to maintain syntax compatibility with Ledger whenever possible.
 
 #### Sample Text report
-![Abandon Text output Screenshot](http://i.imgur.com/3mks4uv.png)
+![Abandon Text output Screenshot](http://i.imgur.com/3n3GmdE.png)
 
 #### Sample Graphical report
-![Abandon Screenshot](http://i.imgur.com/NjsTssB.png)
+![Abandon Screenshot](http://i.imgur.com/9mTthiH.png)
 
 [(Screenshot Gallery)](http://imgur.com/a/GLhV5#0)
 
