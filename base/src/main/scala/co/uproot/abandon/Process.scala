@@ -25,31 +25,34 @@ case class DetailedTransaction(name: AccountName, delta: BigDecimal, commentOpt:
   var resultAmount = Zero
 }
 
-class AccountState(initAmounts: Map[AccountName, BigDecimal], initTxns: Seq[DetailedTransaction]) {
+class AccountState {
 
-  private var _amounts = initAmounts
-  private var _txns = initTxns
+  private var _amounts = Map[AccountName, BigDecimal]() // initAmounts
+  private var _txns = Seq[DetailedTransaction]() // initTxns
+  private var _txnGroups = Seq[TxnGroup]() // initTxns
 
   def amounts = _amounts
   def txns = _txns
+  def txnGroups = _txnGroups
 
   def updateAmounts(txnGroup: TxnGroup) = {
     txnGroup.children foreach { txn =>
-      val updatedAmount = updateAmount(txn.name, txn.delta, txn.date)
+      val updatedAmount = updateAmountTxn(txn.name, txn.delta, txn.date)
       txn.resultAmount = updatedAmount
       _txns :+= txn
     }
+    _txnGroups :+= txnGroup
   }
 
-  def updateAmount(name: AccountName, delta: BigDecimal, date: Date) = {
+  private def updateAmountTxn(name: AccountName, delta: BigDecimal, date: Date) = {
     val origAmount = _amounts.get(name).getOrElse(Zero)
     val updatedAmount = (origAmount + delta)
     _amounts += (name -> updatedAmount)
     updatedAmount
   }
 
-  def mkTree = {
-    val accountsByPathLengths = _amounts.groupBy(_._1.fullPath.length)
+  def mkTree(nameMatcher: (String) => Boolean) = {
+    val accountsByPathLengths = _amounts.filter(a => nameMatcher(a._1.fullPathStr)).groupBy(_._1.fullPath.length)
     val maxPathLength = maxElseZero(accountsByPathLengths.keys)
     val topLevelAccounts = accountsByPathLengths.get(1).getOrElse(Map())
     def mkTreeLevel(prefix: Seq[String], n: Int): Seq[AccountTreeState] = {
@@ -68,11 +71,6 @@ class AccountState(initAmounts: Map[AccountName, BigDecimal], initTxns: Seq[Deta
     AccountTreeState(AccountName(Nil), Zero, mkTreeLevel(Nil, 1))
   }
 
-  def filterAndClone(nameMatcher: (String) => Boolean) = {
-    val newAmounts = amounts.filter(m => nameMatcher(m._1.fullPathStr))
-    val newTxns = txns.filter(m => nameMatcher(m.name.fullPathStr))
-    new AccountState(newAmounts, newTxns)
-  }
 }
 
 case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: Seq[AccountTreeState]) {
@@ -173,7 +171,7 @@ object Processor {
 
     val transactions = filterByType[Transaction](entries)
     val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
-    val accState = new AccountState(Map(), Nil)
+    val accState = new AccountState()
     sortedTxns foreach { tx =>
       val (txWithAmount, txNoAmount) = tx.transactions.partition(t => t.amount.isDefined)
       assert(txNoAmount.length <= 1, "More than one account with unspecified amount: " + txNoAmount)

@@ -1,6 +1,6 @@
 package co.uproot.abandon
 
-import Helper.{ Zero, maxElseZero }
+import Helper.{ Zero, maxElseZero, sumDeltas }
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
 case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
@@ -67,7 +67,7 @@ object Reports {
       }
     }
 
-    val filteredAccountTree = state.accState.filterAndClone(reportSettings.isAccountMatching).mkTree
+    val filteredAccountTree = state.accState.mkTree(reportSettings.isAccountMatching)
     assert(reportSettings.accountMatch.isDefined || (filteredAccountTree.total equals Zero), "The Account tree doesn't balance!")
 
     val rightAccNames = settings.reportOptions.isRight
@@ -101,27 +101,24 @@ object Reports {
   }
 
   def registerReport(state: AppState, reportSettings: RegisterReportSettings) : Seq[RegisterReportGroup] = {
-    val filteredState = state.accState.filterAndClone(reportSettings.isAccountMatching)
-
-    val groupedTxns = filteredState.txns.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+    val txnGroups = state.accState.txnGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
+    val monthlyGroups = txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
 
     var reportGroups = Seq[RegisterReportGroup]()
-    var groupState = new AccountState(Map[AccountName, BigDecimal](), Nil)
+    var groupState = new AccountState()
 
-    groupedTxns.foreach {
-      case (month, groupTxns) =>
-        groupTxns foreach { txn =>
-          groupState.updateAmount(txn.name, txn.delta, txn.date)
+    monthlyGroups.foreach {
+      case (month, monthlyGroup) =>
+        monthlyGroup foreach { g =>
+          groupState.updateAmounts(g)
         }
+        val matchingNames = monthlyGroup.flatMap(_.children.map(_.name)).toSet.filter(name => reportSettings.isAccountMatching(name.fullPathStr))
         val amounts = groupState.amounts
-
-        val matchingAmounts = amounts.filter { case (accountName, amount) =>
-          groupTxns.exists(_.name == accountName)
-        }
+        val matchingAmounts = amounts.filter { case (accountName, amount) => matchingNames.contains(accountName)}
 
         val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
-          val myTxns = groupTxns.filter(_.name equals accountName)
-          val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
+          val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
+          val render = "%-50s %20.2f %20.2f" format (accountName, sumDeltas(myTxns), amount)
           (accountName, myTxns, render)
         }
 
@@ -136,26 +133,22 @@ object Reports {
   }
 
   def bookReport(state: AppState, reportSettings: BookReportSettings) : Seq[RegisterReportGroup] = {
-    val filteredState = state.accState.filterAndClone(reportSettings.isAccountMatching)
-
-    val groupedTxns = filteredState.txns.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+    val monthlyGroups = state.accState.txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
 
     var reportGroups = Seq[RegisterReportGroup]()
-    var groupState = new AccountState(Map[AccountName, BigDecimal](), Nil)
+    var groupState = new AccountState()
 
-    groupedTxns.foreach {
-      case (month, groupTxns) =>
-        groupTxns foreach { txn =>
-          groupState.updateAmount(txn.name, txn.delta, txn.date)
+    monthlyGroups.foreach {
+      case (month, monthlyGroup) =>
+        monthlyGroup foreach { g =>
+          groupState.updateAmounts(g)
         }
+        val groupAmounts = monthlyGroup.flatMap(_.children.map(_.name)).toSet
         val amounts = groupState.amounts
-
-        val matchingAmounts = amounts.filter { case (accountName, amount) =>
-          groupTxns.exists(_.name == accountName)
-        }
+        val matchingAmounts = amounts.filter { case (accountName, amount) => groupAmounts.contains(accountName)}
 
         val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
-          val myTxns = groupTxns.filter(_.name equals accountName)
+          val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
           val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
           (accountName, myTxns, render)
         }
@@ -171,40 +164,22 @@ object Reports {
   }
 
   def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {
-    val filteredState = state.accState.filterAndClone(exportSettings.isAccountMatching)
+    val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
 
-    val sortedTxns = filteredState.txns.sortBy(t => t.date.toInt)
-
-    <abandon>
-      <transactions> {
-       sortedTxns.map {txn =>
-         val parent = txn.parentOpt.get
-         val otherTxns = parent.children.filterNot(_.name equals txn.name)
-         <txn
-           date={txn.date.formatCompact}
-           name={txn.name.fullPathStr}
-           delta={txn.delta.toString}
-         >{
-         txn.commentOpt.map{comment => <comment>{comment}</comment>}.getOrElse(xml.Null)
-         }
-         <group>
-           { parent.payeeOpt.map(payee => <payee>{payee}</payee>).getOrElse(xml.Null)}
-           { parent.annotationOpt.map(annotation => <annotation>{annotation}</annotation>).getOrElse(xml.Null)}
-           { parent.groupComments.map{comment => <comment>{comment}</comment>} }
-           <other_txns>{
-             otherTxns.map{ot =>
-               <txn
-                 name={ot.name.fullPathStr}
-                 delta={ot.delta.toString}
-               >{
-                 ot.commentOpt.map{comment => <comment>{comment}</comment>}.getOrElse(xml.Null)
-               }</txn>
-             }
-           }</other_txns>
-         </group>
-       </txn>
-       }
-      }</transactions>
-    </abandon>
+    <abandon><transactions>{
+      sortedGroups.map {txnGroup =>
+        <txnGroup date={txnGroup.date.formatCompact}>
+          { txnGroup.payeeOpt.map(payee => <payee>{payee}</payee>).getOrElse(xml.Null)}
+          { txnGroup.annotationOpt.map(annotation => <annotation>{annotation}</annotation>).getOrElse(xml.Null)}
+          { txnGroup.groupComments.map{comment => <comment>{comment}</comment>} }
+          { txnGroup.children.map(txn=>
+              <txn name={txn.name.fullPathStr} delta={txn.delta.toString}>{
+                 txn.commentOpt.map{comment => <comment>{comment}</comment>}.getOrElse(xml.Null)
+              }</txn>
+            )
+          }
+        </txnGroup>
+      }
+    }</transactions></abandon>
   }
 }

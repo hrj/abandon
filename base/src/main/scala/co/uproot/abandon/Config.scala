@@ -117,7 +117,7 @@ trait SignChecker {
   val correctSign: (BigDecimal) => Boolean
 
   def check(appState:AppState) = {
-    val txns = appState.accState.filterAndClone(_ == accName).txns
+    val txns = appState.accState.txns.filter(_.name.fullPathStr == accName)
     val dailyDeltas = txns.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
 
     var acc = Helper.Zero
