@@ -188,7 +188,7 @@ object Processor {
         detailedTxns :+= DetailedTransaction(t.accName, delta, t.commentOpt)
       }
       accState.updateAmounts(new TxnGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
-      assert(txTotal equals Zero, "Transactions do not balance")
+      assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)
     AppState(accState, accountDeclarations)
