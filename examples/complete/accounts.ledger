@@ -52,8 +52,9 @@ include opening.ledger
 ; March 2013
 2013/Mar/4  (80008) Far Furnishing
   ; For curtains
-  Assets:Fixed:Furniture                              -1200
-  Assets:Current:BankAccount:Account1
+  Assets:Fixed:Furniture                              -1200         ; Far Furnishing invoice #20
+  Assets:Fixed:Furniture                              -200          ; Transportation cost
+  Assets:Current:Cash
 
 2013/Mar/4  (80009) Ekta
   ; Feb 2013 rent
