@@ -146,7 +146,7 @@ object AbandonUI extends JFXApp {
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(parameters.raw)
     settingsResult match {
-      case Left(errorMsg) => // TODO
+      case Left(errorMsg) => println("Error: " + errorMsg)
       case Right(settings) =>
 
         def updateReports(firstRun: Boolean): Unit = {
