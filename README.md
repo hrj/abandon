@@ -72,9 +72,10 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 * An interactive GUI for viewing reports. 
 
 ### Installation
-* Make sure you have installed *Oracle Java 7*.
-  As of today, OpenJDK won't work, nor will Oracle Java 6 since this app requires JavaFX (an upcoming technology).
-* Download and extract the archive from [here](https://github.com/hrj/abandon/releases)
+* Install *Oracle Java 7*
+  As of Feb 2014, OpenJDK won't work, nor will older versions of Oracle Java since this app requires JavaFX (an upcoming technology).
+  When Java 8 is released (due March 2014), this project will shift to the newer APIs and it would be possible to use any implementation of Java 8.
+* Download and extract the `Abandon` binaries from [here](https://github.com/hrj/abandon/releases)
 * Use the `*.sh` files to run on `*nix` and `Mac` or the `*.bat` files to run on `Windows`.
 
 ### Running
@@ -85,10 +86,9 @@ The command line options are:
    -i <input-file-path>         Specifies the path to an input file
 ```
 
-The config file can specify which reports to generate and the report's settings. Eventually all of these options would be
-exposed as command line parameters too.
+The config file can specify which reports to generate and how. Some of these options are available as command line parameters too.
 
-As of now, the preferred way of running the program is by specifying a config file. Look at `testCases/complete.conf` for an example config file.
+As of now, the preferred way of running the program is by specifying a config file. Look at `examples/simple/accounts.conf` for an example config file.
 
 ### Roadmap
 
@@ -97,6 +97,9 @@ Many features are still missing. Until version 0.5 the focus will be on adding b
 * Support for currencies
 * Reporting options (sorting, grouping, time limits, etc)
 
+Look at the issue list for a complete road map.
+
+
 ### License
 Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
-(that is free to use, share, modify, but attribution is required)
+(free to use, share, modify, but attribution is required)
