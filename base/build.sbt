@@ -1,8 +1,10 @@
 
-libraryDependencies += "joda-time" % "joda-time" % "1.6.2"
+libraryDependencies += "joda-time" % "joda-time" % "2.3"
 
-libraryDependencies += "org.rogach" %% "scallop" % "0.9.4"
+libraryDependencies += "org.joda" % "joda-convert" % "1.6"
 
-libraryDependencies += "com.typesafe" % "config" % "1.0.2"
+libraryDependencies += "org.rogach" %% "scallop" % "0.9.5"
+
+libraryDependencies += "com.typesafe" % "config" % "1.2.0"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "test"
