@@ -132,4 +132,32 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
+  "parser" should "parse a simple expression" in {
+    val testInput = """
+    2013/1/1
+      Expense       -(200 + 40)
+      Cash
+    """
+    val parseResult = AbandonParser.abandon(scanner(testInput))
+
+    inside(parseResult) {
+      case AbandonParser.Success(result, _) =>
+        inside(result) {
+          case List(txnGroup) =>
+            inside(txnGroup) {
+              case Transaction(date, txns, None, None, Nil) =>
+                date should be(Date(2013, 1, 1))
+                inside(txns) {
+                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _)) =>
+                    acc1 should be (expenseAccount)
+                    acc2 should be (cashAccount)
+                    expr1 should be (Some(UnaryNegExpr(AddExpr(NumericLiteralExpr(200),NumericLiteralExpr(40)))))
+                    expr2 should be (None)
+                }
+            }
+        }
+    }
+  }
+
+
 }

@@ -120,3 +120,9 @@ case class SubExpr(val op1: NumericExpr, val op2: NumericExpr) extends BinaryNum
 case class MulExpr(val op1: NumericExpr, val op2: NumericExpr) extends BinaryNumericExpr(op1, op2, "*", _ * _)
 
 case class DivExpr(val op1: NumericExpr, val op2: NumericExpr) extends BinaryNumericExpr(op1, op2, "/", _ / _)
+
+case class UnaryNegExpr(val op: NumericExpr) extends NumericExpr {
+  def evaluate(context:EvaluationContext[BigDecimal]): BigDecimal = -op.evaluate(context)
+  override def prettyPrint = " -(" + op.prettyPrint + ")"
+  def getRefs = op.getRefs
+}
