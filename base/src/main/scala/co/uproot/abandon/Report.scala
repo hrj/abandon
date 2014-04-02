@@ -47,10 +47,11 @@ object Reports {
             if (onlyChildren) Some(indent) else None
           )
       }
+      val selfAmount = if(a.amount !=0 && !a.childStates.isEmpty ) { " (" + a.amount + ")" } else { "" }
       lazy val selfRender = (
         BalanceReportEntry(Some(a.name),
           ("%" + width + ".2f   %-" + maxNameLength + "s") format (
-            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name)
+            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
           )
         )
       )
