@@ -171,13 +171,14 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   lazy val numericParser:Parser[NumericExpr] = phrase(numericExpr)
 
-  private lazy val numericExpr:PackratParser[NumericExpr] = (addExpr | subExpr | mulExpr | divExpr | unaryNegExpr |numericLiteralExpr | numericFunctionExpr |  parenthesizedExpr)
   private lazy val numericLiteralExpr:PackratParser[NumericExpr] = (number ^^ {case n => NumericLiteralExpr(n)})
+  private lazy val numericExpr:PackratParser[NumericExpr] = (addExpr | subExpr | mulExpr | divExpr | numericLiteralExpr | numericFunctionExpr | parenthesizedExpr | unaryNegExpr )
+  private lazy val numericLiteralFirstExpr:PackratParser[NumericExpr] = (numericLiteralExpr | numericExpr)
   private lazy val addExpr:PackratParser[AddExpr] = ((numericExpr <~ "+") ~ numericExpr) ^^ { case a ~ b => AddExpr(a, b) }
   private lazy val subExpr:PackratParser[SubExpr] = ((numericExpr <~ "-") ~ numericExpr) ^^ { case a ~ b => SubExpr(a, b) }
   private lazy val mulExpr:PackratParser[MulExpr] = ((numericExpr <~ "*") ~ numericExpr) ^^ { case a ~ b => MulExpr(a, b) }
   private lazy val divExpr:PackratParser[DivExpr] = ((numericExpr <~ "/") ~ numericExpr) ^^ { case a ~ b => DivExpr(a, b) }
-  private lazy val unaryNegExpr:PackratParser[UnaryNegExpr] = ("-" ~> numericExpr) ^^ { case expr => UnaryNegExpr(expr) }
+  private lazy val unaryNegExpr:PackratParser[UnaryNegExpr] = ("-" ~> numericLiteralFirstExpr) ^^ { case expr => UnaryNegExpr(expr) }
   private lazy val parenthesizedExpr:PackratParser[NumericExpr] = (("(" ~> numericExpr) <~ ")") ^^ { case expr => expr }
 
   private lazy val booleanExpression:PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))

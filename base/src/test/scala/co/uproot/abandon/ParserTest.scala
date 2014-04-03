@@ -17,6 +17,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
   private val cashAccount = AccountName(Seq("Cash"))
   private val bankAccount = AccountName(Seq("Bank", "Current"))
 
+  private def nlit(n:BigDecimal) = NumericLiteralExpr(n)
+
   "parser" should "parse empty file" in {
     val testInput = ""
     val parseResult = AbandonParser.abandon(scanner(testInput))
@@ -76,7 +78,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc3 should be (bankAccount)
                     expr1 should be (Some(NumericLiteralExpr(200)))
                     expr2 should be (Some(UnaryNegExpr(NumericLiteralExpr(100))))
-                    expr3 should be (Some(UnaryNegExpr(NumericLiteralExpr(100))))
                 }
             }
         }
@@ -244,8 +245,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
        Cash         -0 + (10*3)
      """
 
-    pending
-
     val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
@@ -295,10 +294,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc2 should be (cashAccount)
                     acc3 should be (cashAccount)
                     acc4 should be (cashAccount)
-                    expr1 should be (Some(SubExpr(NumericLiteralExpr(200),NumericLiteralExpr(4))))
-                    expr2 should be (Some(SubExpr(NumericLiteralExpr(10),(SubExpr(NumericLiteralExpr(5),NumericLiteralExpr(6))))))
-                    expr3 should be (Some(UnaryNegExpr(AddExpr(NumericLiteralExpr(20),MulExpr(NumericLiteralExpr(3),UnaryNegExpr(NumericLiteralExpr(4)))))))
-                    expr4 should be (Some(SubExpr(NumericLiteralExpr(0),MulExpr(NumericLiteralExpr(3),NumericLiteralExpr(4)))))
+                    expr1 should be (Some(SubExpr(nlit(200),nlit(4))))
+                    expr2 should be (Some(SubExpr(nlit(10),(SubExpr(nlit(5),nlit(6))))))
+                    expr3 should be (Some(AddExpr(UnaryNegExpr(nlit(20)),MulExpr(nlit(3),UnaryNegExpr(nlit(4))))))
+                    expr4 should be (Some(SubExpr(nlit(0),MulExpr(nlit(3),nlit(4)))))
                 }
             }
         }
