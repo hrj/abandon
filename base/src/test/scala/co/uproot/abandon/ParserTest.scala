@@ -306,13 +306,16 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   import ASTHelper.NumericExpr
 
+  def bd(s:String) = BigDecimal(s)
+
   "parser" should "parse simple numeric expression" in {
     val tests = Map(
-      "0001" -> NumericLiteralExpr(1),
-      "000" -> NumericLiteralExpr(0),
-      "0" -> NumericLiteralExpr(0),
-      "-20" -> UnaryNegExpr(NumericLiteralExpr(20))
+      "0001" -> (bd("1") -> nlit(1)),
+      "000"  -> (bd("0") -> nlit(0)),
+      "0"    -> (bd("0") -> nlit(0)),
+      "-20"  -> (bd("-20") -> UnaryNegExpr(nlit(20)))
     )
+    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
 
     tests foreach {
       case (testInput, expectedOutput) =>
@@ -322,7 +325,34 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case AbandonParser.Success(result, _) =>
             inside(result) {
               case ne:NumericExpr =>
-                ne should be(expectedOutput)
+                ne.evaluate(context) should be (expectedOutput._1)
+                ne should be(expectedOutput._2)
+            }
+        }
+    }
+  }
+
+  "parser" should "parse complex numeric expression" in {
+    val tests = Map(
+      "0001 + 10.00"      -> (bd("11"), AddExpr(nlit(1),nlit(10.00))),
+      "10.5 - (2.5 * 2)"  -> (bd("5.5"), SubExpr(nlit(10.5),MulExpr(nlit(2.5),nlit(2)))),
+      "10.5 - (2.5 * -2)" -> (bd("15.5"), SubExpr(nlit(10.5),MulExpr(nlit(2.5),UnaryNegExpr(nlit(2))))),
+      "10.5 + -(2.5 * 2)" -> (bd("5.5"), AddExpr(nlit(10.5),UnaryNegExpr(MulExpr(nlit(2.5),nlit(2))))),
+      "-20 + 30"               -> (bd("10"), AddExpr(UnaryNegExpr(nlit(20)), nlit(30)))
+    )
+
+    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+
+    tests foreach {
+      case (testInput, expectedOutput) =>
+        val parseResult = AbandonParser.numericParser(scanner(testInput))
+
+        inside(parseResult) {
+          case AbandonParser.Success(result, _) =>
+            inside(result) {
+              case ne:NumericExpr =>
+                ne.evaluate(context) should be (expectedOutput._1)
+                ne should be(expectedOutput._2)
             }
         }
     }
