@@ -360,4 +360,54 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
+  "parser" should "ensure precedence of operators" in {
+    val tests = Map(
+      "1 + 2 * 3"          -> (bd("7"), AddExpr(nlit(1),MulExpr(nlit(2), nlit(3)))),
+      "1 * 2 + 3"          -> (bd("5"), AddExpr(MulExpr(nlit(1), nlit(2)), nlit(3))),
+      "1 * 2 + 3 * 4 - 2"  -> (bd("12"), SubExpr(AddExpr(MulExpr(nlit(1), nlit(2)), MulExpr(nlit(3), nlit(4))), nlit(2))),
+      "1 + 2 * 3 * 4 - 2"  -> (bd("23"), SubExpr(AddExpr(nlit(1), MulExpr(MulExpr(nlit(2),nlit(3)), nlit(4))), nlit(2))),
+      "1 + 2 * -3 * 4 - 2" -> (bd("-25"), SubExpr(AddExpr(nlit(1), MulExpr(MulExpr(nlit(2),UnaryNegExpr(nlit(3))), nlit(4))), nlit(2)))
+    )
+
+    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+
+    tests foreach {
+      case (testInput, expectedOutput) =>
+        val parseResult = AbandonParser.numericParser(scanner(testInput))
+
+        inside(parseResult) {
+          case AbandonParser.Success(result, _) =>
+            inside(result) {
+              case ne:NumericExpr =>
+                ne.evaluate(context) should be (expectedOutput._1)
+                ne should be(expectedOutput._2)
+            }
+        }
+    }
+  }
+
+  "parser" should "handle parenthesis correctly" in {
+    val tests = Map(
+      "1 + (2 * 3)"          -> (bd("7"), AddExpr(nlit(1),MulExpr(nlit(2), nlit(3)))),
+      "(1 + 2) * 3"          -> (bd("9"), MulExpr(AddExpr(nlit(1),nlit(2)), nlit(3))),
+      "1 * (2 + 3)"          -> (bd("5"), MulExpr(nlit(1), AddExpr(nlit(2), nlit(3)))),
+      "1 * (2 + 3) * 4 - 2"  -> (bd("18"), SubExpr(MulExpr(MulExpr(nlit(1), AddExpr(nlit(2), nlit(3))), nlit(4)), nlit(2)))
+    )
+
+    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+
+    tests foreach {
+      case (testInput, expectedOutput) =>
+        val parseResult = AbandonParser.numericParser(scanner(testInput))
+
+        inside(parseResult) {
+          case AbandonParser.Success(result, _) =>
+            inside(result) {
+              case ne:NumericExpr =>
+                ne.evaluate(context) should be (expectedOutput._1)
+                ne should be(expectedOutput._2)
+            }
+        }
+    }
+  }
 }

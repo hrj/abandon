@@ -172,14 +172,30 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   lazy val numericParser:Parser[NumericExpr] = phrase(numericExpr)
 
   private lazy val numericLiteralExpr:PackratParser[NumericExpr] = (number ^^ {case n => NumericLiteralExpr(n)})
-  private lazy val numericExpr:PackratParser[NumericExpr] = (addExpr | subExpr | mulExpr | divExpr | numericLiteralExpr | numericFunctionExpr | parenthesizedExpr | unaryNegExpr )
   private lazy val numericLiteralFirstExpr:PackratParser[NumericExpr] = (numericLiteralExpr | numericExpr)
-  private lazy val addExpr:PackratParser[AddExpr] = ((numericExpr <~ "+") ~ numericExpr) ^^ { case a ~ b => AddExpr(a, b) }
-  private lazy val subExpr:PackratParser[SubExpr] = ((numericExpr <~ "-") ~ numericExpr) ^^ { case a ~ b => SubExpr(a, b) }
-  private lazy val mulExpr:PackratParser[MulExpr] = ((numericExpr <~ "*") ~ numericExpr) ^^ { case a ~ b => MulExpr(a, b) }
-  private lazy val divExpr:PackratParser[DivExpr] = ((numericExpr <~ "/") ~ numericExpr) ^^ { case a ~ b => DivExpr(a, b) }
   private lazy val unaryNegExpr:PackratParser[UnaryNegExpr] = ("-" ~> numericLiteralFirstExpr) ^^ { case expr => UnaryNegExpr(expr) }
   private lazy val parenthesizedExpr:PackratParser[NumericExpr] = (("(" ~> numericExpr) <~ ")") ^^ { case expr => expr }
+
+  private def mkExpr(op:String, e1:NumericExpr, e2:NumericExpr) = {
+    op match {
+      case "+" => AddExpr(e1, e2)
+      case "-" => SubExpr(e1, e2)
+      case "*" => MulExpr(e1, e2)
+      case "/" => DivExpr(e1, e2)
+    }
+  }
+
+  private lazy val numericExpr:PackratParser[NumericExpr] =
+    (term ~ termFrag) ^^ {
+      case t1 ~ ts => ts.foldLeft(t1){case (acc, op ~ t2) => mkExpr(op, acc, t2)}
+    }
+  private lazy val term:PackratParser[NumericExpr] =
+    factor ~ factorFrag ^^ {
+      case t1 ~ ts => ts.foldLeft(t1){case (acc, op ~ t2) => mkExpr(op, acc, t2)}
+  }
+  private lazy val termFrag:PackratParser[Seq[String ~ NumericExpr]] = (("+" | "-") ~ term)*
+  private lazy val factor:PackratParser[NumericExpr] = numericLiteralExpr | parenthesizedExpr | unaryNegExpr
+  private lazy val factorFrag:PackratParser[Seq[String ~ NumericExpr]] = (("*" | "/") ~ factor)*
 
   private lazy val booleanExpression:PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
 
