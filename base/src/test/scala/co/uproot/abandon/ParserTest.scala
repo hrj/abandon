@@ -47,8 +47,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                   case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
-                    expr1 should be (Some(NumericLiteralExpr(200)))
-                    expr2 should be (Some(UnaryNegExpr(NumericLiteralExpr(200))))
+                    expr1 should be (Some(nlit(200)))
+                    expr2 should be (Some(UnaryNegExpr(nlit(200))))
                 }
             }
         }
@@ -76,8 +76,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (bankAccount)
-                    expr1 should be (Some(NumericLiteralExpr(200)))
-                    expr2 should be (Some(UnaryNegExpr(NumericLiteralExpr(100))))
+                    expr1 should be (Some(nlit(200)))
+                    expr2 should be (Some(UnaryNegExpr(nlit(100))))
+                    expr3 should be (Some(UnaryNegExpr(nlit(100))))
                 }
             }
         }
@@ -110,8 +111,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (bankAccount)
-                    expr1 should be (Some(NumericLiteralExpr(200)))
-                    expr2 should be (Some(UnaryNegExpr(NumericLiteralExpr(100))))
+                    expr1 should be (Some(nlit(200)))
+                    expr2 should be (Some(UnaryNegExpr(nlit(100))))
                     expr3 should be (None)
                 }
             }
@@ -123,7 +124,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (bankAccount)
-                    expr1 should be (Some(NumericLiteralExpr(200)))
+                    expr1 should be (Some(nlit(200)))
                     expr2 should be (None)
                     expr3 should be (None)
                     comment should be (" Comment")
@@ -153,7 +154,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                   case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
-                    expr1 should be (Some(UnaryNegExpr(AddExpr(NumericLiteralExpr(200),NumericLiteralExpr(40)))))
+                    expr1 should be (Some(UnaryNegExpr(AddExpr(nlit(200),nlit(40)))))
                     expr2 should be (None)
                 }
             }
@@ -190,13 +191,13 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc4 should be (cashAccount)
                     acc5 should be (cashAccount)
                     acc6 should be (cashAccount)
-                    expr1 should be (Some(NumericLiteralExpr(200)))
-                    expr2 should be (Some(NumericLiteralExpr(0)))
-                    expr3 should be (Some(NumericLiteralExpr(0)))
-                    expr4 should be (Some(NumericLiteralExpr(0)))
-                    expr5 should be (Some(NumericLiteralExpr(0)))
-                    expr6 should be (Some(AddExpr(NumericLiteralExpr(0),NumericLiteralExpr(200))))
-                    expr7 should be (Some(MulExpr(AddExpr(NumericLiteralExpr(200),NumericLiteralExpr(10)),NumericLiteralExpr(0))))
+                    expr1 should be (Some(nlit(200)))
+                    expr2 should be (Some(nlit(0)))
+                    expr3 should be (Some(nlit(0)))
+                    expr4 should be (Some(nlit(0)))
+                    expr5 should be (Some(nlit(0)))
+                    expr6 should be (Some(AddExpr(nlit(0),nlit(200))))
+                    expr7 should be (Some(MulExpr(AddExpr(nlit(200),nlit(10)),nlit(0))))
                 }
             }
          }
@@ -227,9 +228,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (cashAccount)
-                    expr1 should be (Some(NumericLiteralExpr(200)))
-                    expr2 should be (Some(NumericLiteralExpr(0)))
-                    expr3 should be (Some(AddExpr(NumericLiteralExpr(0),NumericLiteralExpr(10))))
+                    expr1 should be (Some(nlit(200)))
+                    expr2 should be (Some(nlit(0)))
+                    expr3 should be (Some(AddExpr(nlit(0),nlit(10))))
                 	}
                 }
             }
@@ -260,10 +261,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc2 should be(cashAccount)
                     acc3 should be(cashAccount)
                     acc4 should be(cashAccount)
-                    expr1 should be(Some(NumericLiteralExpr(200)))
-                    expr2 should be(Some(UnaryNegExpr((NumericLiteralExpr(0)))))
-                    expr3 should be(Some(UnaryNegExpr((NumericLiteralExpr(0)))))
-                    expr4 should be(Some(AddExpr(UnaryNegExpr(NumericLiteralExpr(0)), MulExpr(NumericLiteralExpr(10), NumericLiteralExpr(3)))))
+                    expr1 should be(Some(nlit(200)))
+                    expr2 should be(Some(UnaryNegExpr((nlit(0)))))
+                    expr3 should be(Some(UnaryNegExpr((nlit(0)))))
+                    expr4 should be(Some(AddExpr(UnaryNegExpr(nlit(0)), MulExpr(nlit(10), nlit(3)))))
                 }
             }
         }
