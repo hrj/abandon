@@ -72,9 +72,8 @@ Note: The second `0.00` is for accounts that get printed on right. In this simpl
 * An interactive GUI for viewing reports. 
 
 ### Installation
-* Install *Oracle Java 7*
-  As of Feb 2014, OpenJDK won't work, nor will older versions of Oracle Java since this app requires JavaFX (an upcoming technology).
-  When Java 8 is released (due March 2014), this project will shift to the newer APIs and it would be possible to use any implementation of Java 8.
+* Install **Oracle Java 7** or **Java 8 from any vendor**.
+  Other versions of Java will work fine for the CLI, but the GUI requires the above specific versions.
 * Download and extract the `Abandon` binaries from [here](https://github.com/hrj/abandon/releases)
 * Use the `*.sh` files to run on `*nix` and `Mac` or the `*.bat` files to run on `Windows`.
 
