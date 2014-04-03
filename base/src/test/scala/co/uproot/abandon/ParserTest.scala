@@ -339,7 +339,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "10.5 - (2.5 * 2)"  -> (bd("5.5"), SubExpr(nlit(10.5),MulExpr(nlit(2.5),nlit(2)))),
       "10.5 - (2.5 * -2)" -> (bd("15.5"), SubExpr(nlit(10.5),MulExpr(nlit(2.5),UnaryNegExpr(nlit(2))))),
       "10.5 + -(2.5 * 2)" -> (bd("5.5"), AddExpr(nlit(10.5),UnaryNegExpr(MulExpr(nlit(2.5),nlit(2))))),
-      "-20 + 30"               -> (bd("10"), AddExpr(UnaryNegExpr(nlit(20)), nlit(30)))
+      "-20 + 30"          -> (bd("10"), AddExpr(UnaryNegExpr(nlit(20)), nlit(30))),
+      "-20 + 30*-5.0"     -> (bd("-170"), AddExpr(UnaryNegExpr(nlit(20)), MulExpr(nlit(30), UnaryNegExpr(nlit(5)))))
     )
 
     val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
