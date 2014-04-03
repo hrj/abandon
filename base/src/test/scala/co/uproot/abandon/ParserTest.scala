@@ -171,7 +171,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash 			0+200
       Cash 			(200+10)*0
     """
-    
+
     val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
@@ -204,14 +204,15 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   "parser" should "parse a transaction with Unary plus(+) zero value" in {
     val testInput = """
-     
      2013/9/1
       Expense       200
       Cash          +00
-      Cash 			+(0 + 10)
-      
+      Cash          +(0 + 10)
     """
-      val parseResult = AbandonParser.abandon(scanner(testInput))
+
+    pending
+
+    val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
@@ -233,50 +234,52 @@ class ParserTest extends FlatSpec with Matchers with Inside {
             }
         }
     }
-  
-   "parser" should "parse a transaction with Unary minus(-) zero value" in {
+
+  "parser" should "parse a transaction with Unary minus(-) zero value" in {
     val testInput = """
-     
-     2013/9/1
-      Expense       200
-      Cash          -00
-      Cash 			-0.00
-      Cash 			-0 + (10*3)	
-    """
-      val parseResult = AbandonParser.abandon(scanner(testInput))
+      2013/9/1
+       Expense       200
+       Cash          -00
+       Cash         -0.00
+       Cash         -0 + (10*3)
+     """
+
+    pending
+
+    val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
         inside(result) {
           case List(txnGroup) =>
-              inside(txnGroup) {
+            inside(txnGroup) {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 9, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _),SingleTransaction(acc3, expr3, _),SingleTransaction(acc4, expr4, _)) =>
-                    acc1 should be (expenseAccount)
-                    acc2 should be (cashAccount)
-                    acc3 should be (cashAccount)
-                    acc4 should be (cashAccount)
-                    expr1 should be (Some(NumericLiteralExpr(200)))
-                    expr2 should be (Some(UnaryNegExpr((NumericLiteralExpr(0)))))
-                    expr3 should be (Some(UnaryNegExpr((NumericLiteralExpr(0)))))
-                    expr4 should be (Some(AddExpr(UnaryNegExpr(NumericLiteralExpr(0)),MulExpr(NumericLiteralExpr(10),NumericLiteralExpr(3)))))
-                	}
+                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _), SingleTransaction(acc4, expr4, _)) =>
+                    acc1 should be(expenseAccount)
+                    acc2 should be(cashAccount)
+                    acc3 should be(cashAccount)
+                    acc4 should be(cashAccount)
+                    expr1 should be(Some(NumericLiteralExpr(200)))
+                    expr2 should be(Some(UnaryNegExpr((NumericLiteralExpr(0)))))
+                    expr3 should be(Some(UnaryNegExpr((NumericLiteralExpr(0)))))
+                    expr4 should be(Some(AddExpr(UnaryNegExpr(NumericLiteralExpr(0)), MulExpr(NumericLiteralExpr(10), NumericLiteralExpr(3)))))
                 }
             }
         }
     }
+  }
 
-  
   "parser" should "parse a simple subtraction expression" in {
     val testInput = """
     2013/1/1
       Expense       200-4
-      Cash			10-(5-6)
-      Cash			-20+(3*(-4))
-      Cash			0-(3*4)
+      Cash        10-(5-6)
+      Cash        -20+(3*(-4))
+      Cash        0-(3*4)
     """
+
     val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
@@ -298,13 +301,32 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     expr4 should be (Some(SubExpr(NumericLiteralExpr(0),MulExpr(NumericLiteralExpr(3),NumericLiteralExpr(4)))))
                 }
             }
-            
-            
         }
     }
   }
 
+  import ASTHelper.NumericExpr
 
+  "parser" should "parse simple numeric expression" in {
+    val tests = Map(
+      "0001" -> NumericLiteralExpr(1),
+      "000" -> NumericLiteralExpr(0),
+      "0" -> NumericLiteralExpr(0),
+      "-20" -> UnaryNegExpr(NumericLiteralExpr(20))
+    )
 
+    tests foreach {
+      case (testInput, expectedOutput) =>
+        val parseResult = AbandonParser.numericParser(scanner(testInput))
+
+        inside(parseResult) {
+          case AbandonParser.Success(result, _) =>
+            inside(result) {
+              case ne:NumericExpr =>
+                ne should be(expectedOutput)
+            }
+        }
+    }
+  }
 
 }

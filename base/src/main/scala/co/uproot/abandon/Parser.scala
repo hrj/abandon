@@ -16,7 +16,6 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
     (string ^^ StringLit
       | identChar ~ rep(identChar | digit) ^^ { case first ~ rest => processIdent(first :: rest mkString "") }
       | number ~ letter ^^ { case n ~ l => ErrorToken("Invalid number format : " + n + l) }
-      | '-' ~> number ^^ { case num => NumericLit("-" + num) }
       | number ^^ NumericLit
       | eol ^^^ EOL
       | comment ^^ { case commentContents => CommentToken(commentContents.toString)}
@@ -55,8 +54,14 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
     case i ~ f ~ e =>
       i + optString(".", f) + optString("", e)
   }
-  def intPart = (zero*) ~> intList
-  def intList = (nonzero ~ ((comma ~> rep1sep(digit, comma?)) | repsep(digit, comma?)))  ^^ { case x ~ y => (x :: y) mkString "" }
+
+  /** backtracking version of prefix* ~> suffix */
+  def lazyPrefix[T](prefix:Parser[T], suffix:Parser[T]):Parser[T] = {
+    (prefix ~> lazyPrefix(prefix, suffix)) | (prefix ~> suffix) | suffix
+  }
+
+  def intPart = lazyPrefix(zero, intList)
+  def intList = (digit ~ ((comma ~> rep1sep(digit, comma?)) | repsep(digit, comma?)))  ^^ { case x ~ y => (x :: y) mkString "" }
   def fracPart = '.' ~> rep(digit) ^^ { _ mkString "" }
   def expPart = exponent ~ opt(sign) ~ rep1(digit) ^^ {
     case e ~ s ~ d =>
@@ -164,7 +169,9 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   import ASTHelper.NumericExpr
 
-  private lazy val numericExpr:PackratParser[NumericExpr] = (addExpr | subExpr | mulExpr | divExpr | numericLiteralExpr | numericFunctionExpr | unaryNegExpr | parenthesizedExpr)
+  lazy val numericParser:Parser[NumericExpr] = phrase(numericExpr)
+
+  private lazy val numericExpr:PackratParser[NumericExpr] = (addExpr | subExpr | mulExpr | divExpr | unaryNegExpr |numericLiteralExpr | numericFunctionExpr |  parenthesizedExpr)
   private lazy val numericLiteralExpr:PackratParser[NumericExpr] = (number ^^ {case n => NumericLiteralExpr(n)})
   private lazy val addExpr:PackratParser[AddExpr] = ((numericExpr <~ "+") ~ numericExpr) ^^ { case a ~ b => AddExpr(a, b) }
   private lazy val subExpr:PackratParser[SubExpr] = ((numericExpr <~ "-") ~ numericExpr) ^^ { case a ~ b => SubExpr(a, b) }
