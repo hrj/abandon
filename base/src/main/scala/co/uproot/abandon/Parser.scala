@@ -198,11 +198,15 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
     case y ~ (m: Int) ~ d if (isValidDate(y, m, d)) =>
       Date(y, m, d)
-    case y ~ (m: String) ~ d if (Helper.getMonthNumber(m).isDefined && isValidDate(y, Helper.getMonthNumber(m).get, d)) =>
+    case y ~ (m: String) ~ d if (isValidDate(y, m, d)) =>
       Date(y, Helper.getMonthNumber(m).get, d)
   }, { case y ~ m ~ d => List(y, m, d).mkString("/") + " is not a valid calendar date" })
 
-  private def isValidDate(y: Int, m: Int, d: Int) = {
+  private def isValidDate(y: Int, m: String, d: Int):Boolean = {
+    Helper.getMonthNumber(m).isDefined && isValidDate(y, Helper.getMonthNumber(m).get, d)
+  }
+
+  private def isValidDate(y: Int, m: Int, d: Int):Boolean = {
     try {
       new LocalDate(y, m, d)
       true
