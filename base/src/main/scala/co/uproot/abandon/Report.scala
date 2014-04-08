@@ -135,7 +135,6 @@ object Reports {
 
   def bookReport(state: AppState, reportSettings: BookReportSettings) : Seq[RegisterReportGroup] = {
     val monthlyGroups = state.accState.txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
-
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
 
@@ -163,10 +162,39 @@ object Reports {
     }
     reportGroups
   }
+  
+  def otherExport(state: AppState, exportSettings: ExportSettings) : Seq[RegisterReportGroup] = {
+    val monthlyGroups = state.accState.txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+    var reportGroups = Seq[RegisterReportGroup]()
+    var groupState = new AccountState()
+
+    monthlyGroups.foreach {
+      case (month, monthlyGroup) =>
+        monthlyGroup foreach { g =>
+          groupState.updateAmounts(g)
+        }
+        val groupAmounts = monthlyGroup.flatMap(_.children.map(_.name)).toSet
+        val amounts = groupState.amounts
+        val matchingAmounts = amounts.filter { case (accountName, amount) => groupAmounts.contains(accountName)}
+
+        val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
+          val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
+          val render = "%-50s %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta))
+          (accountName, myTxns, render)
+        }
+
+        val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
+
+        reportGroups :+= RegisterReportGroup(
+          formatMonth(month),
+          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
+        )
+    }
+    reportGroups
+  }
 
   def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {
     val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
-
     <abandon><transactions>{
       sortedGroups.map {txnGroup =>
         <txnGroup date={txnGroup.date.formatCompact}>
@@ -182,5 +210,5 @@ object Reports {
         </txnGroup>
       }
     }</transactions></abandon>
-  }
+  } 
 }
