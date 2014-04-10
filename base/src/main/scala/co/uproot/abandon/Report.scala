@@ -171,7 +171,7 @@ object Reports {
          sortedGroups foreach { g =>
           groupState.updateAmounts(g)
       }
-     } 
+     }
      val groupAmounts = sortedGroups.flatMap(_.children.map(_.name)).toSet
      val amounts = groupState.amounts
      val matchingAmounts = amounts.filter { case (accountName, amount) => groupAmounts.contains(accountName)}
@@ -181,8 +181,6 @@ object Reports {
           (accountName, myTxns, render)
      }
      val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
-     
-     
      var date1 = "";
      sortedGroups.map { txnGroup =>
          date1 = txnGroup.date.formatYYYYMMDD
@@ -191,7 +189,6 @@ object Reports {
         date1,
         sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
        ) 
-    
     reportGroups
   } 
 
