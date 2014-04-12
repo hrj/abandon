@@ -125,8 +125,33 @@ object AbandonApp extends App {
         if (!parseError) {
           val appState = Processor.process(astEntries)
           Processor.checkConstaints(appState, settings.eodConstraints)
+        
           settings.exports.foreach { exportSettings =>
+            println("--->" + exportSettings)
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
+            exportSettings match {
+            case balSettings: LedgerExportSettings =>
+                
+                val (leftEntries, rightEntries, totalLeft, totalRight) = Reports.ledgerExport(appState, settings, balSettings)
+                val left = leftEntries.map(_.render)
+                val right = rightEntries.map(_.render)
+
+                val lines = left.zipAll(right, "", "")
+                val maxLeftLength = maxElseZero(left.map(_.length))
+
+                def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
+                val balRender = lines.map { case (left, right) => renderBoth(left, right) }
+                reportWriter.println(balRender.mkString("\n"))
+                val totalLine = renderBoth(totalLeft, totalRight)
+                reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
+                reportWriter.println(totalLine)
+            case xmlSettings : xmlExportSettings =>
+              val xmlData = Reports.xmlExport(appState, exportSettings)
+              reportWriter.printXml(xmlData)
+            }
+            reportWriter.close
+          }
+            /*    val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
             val outFiles  = exportSettings.outFiles
             var fileExtn = "";
             outFiles.foreach{ extn => val extArray = extn.split("\\."); fileExtn = extArray(1) }
@@ -139,10 +164,7 @@ object AbandonApp extends App {
                 val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
                 val  export =Reports.otherExport(appState, exportSettings)
                 printOtherExport(reportWriter, exportSettings, export)
-                reportWriter.close
-            }
-          }
-
+                reportWriter.close */
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
 

@@ -62,7 +62,8 @@ object SettingsHelper {
         val reportOptions = config.optConfig("reportOptions")
         val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
-        val exports = exportConfigs.map(makeExportSettings)
+       // val exports = exportConfigs.map(makeExportSettings)
+        val exports = exportConfigs.map(makeExportSettings(_))
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
         Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
@@ -85,7 +86,7 @@ object SettingsHelper {
 
   def makeReportSettings(config: Config) = {
     val title = config.getString("title")
-    val reportType = config.getString("type")
+    val reportType = config.getString("type") 
     val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
     val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
     reportType match {
@@ -101,9 +102,19 @@ object SettingsHelper {
   }
 
   def makeExportSettings(config: Config) = {
-    val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-    val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
-    ExportSettings(accountMatch, outFiles)
+    try { 
+      val reportType = config.getString("type")
+      val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+      val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
+      val title = config.getString("title")
+      val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
+        LedgerExportSettings(title, accountMatch, outFiles, showZeroAmountAccounts)
+    } catch {
+      case e: ConfigException.Missing => val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+       val title = ""
+      val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
+         xmlExportSettings(title,accountMatch, outFiles)
+    } 
   }
 }
 
@@ -164,11 +175,21 @@ trait AccountMatcher {
 abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
+abstract class ExportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
+}
+
 case class BalanceReportSettings(
   _title: String,
   _accountMatch: Option[Seq[String]],
   _outFiles: Seq[String],
   showZeroAmountAccounts: Boolean) extends ReportSettings(_title, _accountMatch, _outFiles) {
+}
+
+case class LedgerExportSettings(
+  _title: String,
+  _accountMatch: Option[Seq[String]],
+  _outFiles: Seq[String],
+  showZeroAmountAccounts: Boolean) extends ExportSettings(_title, _accountMatch, _outFiles) {
 }
 
 case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ReportSettings(_title, _accountMatch, _outFiles) {
@@ -177,9 +198,7 @@ case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[Stri
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
-case class otherExport(_title: String, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ReportSettings(_title, _accountMatch, _outFiles) {
-}
-case class ExportSettings(accountMatch: Option[Seq[String]], outFiles: Seq[String]) extends AccountMatcher
+case class xmlExportSettings(_title: String,_accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_title,_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])
 

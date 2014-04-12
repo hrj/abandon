@@ -162,35 +162,94 @@ object Reports {
     }
     reportGroups
   }
-  def otherExport(state: AppState, exportSettings: ExportSettings) : Seq[RegisterReportGroup] = {
-    val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
-    var reportGroups = Seq[RegisterReportGroup]()
-    var groupState = new AccountState()
-   sortedGroups.foreach {
-    case (monthlyGroup) =>
-         sortedGroups foreach { g =>
-          groupState.updateAmounts(g)
+  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings) = {
+  def show(width: Int, a: AccountTreeState, maxNameLength: Int, treePrefix: String = "", isLastChild: Boolean = false, isParentLastChild: Boolean = false, prefix: Option[String] = None, forceIndent: Option[Int] = None): Seq[BalanceReportEntry] = {
+      val indent = forceIndent.getOrElse(a.name.depth)
+      val amountIsZero = a.amount equals Zero
+      val hideAccount = (!reportSettings.showZeroAmountAccounts) && amountIsZero
+      val renderableChildren = a.childrenNonZero
+      val onlyChildren = (renderableChildren == 1) && hideAccount
+     
+      val myPrefix = treePrefix + (
+        if (indent <= 1) {
+          ""
+        } else if (isLastChild && !(prefix.isDefined && !isParentLastChild)) {
+          " "
+        } else {
+          " "
+        })
+
+      val childTreePrefix = (
+        if (onlyChildren) {
+          treePrefix
+        } else if (isLastChild) {
+          treePrefix + "   "
+        } else {
+          if (indent <= 1) {
+            treePrefix
+          } else {
+            treePrefix 
+          }
+        }) 
+
+      val children = a.childStates
+      val lastChildIndex = children.length - 1
+      val renderedChildren = children.sortBy(_.name.toString).zipWithIndex.flatMap {
+        case (c, i) =>
+        show(width, c, maxNameLength, childTreePrefix, i == lastChildIndex, isLastChild || (prefix.isDefined && isParentLastChild),
+            if (onlyChildren) Some(prefix.map(_ + ":").getOrElse("") + a.name.name) else None,
+            if (onlyChildren) Some(indent) else None
+          )
+      } 
+      val selfAmount = if(a.amount !=0 && !a.childStates.isEmpty ) { " (" + a.amount + ")" } else { "" }
+      lazy val selfRender = (
+        BalanceReportEntry(Some(a.name),
+          ("%" + width + ".2f   %-" + maxNameLength + "s") format (
+            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
+          )
+        )
+      )
+      if (renderableChildren == 0) {
+        if (hideAccount) {
+          Nil
+        } else {
+          Seq(selfRender)
+        }
+      } else if (onlyChildren) {
+        renderedChildren
+      } else {
+        selfRender +: renderedChildren
       }
-     }
-     val groupAmounts = sortedGroups.flatMap(_.children.map(_.name)).toSet
-     val amounts = groupState.amounts
-     val matchingAmounts = amounts.filter { case (accountName, amount) => groupAmounts.contains(accountName)}
-     val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
-     val myTxns = sortedGroups.flatMap(_.children).filter(_.name equals accountName)
-     val render = "%-50s %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta))
-          (accountName, myTxns, render)
-     }
-     val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
-     var date1 = "";
-     sortedGroups.map { txnGroup =>
-         date1 = txnGroup.date.formatYYYYMMDD
-     } 
-     reportGroups :+= RegisterReportGroup(
-        date1,
-        sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
-       ) 
-    reportGroups
-  } 
+    } 
+
+    val filteredAccountTree = state.accState.mkTree(reportSettings.isAccountMatching)
+    assert(reportSettings.accountMatch.isDefined || (filteredAccountTree.total equals Zero), "The Account tree doesn't balance!")
+
+    val rightAccNames = settings.reportOptions.isRight
+    val (rightAccs, leftAccs) = filteredAccountTree.childStates.partition(at => rightAccNames.contains(at.name.name))
+
+    val leftAmountWidth = maxElseZero(leftAccs.map(_.total.toBigInt.toString.length)) + 5
+    val rightAmountWidth = maxElseZero(rightAccs.map(_.total.toBigInt.toString.length)) + 5
+
+    val leftMaxNameLength = maxElseZero(leftAccs.map(_.maxNameLength))
+    val rightMaxNameLength = maxElseZero(rightAccs.map(_.maxNameLength))
+
+    val leftRender = leftAccs.sortBy(_.name.toString).flatMap(show(leftAmountWidth, _, leftMaxNameLength))
+    val rightRender = rightAccs.sortBy(_.name.toString).flatMap(show(rightAmountWidth, _, rightMaxNameLength))
+
+    val leftTotal = leftAccs.map(_.total).sum
+    val rightTotal = rightAccs.map(_.total).sum
+    val total = leftTotal + rightTotal
+    val totalStr =
+      if (total equals Zero) {
+        "Zero"
+      } else {
+        total.toString
+      }
+    (leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
+  }
+    
+  
 
   def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {
     val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
