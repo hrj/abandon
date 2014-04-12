@@ -174,9 +174,11 @@ object Reports {
         if (indent <= 1) {
           ""
         } else if (isLastChild && !(prefix.isDefined && !isParentLastChild)) {
-          " "
+          //" └╴"
+          ":"
         } else {
-          " "
+          //" ├╴"
+          "-->"
         })
 
       val childTreePrefix = (
@@ -188,10 +190,10 @@ object Reports {
           if (indent <= 1) {
             treePrefix
           } else {
-            treePrefix 
+            treePrefix + " │ "
           }
         }) 
-
+       
       val children = a.childStates
       val lastChildIndex = children.length - 1
       val renderedChildren = children.sortBy(_.name.toString).zipWithIndex.flatMap {
@@ -200,7 +202,7 @@ object Reports {
             if (onlyChildren) Some(prefix.map(_ + ":").getOrElse("") + a.name.name) else None,
             if (onlyChildren) Some(indent) else None
           )
-      } 
+      }
       val selfAmount = if(a.amount !=0 && !a.childStates.isEmpty ) { " (" + a.amount + ")" } else { "" }
       lazy val selfRender = (
         BalanceReportEntry(Some(a.name),
@@ -220,7 +222,7 @@ object Reports {
       } else {
         selfRender +: renderedChildren
       }
-    } 
+    }
 
     val filteredAccountTree = state.accState.mkTree(reportSettings.isAccountMatching)
     assert(reportSettings.accountMatch.isDefined || (filteredAccountTree.total equals Zero), "The Account tree doesn't balance!")
@@ -246,7 +248,7 @@ object Reports {
       } else {
         total.toString
       }
-    (leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
+   (leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
   }
     
   
