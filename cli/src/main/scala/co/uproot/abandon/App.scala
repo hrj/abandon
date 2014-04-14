@@ -6,10 +6,8 @@ import java.io.FileWriter
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
-
   val filePaths = outFiles.filterNot(_ equals "-").map(settings.getConfigRelativePath(_))
   val fileWriters = filePaths.map(path => new FileWriter(path))
-
   def startCodeBlock() = {
     fileWriters foreach { fileWriter =>
       fileWriter.write("```\n")
@@ -71,9 +69,8 @@ object AbandonApp extends App {
   def printRegReport(reportWriter: ReportWriter, regReport: Seq[RegisterReportGroup]) = {
     regReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
-      reportGroup.entries foreach { e =>
+      reportGroup.entries foreach { e => 
         reportWriter.println("   " + e.render)
-
       }
     }
   }
@@ -109,23 +106,46 @@ object AbandonApp extends App {
     reportWriter.endCodeBlock()
   }
 
+  def printOtherExport(reportWriter: ReportWriter, exportSettings: ExportSettings, export: Seq[RegisterReportGroup]) = {
+   export foreach { reportGroup =>
+      reportWriter.println(reportGroup.groupTitle)
+      reportGroup.entries foreach { e => 
+        reportWriter.println("   " + e.render)
+      }
+    }
+  }
+
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
       case Left(errorMsg) => println("Error:", errorMsg)
       case Right(settings) =>
-
+      var i = 0;
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
           val appState = Processor.process(astEntries)
           Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
-            val xmlData = Reports.xmlExport(appState, exportSettings)
-            reportWriter.printXml(xmlData)
+            exportSettings match {
+            case balSettings: LedgerExportSettings =>
+               val (date, leftEntries, rightEntries, totalLeft, totalRight) = Reports.ledgerExport(appState, settings, balSettings)
+               reportWriter.println(date + "\n")  
+               val left = leftEntries.map(_.render)
+                val right = rightEntries.map(_.render)
+                val lines = left.zipAll(right, "", "")
+                val maxLeftLength = maxElseZero(left.map(_.length))
+                def renderBoth(l: String, r: String) = "\t %-" + (maxLeftLength + 2) + "s%s" format (l, r)
+                val balRender = lines.map { case (left, right) => renderBoth(left, right) }
+               reportWriter.println(balRender.mkString("\n"))
+              //val totalLine = renderBoth(totalLeft, totalRight)
+               //reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
+            case xmlSettings : xmlExportSettings =>
+              val xmlData = Reports.xmlExport(appState, exportSettings)
+              reportWriter.printXml(xmlData)
+            }
             reportWriter.close
           }
-
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
 
@@ -153,7 +173,7 @@ object AbandonApp extends App {
                 val totalLine = renderBoth(totalLeft, totalRight)
                 reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
                 reportWriter.println(totalLine)
-              case regSettings: RegisterReportSettings =>
+              case regSettings: RegisterReportSettings =>  
                 val regReport = Reports.registerReport(appState, regSettings)
                 printRegReport(reportWriter, regReport)
               case bookSettings: BookReportSettings =>
@@ -172,6 +192,5 @@ object AbandonApp extends App {
 
   def printErr(msg:String) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
-    
   }
 }
