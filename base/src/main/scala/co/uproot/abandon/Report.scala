@@ -3,6 +3,7 @@ package co.uproot.abandon
 import Helper.{ Zero, maxElseZero, sumDeltas }
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
+case class LedgerExportEntry(accName: Option[AccountName],render: String)
 case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
 
@@ -100,7 +101,6 @@ object Reports {
     val month = monthYear % 100 
     s"$year / ${Helper.monthLabels(month - 1)}"
   }
-  
   def registerReport(state: AppState, reportSettings: RegisterReportSettings) : Seq[RegisterReportGroup] = {
     val txnGroups = state.accState.txnGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
     val monthlyGroups = txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
@@ -163,21 +163,18 @@ object Reports {
     reportGroups
   }
   def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings) = {
-  def show(width: Int, a: AccountTreeState, maxNameLength: Int, treePrefix: String = "", isLastChild: Boolean = false, isParentLastChild: Boolean = false, prefix: Option[String] = None, forceIndent: Option[Int] = None): Seq[BalanceReportEntry] = {
+  def show(width: Int, a: AccountTreeState, maxNameLength: Int, treePrefix: String = "", isLastChild: Boolean = false, isParentLastChild: Boolean = false, prefix: Option[String] = None, forceIndent: Option[Int] = None): Seq[LedgerExportEntry] = {
       val indent = forceIndent.getOrElse(a.name.depth)
       val amountIsZero = a.amount equals Zero
       val hideAccount = (!reportSettings.showZeroAmountAccounts) && amountIsZero
       val renderableChildren = a.childrenNonZero
       val onlyChildren = (renderableChildren == 1) && hideAccount
-     
       val myPrefix = treePrefix + (
         if (indent <= 1) {
           ""
         } else if (isLastChild && !(prefix.isDefined && !isParentLastChild)) {
-          //" └╴"
           ""
         } else {
-          //" ├╴"
           ""
         })
 
@@ -190,7 +187,6 @@ object Reports {
           if (indent <= 1) {
             treePrefix
           } else {
-            //treePrefix + " │ "
             treePrefix + ""
           }
         }) 
@@ -203,10 +199,9 @@ object Reports {
             if (onlyChildren) Some(indent) else None
           )
       }
-       
-      lazy val selfRender = (
-        BalanceReportEntry(Some(a.name),
-          (" %-" + maxNameLength + "s  %" + width + ".2f") format (
+      lazy val selfRender1 = (
+        LedgerExportEntry(Some(a.name),
+          ("%-" + maxNameLength + "s  %" + width + ".2f") format (
            a.name + myPrefix,a.amount 
           )
         )
@@ -215,12 +210,12 @@ object Reports {
         if (hideAccount) {
           Nil
         } else {
-          Seq(selfRender)
+          Seq(selfRender1)
         }
       } else if (onlyChildren) {
         renderedChildren
       } else {
-        selfRender +: renderedChildren
+        selfRender1 +: renderedChildren
       }
     }
 
@@ -233,8 +228,8 @@ object Reports {
     val leftAmountWidth = maxElseZero(leftAccs.map(_.total.toBigInt.toString.length)) + 5
     val rightAmountWidth = maxElseZero(rightAccs.map(_.total.toBigInt.toString.length)) + 5
 
-    val leftMaxNameLength = maxElseZero(leftAccs.map(_.maxNameLength))
-    val rightMaxNameLength = maxElseZero(rightAccs.map(_.maxNameLength))
+    val leftMaxNameLength = maxElseZero(leftAccs.map(_.maxNameLength)) + 20
+    val rightMaxNameLength = maxElseZero(rightAccs.map(_.maxNameLength)) + 20
 
     val leftRender = leftAccs.sortBy(_.name.toString).flatMap(show(leftAmountWidth, _, leftMaxNameLength))
     val rightRender = rightAccs.sortBy(_.name.toString).flatMap(show(rightAmountWidth, _, rightMaxNameLength))
@@ -248,10 +243,13 @@ object Reports {
       } else {
         total.toString
       }
-   (leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
+    val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
+    var currDate = ""
+       sortedGroups.foreach { latestDate => 
+            currDate  = latestDate.date.formatYYYYMMDD
+       }
+   ("%s" format currDate,leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
   }
-    
-  
 
   def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {
     val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
