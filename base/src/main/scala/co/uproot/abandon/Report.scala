@@ -51,8 +51,8 @@ object Reports {
       lazy val selfRender = (
         BalanceReportEntry(Some(a.name),
           ("%" + width + ".2f   %-" + maxNameLength + "s") format (
-            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
-          )
+            a.total ,  myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
+         )
         )
       )
       if (renderableChildren == 0) {
@@ -175,25 +175,25 @@ object Reports {
           ""
         } else if (isLastChild && !(prefix.isDefined && !isParentLastChild)) {
           //" └╴"
-          ":"
+          ""
         } else {
           //" ├╴"
-          "-->"
+          ""
         })
 
       val childTreePrefix = (
         if (onlyChildren) {
           treePrefix
         } else if (isLastChild) {
-          treePrefix + "   "
+          treePrefix + ""
         } else {
           if (indent <= 1) {
             treePrefix
           } else {
-            treePrefix + " │ "
+            //treePrefix + " │ "
+            treePrefix + ""
           }
         }) 
-       
       val children = a.childStates
       val lastChildIndex = children.length - 1
       val renderedChildren = children.sortBy(_.name.toString).zipWithIndex.flatMap {
@@ -203,11 +203,11 @@ object Reports {
             if (onlyChildren) Some(indent) else None
           )
       }
-      val selfAmount = if(a.amount !=0 && !a.childStates.isEmpty ) { " (" + a.amount + ")" } else { "" }
+       
       lazy val selfRender = (
         BalanceReportEntry(Some(a.name),
-          ("%" + width + ".2f   %-" + maxNameLength + "s") format (
-            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
+          (" %-" + maxNameLength + "s  %" + width + ".2f") format (
+           a.name + myPrefix,a.amount 
           )
         )
       )
