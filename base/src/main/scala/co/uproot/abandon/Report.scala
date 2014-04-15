@@ -3,7 +3,7 @@ package co.uproot.abandon
 import Helper.{ Zero, maxElseZero, sumDeltas }
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
-case class LedgerExportEntry(accName: Option[AccountName],render: String)
+case class LedgerExportEntry(accName: Option[AccountName], render:String)
 case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
 
@@ -162,93 +162,19 @@ object Reports {
     }
     reportGroups
   }
-  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings) = {
-  def show(width: Int, a: AccountTreeState, maxNameLength: Int, treePrefix: String = "", isLastChild: Boolean = false, isParentLastChild: Boolean = false, prefix: Option[String] = None, forceIndent: Option[Int] = None): Seq[LedgerExportEntry] = {
-      val indent = forceIndent.getOrElse(a.name.depth)
-      val amountIsZero = a.amount equals Zero
-      val hideAccount = (!reportSettings.showZeroAmountAccounts) && amountIsZero
-      val renderableChildren = a.childrenNonZero
-      val onlyChildren = (renderableChildren == 1) && hideAccount
-      val myPrefix = treePrefix + (
-        if (indent <= 1) {
-          ""
-        } else if (isLastChild && !(prefix.isDefined && !isParentLastChild)) {
-          ""
-        } else {
-          ""
-        })
-
-      val childTreePrefix = (
-        if (onlyChildren) {
-          treePrefix
-        } else if (isLastChild) {
-          treePrefix + ""
-        } else {
-          if (indent <= 1) {
-            treePrefix
-          } else {
-            treePrefix + ""
-          }
-        }) 
-      val children = a.childStates
-      val lastChildIndex = children.length - 1
-      val renderedChildren = children.sortBy(_.name.toString).zipWithIndex.flatMap {
-        case (c, i) =>
-        show(width, c, maxNameLength, childTreePrefix, i == lastChildIndex, isLastChild || (prefix.isDefined && isParentLastChild),
-            if (onlyChildren) Some(prefix.map(_ + ":").getOrElse("") + a.name.name) else None,
-            if (onlyChildren) Some(indent) else None
-          )
-      }
-      lazy val selfRender1 = (
-        LedgerExportEntry(Some(a.name),
-          ("%-" + maxNameLength + "s  %" + width + ".2f") format (
-           a.name + myPrefix,a.amount 
-          )
-        )
-      )
-      if (renderableChildren == 0) {
-        if (hideAccount) {
-          Nil
-        } else {
-          Seq(selfRender1)
-        }
-      } else if (onlyChildren) {
-        renderedChildren
-      } else {
-        selfRender1 +: renderedChildren
-      }
-    }
-
-    val filteredAccountTree = state.accState.mkTree(reportSettings.isAccountMatching)
-    assert(reportSettings.accountMatch.isDefined || (filteredAccountTree.total equals Zero), "The Account tree doesn't balance!")
-
-    val rightAccNames = settings.reportOptions.isRight
-    val (rightAccs, leftAccs) = filteredAccountTree.childStates.partition(at => rightAccNames.contains(at.name.name))
-
-    val leftAmountWidth = maxElseZero(leftAccs.map(_.total.toBigInt.toString.length)) + 5
-    val rightAmountWidth = maxElseZero(rightAccs.map(_.total.toBigInt.toString.length)) + 5
-
-    val leftMaxNameLength = maxElseZero(leftAccs.map(_.maxNameLength)) + 20
-    val rightMaxNameLength = maxElseZero(rightAccs.map(_.maxNameLength)) + 20
-
-    val leftRender = leftAccs.sortBy(_.name.toString).flatMap(show(leftAmountWidth, _, leftMaxNameLength))
-    val rightRender = rightAccs.sortBy(_.name.toString).flatMap(show(rightAmountWidth, _, rightMaxNameLength))
-
-    val leftTotal = leftAccs.map(_.total).sum
-    val rightTotal = rightAccs.map(_.total).sum
-    val total = leftTotal + rightTotal
-    val totalStr =
-      if (total equals Zero) {
-        "Zero"
-      } else {
-        total.toString
-      }
-    val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
-    var currDate = ""
-       sortedGroups.foreach { latestDate => 
-            currDate  = latestDate.date.formatYYYYMMDD
+  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings)  = {
+       val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
+       var currDate1 = ""
+       sortedGroup.foreach { latestDate => 
+            currDate1  = latestDate.date.formatYYYYMMDD
        }
-   ("%s" format currDate,leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
+       val accAmounts = state.accState.amounts
+       lazy val Accs = accAmounts.map { case (accountName,amount) =>
+          val render = "%-50s %10.2f" format (accountName,amount)
+          LedgerExportEntry(Some(accountName), render)
+       }
+  val sortedGroups = Accs.toSeq.sortBy(_.accName.toString)
+  ("%s" format currDate1,sortedGroups)
   }
 
   def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {

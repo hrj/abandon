@@ -120,7 +120,6 @@ object AbandonApp extends App {
     settingsResult match {
       case Left(errorMsg) => println("Error:", errorMsg)
       case Right(settings) =>
-      var i = 0;
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
           val appState = Processor.process(astEntries)
@@ -129,17 +128,10 @@ object AbandonApp extends App {
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
             exportSettings match {
             case balSettings: LedgerExportSettings =>
-               val (date, leftEntries, rightEntries, totalLeft, totalRight) = Reports.ledgerExport(appState, settings, balSettings)
-               reportWriter.println(date + "\n")  
-               val left = leftEntries.map(_.render)
-                val right = rightEntries.map(_.render)
-                val lines = left.zipAll(right, "", "")
-                val maxLeftLength = maxElseZero(left.map(_.length))
-                def renderBoth(l: String, r: String) = "\t %-" + (maxLeftLength + 2) + "s%s" format (l, r)
-                val balRender = lines.map { case (left, right) => renderBoth(left, right) }
+               val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
+               reportWriter.println(date1 + "\n")  
+               val balRender = entry.map { case (e) => "\t %s" format (e.render)}
                reportWriter.println(balRender.mkString("\n"))
-              //val totalLine = renderBoth(totalLeft, totalRight)
-               //reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
             case xmlSettings : xmlExportSettings =>
               val xmlData = Reports.xmlExport(appState, exportSettings)
               reportWriter.printXml(xmlData)
@@ -151,7 +143,7 @@ object AbandonApp extends App {
 
             println()
             reportWriter.filePaths foreach { filePath =>
-              println(s"Writing ${reportSettings.title} to: $filePath")
+            println(s"Writing ${reportSettings.title} to: $filePath")
             }
             if (reportWriter.writesToScreen) {
               println()
@@ -161,6 +153,7 @@ object AbandonApp extends App {
             reportSettings match {
               case balSettings: BalanceReportSettings =>
                 val (leftEntries, rightEntries, totalLeft, totalRight) = Reports.balanceReport(appState, settings, balSettings)
+                
                 val left = leftEntries.map(_.render)
                 val right = rightEntries.map(_.render)
 
