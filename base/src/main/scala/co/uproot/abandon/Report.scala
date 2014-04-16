@@ -52,7 +52,7 @@ object Reports {
       lazy val selfRender = (
         BalanceReportEntry(Some(a.name),
           ("%" + width + ".2f   %-" + maxNameLength + "s") format (
-            a.total ,  myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
+            a.total ,  myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount
          )
         )
       )
@@ -98,7 +98,7 @@ object Reports {
 
   private def formatMonth(monthYear: Int) = {
     val year = monthYear / 100
-    val month = monthYear % 100 
+    val month = monthYear % 100
     s"$year / ${Helper.monthLabels(month - 1)}"
   }
   def registerReport(state: AppState, reportSettings: RegisterReportSettings) : Seq[RegisterReportGroup] = {
@@ -194,5 +194,5 @@ object Reports {
         </txnGroup>
       }
     }</transactions></abandon>
-  } 
+  }
 }

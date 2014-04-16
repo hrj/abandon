@@ -62,8 +62,7 @@ object SettingsHelper {
         val reportOptions = config.optConfig("reportOptions")
         val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
-       // val exports = exportConfigs.map(makeExportSettings)
-        val exports = exportConfigs.map(makeExportSettings(_))
+        val exports = exportConfigs.map(makeExportSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
         Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
@@ -86,7 +85,7 @@ object SettingsHelper {
 
   def makeReportSettings(config: Config) = {
     val title = config.getString("title")
-    val reportType = config.getString("type") 
+    val reportType = config.getString("type")
     val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
     val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
     reportType match {
@@ -102,7 +101,7 @@ object SettingsHelper {
   }
 
   def makeExportSettings(config: Config) = {
-    try { 
+    try {
       val reportType = config.getString("type")
       val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
       val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
@@ -114,7 +113,7 @@ object SettingsHelper {
        val title = ""
       val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
          xmlExportSettings(title,accountMatch, outFiles)
-    } 
+    }
   }
 }
 

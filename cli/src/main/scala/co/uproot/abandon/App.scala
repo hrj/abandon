@@ -69,7 +69,7 @@ object AbandonApp extends App {
   def printRegReport(reportWriter: ReportWriter, regReport: Seq[RegisterReportGroup]) = {
     regReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
-      reportGroup.entries foreach { e => 
+      reportGroup.entries foreach { e =>
         reportWriter.println("   " + e.render)
       }
     }
@@ -86,7 +86,6 @@ object AbandonApp extends App {
     bookReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
-
         e.txns foreach { txn =>
           val parent = txn.parentOpt.get
           reportWriter.println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
@@ -105,16 +104,6 @@ object AbandonApp extends App {
     }
     reportWriter.endCodeBlock()
   }
-
-  def printOtherExport(reportWriter: ReportWriter, exportSettings: ExportSettings, export: Seq[RegisterReportGroup]) = {
-   export foreach { reportGroup =>
-      reportWriter.println(reportGroup.groupTitle)
-      reportGroup.entries foreach { e => 
-        reportWriter.println("   " + e.render)
-      }
-    }
-  }
-
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
@@ -129,7 +118,7 @@ object AbandonApp extends App {
             exportSettings match {
             case balSettings: LedgerExportSettings =>
                val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
-               reportWriter.println(date1 + "\n")  
+               reportWriter.println(date1 + "\n")
                val balRender = entry.map { case (e) => "\t %s" format (e.render)}
                reportWriter.println(balRender.mkString("\n"))
             case xmlSettings : xmlExportSettings =>
@@ -143,7 +132,7 @@ object AbandonApp extends App {
 
             println()
             reportWriter.filePaths foreach { filePath =>
-            println(s"Writing ${reportSettings.title} to: $filePath")
+              println(s"Writing ${reportSettings.title} to: $filePath")
             }
             if (reportWriter.writesToScreen) {
               println()
@@ -153,7 +142,6 @@ object AbandonApp extends App {
             reportSettings match {
               case balSettings: BalanceReportSettings =>
                 val (leftEntries, rightEntries, totalLeft, totalRight) = Reports.balanceReport(appState, settings, balSettings)
-                
                 val left = leftEntries.map(_.render)
                 val right = rightEntries.map(_.render)
 
@@ -166,7 +154,7 @@ object AbandonApp extends App {
                 val totalLine = renderBoth(totalLeft, totalRight)
                 reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
                 reportWriter.println(totalLine)
-              case regSettings: RegisterReportSettings =>  
+              case regSettings: RegisterReportSettings =>
                 val regReport = Reports.registerReport(appState, regSettings)
                 printRegReport(reportWriter, regReport)
               case bookSettings: BookReportSettings =>
