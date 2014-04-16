@@ -113,14 +113,6 @@ object SettingsHelper {
           val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
           XmlExportSettings(title,accountMatch, outFiles)
       }
-        /*val title = config.getString("title")
-        val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
-        LedgerExportSettings(title, accountMatch, outFiles, showZeroAmountAccounts)
-      case e: ConfigException.Missing => val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-       val title = ""
-      val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
-         XmlExportSettings(title,accountMatch, outFiles)
-  } */
   }
 }
 abstract class Constraint {
