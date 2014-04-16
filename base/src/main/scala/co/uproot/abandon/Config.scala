@@ -101,22 +101,28 @@ object SettingsHelper {
   }
 
   def makeExportSettings(config: Config) = {
-    try {
       val reportType = config.getString("type")
       val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
       val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
-      val title = config.getString("title")
-      val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
+      reportType match {
+        case "balance" => val title = config.getString("title")
+          val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
+          LedgerExportSettings(title, accountMatch, outFiles, showZeroAmountAccounts)
+        case "xml" => val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+          val title = ""
+          val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
+          XmlExportSettings(title,accountMatch, outFiles)
+      }
+        /*val title = config.getString("title")
+        val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
         LedgerExportSettings(title, accountMatch, outFiles, showZeroAmountAccounts)
-    } catch {
       case e: ConfigException.Missing => val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
        val title = ""
       val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
          XmlExportSettings(title,accountMatch, outFiles)
-    }
+  } */
   }
 }
-
 abstract class Constraint {
   def check(appState:AppState):Boolean
 }
