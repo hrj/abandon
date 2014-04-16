@@ -112,7 +112,7 @@ object SettingsHelper {
       case e: ConfigException.Missing => val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
        val title = ""
       val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
-         xmlExportSettings(title,accountMatch, outFiles)
+         XmlExportSettings(title,accountMatch, outFiles)
     }
   }
 }
@@ -197,7 +197,7 @@ case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[Stri
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
-case class xmlExportSettings(_title: String,_accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_title,_accountMatch, _outFiles)
+case class XmlExportSettings(_title: String,_accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_title,_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])
 
