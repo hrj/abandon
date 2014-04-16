@@ -165,7 +165,7 @@ object Reports {
   def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings)  = {
        val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
        var currDate1 = ""
-       sortedGroup.foreach { latestDate => 
+       sortedGroup.foreach { latestDate =>
             currDate1  = latestDate.date.formatYYYYMMDD
        }
        val accAmounts = state.accState.amounts
