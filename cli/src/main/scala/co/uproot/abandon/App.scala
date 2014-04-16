@@ -117,14 +117,14 @@ object AbandonApp extends App {
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
             exportSettings match {
             case balSettings: LedgerExportSettings =>
-               val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
-               reportWriter.println(date1 + "\n")
-               val balRender = entry.map { e => e.accName match { 
-               case Some(x) => "\t %s" format (e.render)
-               case None => ""
-                 } 
-               }
-               reportWriter.println(balRender.mkString("\n"))
+              val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
+              reportWriter.println(date1 + "\n")
+              val balRender = entry.map { e => e.accName match {
+                case Some(x) => "\t %s" format (e.render)
+                case None => ""
+              }
+            }
+            reportWriter.println(balRender.mkString("\n"))
             case xmlSettings : XmlExportSettings =>
               val xmlData = Reports.xmlExport(appState, exportSettings)
               reportWriter.printXml(xmlData)
