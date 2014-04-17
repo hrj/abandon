@@ -164,17 +164,17 @@ object Reports {
   def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings) = {
     val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
     var currDate1 = ""
-    sortedGroup.foreach { latestDate =>
+    sortedGroup.lastOption.foreach{ latestDate =>
       currDate1 = latestDate.date.formatYYYYMMDD
-     }
-     val accAmounts = state.accState.amounts
-     lazy val Accs = accAmounts.map {
-       case (accountName, amount) =>
-       val render = "%-50s %10.2f" format (accountName, amount)
-         LedgerExportEntry(Some(accountName), render)
-      }
-      val sortedGroups = Accs.toSeq.sortBy(_.accName.toString)
-      ("%s" format currDate1, sortedGroups)
+    }
+    val accAmounts = state.accState.amounts
+    lazy val Accs = accAmounts.map {
+      case (accountName, amount) =>
+        val render = "%-50s %10.2f" format (accountName, amount)
+        LedgerExportEntry(Some(accountName), render)
+    }
+    val sortedGroups = Accs.toSeq.sortBy(_.accName.toString)
+    ("%s" format currDate1, sortedGroups)
   }
   def xmlExport(state: AppState, exportSettings: ExportSettings): xml.Node = {
     <abandon><transactions>{
