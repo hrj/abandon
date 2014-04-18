@@ -116,16 +116,20 @@ object AbandonApp extends App {
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
             exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
-              reportWriter.println(date1 + "\n")
-              val balRender = entry.map { e => e.accName match {
-                case Some(x) => "\t %s" format (e.render)
-                case None => ""
-              }
-            }
-            reportWriter.println(balRender.mkString("\n"))
-            case xmlSettings : XmlExportSettings =>
+              case balSettings: LedgerExportSettings =>
+                val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
+                if(!entry.isEmpty) {  
+                  reportWriter.println(date1 + "\n")
+                  val balRender = entry.map { e => e.accName match {
+                    case Some(x) => "\t %s" format (e.render)
+                    case None => ""
+                  }
+                 }
+                 reportWriter.println(balRender.mkString("\n"))
+                } else {
+                    reportWriter.println()
+                }
+              case xmlSettings : XmlExportSettings =>
               val xmlData = Reports.xmlExport(appState, exportSettings)
               reportWriter.printXml(xmlData)
             }
