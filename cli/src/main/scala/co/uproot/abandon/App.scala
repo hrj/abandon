@@ -118,7 +118,7 @@ object AbandonApp extends App {
             exportSettings match {
               case balSettings: LedgerExportSettings =>
                 val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
-                if(!entry.isEmpty) {  
+                if(!entry.isEmpty) {
                   reportWriter.println(date1 + "\n")
                   val balRender = entry.map { e => e.accName match {
                     case Some(x) => "\t %s" format (e.render)
