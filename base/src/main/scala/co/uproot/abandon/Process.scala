@@ -195,7 +195,7 @@ object Processor {
   }
 
   def checkConstaints(appState: AppState, constraints: Seq[Constraint]) = {
-    constraints.foreach{c => c.check(appState)}
+    constraints.foreach{ c => c.check(appState) }
   }
 
 }

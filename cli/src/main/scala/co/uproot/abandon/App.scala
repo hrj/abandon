@@ -165,13 +165,13 @@ object AbandonApp extends App {
         }
     }
   } catch {
-    case a: AssertionError => printErr("Error: " + a.getMessage)
-    case i: InputError     => printErr("Input error: " + i.getMessage)
-    case i: ConstraintError=> printErr("Constraint Failed: " + i.getMessage)
+    case a: AssertionError  => printErr("Error: " + a.getMessage)
+    case i: InputError      => printErr("Input error: " + i.getMessage)
+    case i: ConstraintError => printErr("Constraint Failed: " + i.getMessage)
   }
 
-  def printErr(msg:String) = {
+  def printErr(msg: String) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
-    
+
   }
 }
