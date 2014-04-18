@@ -6,10 +6,8 @@ import java.io.FileWriter
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
-
   val filePaths = outFiles.filterNot(_ equals "-").map(settings.getConfigRelativePath(_))
   val fileWriters = filePaths.map(path => new FileWriter(path))
-
   def startCodeBlock() = {
     fileWriters foreach { fileWriter =>
       fileWriter.write("```\n")
@@ -73,7 +71,6 @@ object AbandonApp extends App {
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
         reportWriter.println("   " + e.render)
-
       }
     }
   }
@@ -89,7 +86,6 @@ object AbandonApp extends App {
     bookReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
-
         e.txns foreach { txn =>
           val parent = txn.parentOpt.get
           reportWriter.println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
@@ -108,24 +104,33 @@ object AbandonApp extends App {
     }
     reportWriter.endCodeBlock()
   }
-
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
       case Left(errorMsg) => println("Error:", errorMsg)
       case Right(settings) =>
-
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
           val appState = Processor.process(astEntries)
           Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
-            val xmlData = Reports.xmlExport(appState, exportSettings)
-            reportWriter.printXml(xmlData)
+            exportSettings match {
+            case balSettings: LedgerExportSettings =>
+              val (date1, entry) = Reports.ledgerExport(appState, settings, balSettings)
+              reportWriter.println(date1 + "\n")
+              val balRender = entry.map { e => e.accName match {
+                case Some(x) => "\t %s" format (e.render)
+                case None => ""
+              }
+            }
+            reportWriter.println(balRender.mkString("\n"))
+            case xmlSettings : XmlExportSettings =>
+              val xmlData = Reports.xmlExport(appState, exportSettings)
+              reportWriter.printXml(xmlData)
+            }
             reportWriter.close
           }
-
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
 
@@ -172,6 +177,5 @@ object AbandonApp extends App {
 
   def printErr(msg:String) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
-    
   }
 }

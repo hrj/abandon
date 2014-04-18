@@ -101,12 +101,19 @@ object SettingsHelper {
   }
 
   def makeExportSettings(config: Config) = {
-    val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-    val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
-    ExportSettings(accountMatch, outFiles)
+      val reportType = config.getString("type")
+      val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+      val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
+      reportType match {
+        case "balance" => val title = config.getString("title")
+          val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
+          LedgerExportSettings(title, accountMatch, outFiles, showZeroAmountAccounts)
+        case "xml" => val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+          val title = ""
+          XmlExportSettings(accountMatch, outFiles)
+      }
   }
 }
-
 abstract class Constraint {
   def check(appState:AppState):Boolean
 }
@@ -164,6 +171,16 @@ trait AccountMatcher {
 abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
+abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
+}
+
+case class LedgerExportSettings(
+  _title: String,
+  _accountMatch: Option[Seq[String]],
+  _outFiles: Seq[String],
+  showZeroAmountAccounts: Boolean) extends ExportSettings(_accountMatch, _outFiles) {
+}
+
 case class BalanceReportSettings(
   _title: String,
   _accountMatch: Option[Seq[String]],
@@ -177,7 +194,7 @@ case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[Stri
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
-case class ExportSettings(accountMatch: Option[Seq[String]], outFiles: Seq[String]) extends AccountMatcher
+case class XmlExportSettings(_accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])
 

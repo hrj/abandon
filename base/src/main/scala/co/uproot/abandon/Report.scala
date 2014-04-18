@@ -3,6 +3,7 @@ package co.uproot.abandon
 import Helper.{ Zero, maxElseZero, sumDeltas }
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
+case class LedgerExportEntry(accName: Option[AccountName], render: String)
 case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
 
@@ -47,14 +48,14 @@ object Reports {
             if (onlyChildren) Some(indent) else None
           )
       }
-      val selfAmount = if(a.amount !=0 && !a.childStates.isEmpty ) { " (" + a.amount + ")" } else { "" }
+      val selfAmount = if (a.amount != 0 && !a.childStates.isEmpty) { " (" + a.amount + ")" } else { "" }
       lazy val selfRender = (
         BalanceReportEntry(Some(a.name),
           ("%" + width + ".2f   %-" + maxNameLength + "s") format (
-            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
+            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name) + selfAmount
+            )
           )
         )
-      )
       if (renderableChildren == 0) {
         if (hideAccount) {
           Nil
@@ -100,7 +101,6 @@ object Reports {
     val month = monthYear % 100
     s"$year / ${Helper.monthLabels(month - 1)}"
   }
-
   def registerReport(state: AppState, reportSettings: RegisterReportSettings) : Seq[RegisterReportGroup] = {
     val txnGroups = state.accState.txnGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
     val monthlyGroups = txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
@@ -135,7 +135,6 @@ object Reports {
 
   def bookReport(state: AppState, reportSettings: BookReportSettings) : Seq[RegisterReportGroup] = {
     val monthlyGroups = state.accState.txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
-
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
 
@@ -147,7 +146,6 @@ object Reports {
         val groupAmounts = monthlyGroup.flatMap(_.children.map(_.name)).toSet
         val amounts = groupState.amounts
         val matchingAmounts = amounts.filter { case (accountName, amount) => groupAmounts.contains(accountName)}
-
         val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
           val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
           val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
@@ -163,11 +161,24 @@ object Reports {
     }
     reportGroups
   }
-
-  def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {
-    val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
-
+  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings) = {
+    val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
+    var currDate1 = ""
+    sortedGroup.lastOption.foreach{ latestDate =>
+      currDate1 = latestDate.date.formatYYYYMMDD
+    }
+    val accAmounts = state.accState.amounts
+    lazy val Accs = accAmounts.map {
+      case (accountName, amount) =>
+        val render = "%-50s %10.2f" format (accountName, amount)
+        LedgerExportEntry(Some(accountName), render)
+    }
+    val sortedGroups = Accs.toSeq.sortBy(_.accName.toString)
+    ("%s" format currDate1, sortedGroups)
+  }
+  def xmlExport(state: AppState, exportSettings: ExportSettings): xml.Node = {
     <abandon><transactions>{
+      val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
       sortedGroups.map {txnGroup =>
         <txnGroup date={txnGroup.date.formatCompact}>
           { txnGroup.payeeOpt.map(payee => <payee>{payee}</payee>).getOrElse(xml.Null)}
