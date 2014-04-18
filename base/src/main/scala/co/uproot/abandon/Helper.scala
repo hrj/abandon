@@ -38,7 +38,7 @@ object Helper {
     getIndexOf(months, monthStr).orElse(getIndexOf(shortMonths, monthStr))
   }
 
-  def getShortMonth(monthNumber:Int) = {
+  def getShortMonth(monthNumber: Int) = {
     shortMonths(monthNumber - 1)
   }
 
@@ -50,9 +50,9 @@ final class RefWrap[T <: AnyRef](val t: T) {
     t.hashCode
   }
 
-  override def equals(that:Any) = {
+  override def equals(that: Any) = {
     that match {
-      case thatGroup: RefWrap[_]  =>
+      case thatGroup: RefWrap[_] =>
         t eq thatGroup.t
       case _ => false
     }
