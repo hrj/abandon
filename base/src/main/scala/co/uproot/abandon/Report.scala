@@ -5,6 +5,11 @@ import Helper.{ Zero, maxElseZero, sumDeltas }
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
 case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
+case class LedgerExportEntry(accountName: AccountName, amount: BigDecimal)
+case class LedgerExportData(date: Date, ledgerEntries: Seq[LedgerExportEntry]) {
+  val maxNameLength = maxElseZero(ledgerEntries.map(_.accountName.toString.length))
+  val maxAmountWidth = maxElseZero(ledgerEntries.map(_.amount.toString.length))
+}
 
 object Reports {
 
@@ -164,6 +169,29 @@ object Reports {
         )
     }
     reportGroups
+  }
+
+  /** Returns a Seq of LedgerExportData
+    * Each instance of LedgerExportData represents a transaction.
+    * If there are no transactions, this function returns Nil
+    * If a separate closure transaction is requested, this function returns two instances of LedgerExportData.
+    * Else, a single instance of LedgerExportData is returned.
+    */
+  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings): Seq[LedgerExportData] = {
+    val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
+    if (sortedGroup.isEmpty) {
+      Nil
+    } else {
+      val latestDate = sortedGroup.last.date
+      val accAmounts = state.accState.amounts
+      val entries = accAmounts.map {
+        case (accountName, amount) => LedgerExportEntry(accountName, amount)
+      }
+      val sortedByName = entries.toSeq.sortBy(_.accountName.toString)
+      Seq(LedgerExportData(
+        latestDate,
+        sortedByName))
+    }
   }
 
   def xmlExport(state: AppState, exportSettings: ExportSettings): xml.Node = {
