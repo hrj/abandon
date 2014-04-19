@@ -40,15 +40,15 @@ object SettingsHelper {
     }
   }
 
-  implicit class ConfigHelper2(val config:Config) {
-    def optConfig(name:String) = {
-        config.optional(name) { _.getConfig(_) }
+  implicit class ConfigHelper2(val config: Config) {
+    def optConfig(name: String) = {
+      config.optional(name) { _.getConfig(_) }
     }
-    def optConfigList(name:String) = {
-        config.optional(name) { _.getConfigList(_).asScala }
+    def optConfigList(name: String) = {
+      config.optional(name) { _.getConfigList(_).asScala }
     }
-    def optStringList(name:String) = {
-        config.optional(name) { _.getStringList(_).asScala }
+    def optStringList(name: String) = {
+      config.optional(name) { _.getStringList(_).asScala }
     }
   }
 
@@ -108,24 +108,25 @@ object SettingsHelper {
 }
 
 abstract class Constraint {
-  def check(appState:AppState):Boolean
+  def check(appState: AppState): Boolean
 }
 
 trait SignChecker {
-  val accName:String
-  val signStr:String
+  val accName: String
+  val signStr: String
   val correctSign: (BigDecimal) => Boolean
 
-  def check(appState:AppState) = {
+  def check(appState: AppState) = {
     val txns = appState.accState.txns.filter(_.name.fullPathStr == accName)
     val dailyDeltas = txns.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
 
     var acc = Helper.Zero
-    dailyDeltas.toSeq.sortBy(_._1).foreach {case (dayInt, delta) =>
-      acc += delta
-      if (!correctSign(acc)) {
-        throw new ConstraintError(s"$accName was not $signStr on ${Date.fromInt(dayInt)}. Was $acc")
-      }
+    dailyDeltas.toSeq.sortBy(_._1).foreach {
+      case (dayInt, delta) =>
+        acc += delta
+        if (!correctSign(acc)) {
+          throw new ConstraintError(s"$accName was not $signStr on ${Date.fromInt(dayInt)}. Was $acc")
+        }
     }
     true
   }
@@ -133,12 +134,12 @@ trait SignChecker {
 }
 
 case class PositiveConstraint(val accName: String) extends Constraint with SignChecker {
-  val correctSign = (x : BigDecimal) => x >= Helper.Zero
+  val correctSign = (x: BigDecimal) => x >= Helper.Zero
   val signStr = "positive"
 }
 
 case class NegativeConstraint(val accName: String) extends Constraint with SignChecker {
-  val correctSign = (x : BigDecimal) => x <= Helper.Zero
+  val correctSign = (x: BigDecimal) => x <= Helper.Zero
   val signStr = "negative"
 }
 

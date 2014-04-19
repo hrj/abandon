@@ -46,7 +46,6 @@ object CurrReports {
 
 }
 
-
 object AbandonUI extends JFXApp {
 
   private val infoTab =

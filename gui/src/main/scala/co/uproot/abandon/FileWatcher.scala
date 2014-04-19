@@ -20,7 +20,7 @@ class FileWatcher(pollDelay: Long = 1000, triggerDelay: Long = 500) {
     runCheckTask
   }
 
-  private var onChange:() => Unit = _
+  private var onChange: () => Unit = _
 
   def stopWatch = {
     timer.cancel()

@@ -47,11 +47,11 @@ object Reports {
             if (onlyChildren) Some(indent) else None
           )
       }
-      val selfAmount = if(a.amount !=0 && !a.childStates.isEmpty ) { " (" + a.amount + ")" } else { "" }
+      val selfAmount = if (a.amount != 0 && !a.childStates.isEmpty) { " (" + a.amount + ")" } else { "" }
       lazy val selfRender = (
         BalanceReportEntry(Some(a.name),
           ("%" + width + ".2f   %-" + maxNameLength + "s") format (
-            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name ) + selfAmount  
+            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name) + selfAmount
           )
         )
       )
@@ -101,7 +101,7 @@ object Reports {
     s"$year / ${Helper.monthLabels(month - 1)}"
   }
 
-  def registerReport(state: AppState, reportSettings: RegisterReportSettings) : Seq[RegisterReportGroup] = {
+  def registerReport(state: AppState, reportSettings: RegisterReportSettings): Seq[RegisterReportGroup] = {
     val txnGroups = state.accState.txnGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
     val monthlyGroups = txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
 
@@ -115,12 +115,13 @@ object Reports {
         }
         val matchingNames = monthlyGroup.flatMap(_.children.map(_.name)).toSet.filter(name => reportSettings.isAccountMatching(name.fullPathStr))
         val amounts = groupState.amounts
-        val matchingAmounts = amounts.filter { case (accountName, amount) => matchingNames.contains(accountName)}
+        val matchingAmounts = amounts.filter { case (accountName, amount) => matchingNames.contains(accountName) }
 
-        val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
-          val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
-          val render = "%-50s %20.2f %20.2f" format (accountName, sumDeltas(myTxns), amount)
-          (accountName, myTxns, render)
+        val totalDeltasPerAccount = matchingAmounts.map {
+          case (accountName, amount) =>
+            val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
+            val render = "%-50s %20.2f %20.2f" format (accountName, sumDeltas(myTxns), amount)
+            (accountName, myTxns, render)
         }
 
         val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
@@ -133,7 +134,7 @@ object Reports {
     reportGroups
   }
 
-  def bookReport(state: AppState, reportSettings: BookReportSettings) : Seq[RegisterReportGroup] = {
+  def bookReport(state: AppState, reportSettings: BookReportSettings): Seq[RegisterReportGroup] = {
     val monthlyGroups = state.accState.txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
 
     var reportGroups = Seq[RegisterReportGroup]()
@@ -146,12 +147,13 @@ object Reports {
         }
         val groupAmounts = monthlyGroup.flatMap(_.children.map(_.name)).toSet
         val amounts = groupState.amounts
-        val matchingAmounts = amounts.filter { case (accountName, amount) => groupAmounts.contains(accountName)}
+        val matchingAmounts = amounts.filter { case (accountName, amount) => groupAmounts.contains(accountName) }
 
-        val totalDeltasPerAccount = matchingAmounts.map { case (accountName, amount) =>
-          val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
-          val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
-          (accountName, myTxns, render)
+        val totalDeltasPerAccount = matchingAmounts.map {
+          case (accountName, amount) =>
+            val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
+            val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
+            (accountName, myTxns, render)
         }
 
         val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
@@ -164,18 +166,19 @@ object Reports {
     reportGroups
   }
 
-  def xmlExport(state: AppState, exportSettings: ExportSettings) : xml.Node = {
+  def xmlExport(state: AppState, exportSettings: ExportSettings): xml.Node = {
     val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
 
     <abandon><transactions>{
-      sortedGroups.map {txnGroup =>
-        <txnGroup date={txnGroup.date.formatCompact}>
-          { txnGroup.payeeOpt.map(payee => <payee>{payee}</payee>).getOrElse(xml.Null)}
-          { txnGroup.annotationOpt.map(annotation => <annotation>{annotation}</annotation>).getOrElse(xml.Null)}
-          { txnGroup.groupComments.map{comment => <comment>{comment}</comment>} }
-          { txnGroup.children.map(txn=>
-              <txn name={txn.name.fullPathStr} delta={txn.delta.toString}>{
-                 txn.commentOpt.map{comment => <comment>{comment}</comment>}.getOrElse(xml.Null)
+      sortedGroups.map { txnGroup =>
+        <txnGroup date={ txnGroup.date.formatCompact }>
+          { txnGroup.payeeOpt.map(payee => <payee>{ payee }</payee>).getOrElse(xml.Null) }
+          { txnGroup.annotationOpt.map(annotation => <annotation>{ annotation }</annotation>).getOrElse(xml.Null) }
+          { txnGroup.groupComments.map{ comment => <comment>{ comment }</comment> } }
+          {
+            txnGroup.children.map(txn =>
+              <txn name={ txn.name.fullPathStr } delta={ txn.delta.toString }>{
+                txn.commentOpt.map{ comment => <comment>{ comment }</comment> }.getOrElse(xml.Null)
               }</txn>
             )
           }
