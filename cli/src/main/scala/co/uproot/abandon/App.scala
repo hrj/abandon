@@ -6,10 +6,8 @@ import java.io.FileWriter
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
-
   val filePaths = outFiles.filterNot(_ equals "-").map(settings.getConfigRelativePath(_))
   val fileWriters = filePaths.map(path => new FileWriter(path))
-
   def startCodeBlock() = {
     fileWriters foreach { fileWriter =>
       fileWriter.write("```\n")
@@ -73,11 +71,20 @@ object AbandonApp extends App {
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
         reportWriter.println("   " + e.render)
-
       }
     }
   }
 
+  def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData]) = {
+    ledgerRep foreach { reportGroup =>
+      val formatStr = "%-" + (reportGroup.maxNameLength+4) + "s %" + (reportGroup.maxAmountWidth+2) + ".2f"
+      reportWriter.println(reportGroup.date.formatYYYYMMDD)
+      reportGroup.ledgerEntries foreach { e =>
+        val render = formatStr format (e.accountName, e.amount)
+        reportWriter.println("   " + render)
+      }
+    }
+  }
   def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
     val txnIndent = " " * 49
 
@@ -89,7 +96,6 @@ object AbandonApp extends App {
     bookReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
-
         e.txns foreach { txn =>
           val parent = txn.parentOpt.get
           reportWriter.println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
@@ -108,7 +114,6 @@ object AbandonApp extends App {
     }
     reportWriter.endCodeBlock()
   }
-
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
@@ -121,11 +126,16 @@ object AbandonApp extends App {
           Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
-            val xmlData = Reports.xmlExport(appState, exportSettings)
-            reportWriter.printXml(xmlData)
+            exportSettings match {
+              case balSettings: LedgerExportSettings =>
+                val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+                exportAsLedger(reportWriter, ledgerRep)
+              case xmlSettings: XmlExportSettings =>
+                val xmlData = Reports.xmlExport(appState, exportSettings)
+                reportWriter.printXml(xmlData)
+            }
             reportWriter.close
           }
-
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
 
@@ -172,6 +182,5 @@ object AbandonApp extends App {
 
   def printErr(msg: String) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
-
   }
 }
