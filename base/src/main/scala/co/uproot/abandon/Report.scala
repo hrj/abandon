@@ -49,17 +49,14 @@ object Reports {
         case (c, i) =>
           show(width, c, maxNameLength, childTreePrefix, i == lastChildIndex, isLastChild || (prefix.isDefined && isParentLastChild),
             if (onlyChildren) Some(prefix.map(_ + ":").getOrElse("") + a.name.name) else None,
-            if (onlyChildren) Some(indent) else None
-          )
+            if (onlyChildren) Some(indent) else None)
       }
       val selfAmount = if (a.amount != 0 && !a.childStates.isEmpty) { " (" + a.amount + ")" } else { "" }
-      lazy val selfRender = (
+      lazy val selfRender =
         BalanceReportEntry(Some(a.name),
           ("%" + width + ".2f   %-" + maxNameLength + "s") format (
-            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name) + selfAmount
-          )
-        )
-      )
+            a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name) + selfAmount))
+
       if (renderableChildren == 0) {
         if (hideAccount) {
           Nil
@@ -133,15 +130,13 @@ object Reports {
 
         reportGroups :+= RegisterReportGroup(
           formatMonth(month),
-          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
-        )
+          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) })
     }
     reportGroups
   }
 
   def bookReport(state: AppState, reportSettings: BookReportSettings): Seq[RegisterReportGroup] = {
     val monthlyGroups = state.accState.txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
-
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
 
@@ -165,8 +160,7 @@ object Reports {
 
         reportGroups :+= RegisterReportGroup(
           formatMonth(month),
-          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) }
-        )
+          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) })
     }
     reportGroups
   }
@@ -195,20 +189,18 @@ object Reports {
   }
 
   def xmlExport(state: AppState, exportSettings: ExportSettings): xml.Node = {
-    val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
-
     <abandon><transactions>{
+      val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
       sortedGroups.map { txnGroup =>
         <txnGroup date={ txnGroup.date.formatCompact }>
           { txnGroup.payeeOpt.map(payee => <payee>{ payee }</payee>).getOrElse(xml.Null) }
           { txnGroup.annotationOpt.map(annotation => <annotation>{ annotation }</annotation>).getOrElse(xml.Null) }
-          { txnGroup.groupComments.map{ comment => <comment>{ comment }</comment> } }
+          { txnGroup.groupComments.map { comment => <comment>{ comment }</comment> } }
           {
             txnGroup.children.map(txn =>
               <txn name={ txn.name.fullPathStr } delta={ txn.delta.toString }>{
-                txn.commentOpt.map{ comment => <comment>{ comment }</comment> }.getOrElse(xml.Null)
-              }</txn>
-            )
+                txn.commentOpt.map { comment => <comment>{ comment }</comment> }.getOrElse(xml.Null)
+              }</txn>)
           }
         </txnGroup>
       }

@@ -117,9 +117,8 @@ object AbandonApp extends App {
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
-      case Left(errorMsg) => println("Error:", errorMsg)
+      case Left(errorMsg) => Console.err.println("Error: " + errorMsg)
       case Right(settings) =>
-
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
           val appState = Processor.process(astEntries)

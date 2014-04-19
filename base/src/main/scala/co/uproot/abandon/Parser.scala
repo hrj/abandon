@@ -22,8 +22,7 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
       | delim
       | '\"' ~> failure("Unterminated string")
       | rep(letter) ^^ checkKeyword
-      | failure("Illegal character")
-    )
+      | failure("Illegal character"))
 
   case object EOL extends Token {
     def chars = "<eol>"
@@ -185,11 +184,11 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val numericExpr: PackratParser[NumericExpr] =
     (term ~ termFrag) ^^ {
-      case t1 ~ ts => ts.foldLeft(t1){ case (acc, op ~ t2) => mkExpr(op, acc, t2) }
+      case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
     }
   private lazy val term: PackratParser[NumericExpr] =
     factor ~ factorFrag ^^ {
-      case t1 ~ ts => ts.foldLeft(t1){ case (acc, op ~ t2) => mkExpr(op, acc, t2) }
+      case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
     }
   private lazy val termFrag: PackratParser[Seq[String ~ NumericExpr]] = (("+" | "-") ~ term)*
   private lazy val factor: PackratParser[NumericExpr] = numericLiteralExpr | parenthesizedExpr | unaryNegExpr
