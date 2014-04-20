@@ -108,8 +108,7 @@ object SettingsHelper {
     val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
     exportType match {
       case "ledger" =>
-        val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
-        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts)
+        LedgerExportSettings(accountMatch, outFiles)
       case "xml" =>
         val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
         XmlExportSettings(accountMatch, outFiles)
@@ -182,8 +181,7 @@ abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFile
 
 case class LedgerExportSettings(
   _accountMatch: Option[Seq[String]],
-  _outFiles: Seq[String],
-  showZeroAmountAccounts: Boolean) extends ExportSettings(_accountMatch, _outFiles) {
+  _outFiles: Seq[String]) extends ExportSettings(_accountMatch, _outFiles) {
 }
 
 case class BalanceReportSettings(

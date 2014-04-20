@@ -178,7 +178,8 @@ object Reports {
     } else {
       val latestDate = sortedGroup.last.date
       val accAmounts = state.accState.amounts
-      val entries = accAmounts.map {
+      val nonZeroAmounts = accAmounts.filter(_._2 != Zero)
+      val entries = nonZeroAmounts.map {
         case (accountName, amount) => LedgerExportEntry(accountName, amount)
       }
       val sortedByName = entries.toSeq.sortBy(_.accountName.toString)
