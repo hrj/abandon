@@ -23,14 +23,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
   private def nlit(n: BigDecimal) = NumericLiteralExpr(n)
 
-  "parser" should "parse Balance Export in ledger Format" in {
-   /*val conf = """
-     exports += {
-        title = "Balance Sheet"
-        type = ledger
-        outFiles = [balSheet13.txt]
-     }
-     """ */
+  "Processor" should "parse Balance Export in ledger Format" in {
     val testInput = """
     2013/1/1
       Expense       -(200 + 40)
@@ -41,22 +34,17 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       case AbandonParser.Success(result, _) =>
         inside(result) {
         case List(txnGroup) =>
-           var str = Seq[co.uproot.abandon.ASTEntry]()
-           str :+= txnGroup
-           val appState = Processor.process(str)
-           val file = new java.io.File("examples/sim/accounts.conf")
-           val confFile = file + ""
-           val parseResult = AbandonParser.abandon(scanner(testInput))
+           val astEntries = Seq[co.uproot.abandon.ASTEntry](txnGroup)
+           val appState = Processor.process(astEntries)
 
-           val config = ConfigFactory.parseFile(file).resolve()
-           val inputs = config.getStringList("inputs").asScala.map(Processor.mkRelativeFileName(_, confFile))
-           val reports = config.getConfigList("reports").asScala.map(makeReportSettings(_))
-           val reportOptions = config.optConfig("reportOptions")
-           val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
-           val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
-           val exports = exportConfigs.map(makeExportSettings)
-           val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-           val settings = Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file))
+           val eodConstraints = Seq[co.uproot.abandon.Constraint]()
+           val reports = Seq[co.uproot.abandon.ReportSettings]()
+           val reportOptions = co.uproot.abandon.ReportOptions
+           val exports = Seq[co.uproot.abandon.ExportSettings](LedgerExportSettings(None,Seq("balSheet12.txt")))
+           val file = new java.io.File("")
+
+
+           val settings = Settings(Seq(""), eodConstraints, reports, ReportOptions(Seq("")), exports, Some(file))
 
            exports.map { exportSettings =>
               exportSettings match {
