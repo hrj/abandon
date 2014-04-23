@@ -6,13 +6,8 @@ import org.scalatest.Matchers
 import scala.util.parsing.input.PagedSeqReader
 import scala.collection.immutable.PagedSeq
 import org.scalatest.Inside
-import parserHelper._
+import TestHelper._
 class ParserTest extends FlatSpec with Matchers with Inside {
-  private val expenseAccount = AccountName(Seq("Expense"))
-  private val cashAccount = AccountName(Seq("Cash"))
-  private val bankAccount = AccountName(Seq("Bank", "Current"))
-
-  private def nlit(n: BigDecimal) = NumericLiteralExpr(n)
 
   "parser" should "parse empty file" in {
     val testInput = ""
