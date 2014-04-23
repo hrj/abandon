@@ -3,20 +3,7 @@ package co.uproot.abandon
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
 import org.scalatest.Matchers
-import scala.util.parsing.input.PagedSeqReader
-import scala.collection.immutable.PagedSeq
 import org.scalatest.Inside
-
-object TestHelper {
-  def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
-  def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
-  def scanner(s: String) = mkScanner(reader(s))
-  def nlit(n: BigDecimal) = NumericLiteralExpr(n)
-
-  val expenseAccount = AccountName(Seq("Expense"))
-  val cashAccount = AccountName(Seq("Cash"))
-  val bankAccount = AccountName(Seq("Bank", "Current"))
-}
 
 import TestHelper._
 
@@ -57,7 +44,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside  {
           }
     }
 
-   "Processor" should "not export a transaction with zero value and showZeroAmount False" in {
+   "Processor" should "not export a transaction with zero value when showZeroAmount is False" in {
     val testInput = """
     2013/1/1
       Expense       -(200 + 40)
@@ -93,7 +80,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside  {
           }
     }
 
-   "Processor" should "not export a transaction with zero value and showZeroAmount True" in {
+   "Processor" should "export a transaction with zero value when showZeroAmount is True" in {
     val testInput = """
     2013/1/1
       Expense       -200

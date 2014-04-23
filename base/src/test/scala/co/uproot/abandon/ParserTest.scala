@@ -3,10 +3,9 @@ package co.uproot.abandon
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
 import org.scalatest.Matchers
-import scala.util.parsing.input.PagedSeqReader
-import scala.collection.immutable.PagedSeq
 import org.scalatest.Inside
 import TestHelper._
+
 class ParserTest extends FlatSpec with Matchers with Inside {
 
   "parser" should "parse empty file" in {
