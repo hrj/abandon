@@ -6,7 +6,6 @@ object ASTHelper {
 
 class InputError(msg: String) extends RuntimeException(msg)
 class ConstraintError(msg: String) extends RuntimeException(msg)
-
 import ASTHelper._
 import Helper._
 object Date {
