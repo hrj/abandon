@@ -148,16 +148,16 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val testInput = """
       2013/1/1
       Expense       4000
-      Cash           -1000
-      Bank:Current    10000
+      Income           -1000
+      Equity    10000
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
         val astEntries = result
         val appState = Processor.process(astEntries)
-        val source = Seq("Cash", "Expense")
-        val destination = Seq("Bank:Current")
+        val source = Seq("Income", "Expense")
+        val destination = Seq("Equity")
         val closure = Seq(ClosureExportSettings(source, destination))
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
@@ -172,9 +172,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
                   date should be(Date(2013, 1, 1))
                   inside(txns) {
                     case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
-                      acc1 should be (bankAccount)
+                      acc1 should be (equityAccount)
                       acc2 should be (expenseAccount)
-                      acc3 should be (cashAccount)
+                      acc3 should be (incomeAccount)
                       expr1 should be (10000)
                       expr2 should be (-1000)
                       expr3 should be (4000)
@@ -182,9 +182,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
                   date1 should be(Date(2013, 1, 1))
                   inside(txns1) {
                     case List(closureExportEntry(acc1, expr1), closureExportEntry(acc2, expr2), closureExportEntry(acc3, expr3)) =>
-                      acc1 should be (bankAccount)
+                      acc1 should be (equityAccount)
                       acc2 should be (expenseAccount)
-                      acc3 should be (cashAccount)
+                      acc3 should be (incomeAccount)
                       expr1 should be (3000)
                       expr2 should be (-4000)
                       expr3 should be (1000)
