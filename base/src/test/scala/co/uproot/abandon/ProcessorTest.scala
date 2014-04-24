@@ -120,6 +120,10 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
   "Processor" should "export no transaction" in {
     val testInput = """
+      2013/1/1
+      Expense       -200
+      Cash
+      Bank:Current           0000
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
@@ -138,5 +142,58 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
           }
         }
     }
+  }
+
+  "Processor" should "export transaction with closing balance" in {
+    val testInput = """
+      2013/1/1
+      Expense       4000
+      Cash           -1000
+      Bank:Current    10000
+    """
+    val parseResult = AbandonParser.abandon(scanner(testInput))
+    inside(parseResult) {
+      case AbandonParser.Success(result, _) =>
+        val astEntries = result
+        val appState = Processor.process(astEntries)
+        val source = Seq("Cash", "Expense")
+        val destination = Seq("Bank:Current")
+        val closure = Seq(ClosureExportSettings(source, destination))
+        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
+
+        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+
+        exports.foreach { exportSettings =>
+          exportSettings match {
+            case balSettings: LedgerExportSettings =>
+              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+              inside(ledgerRep) {
+                case List(LedgerExportData(date, txns), ClosureExportData(date1, txns1)) =>
+                  date should be(Date(2013, 1, 1))
+                  inside(txns) {
+                    case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
+                      acc1 should be (bankAccount)
+                      acc2 should be (expenseAccount)
+                      acc3 should be (cashAccount)
+                      expr1 should be (10000)
+                      expr2 should be (-1000)
+                      expr3 should be (4000)
+                  }
+                  date1 should be(Date(2013, 1, 1))
+                  inside(txns1) {
+                    case List(closureExportEntry(acc1, expr1), closureExportEntry(acc2, expr2), closureExportEntry(acc3, expr3)) =>
+                      acc1 should be (bankAccount)
+                      acc2 should be (expenseAccount)
+                      acc3 should be (cashAccount)
+                      expr1 should be (3000)
+                      expr2 should be (-4000)
+                      expr3 should be (1000)
+                  }
+              }
+          }
+        }
+
+    }
+
   }
 }
