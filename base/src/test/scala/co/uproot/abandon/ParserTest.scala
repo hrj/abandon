@@ -3,21 +3,10 @@ package co.uproot.abandon
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
 import org.scalatest.Matchers
-import scala.util.parsing.input.PagedSeqReader
-import scala.collection.immutable.PagedSeq
 import org.scalatest.Inside
+import TestHelper._
 
 class ParserTest extends FlatSpec with Matchers with Inside {
-
-  private def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
-  private def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
-  private def scanner(s: String) = mkScanner(reader(s))
-
-  private val expenseAccount = AccountName(Seq("Expense"))
-  private val cashAccount = AccountName(Seq("Cash"))
-  private val bankAccount = AccountName(Seq("Bank", "Current"))
-
-  private def nlit(n: BigDecimal) = NumericLiteralExpr(n)
 
   "parser" should "parse empty file" in {
     val testInput = ""
