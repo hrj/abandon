@@ -75,12 +75,21 @@ object AbandonApp extends App {
     }
   }
 
-  def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData]) = {
-    ledgerRep foreach { reportGroup =>
-      val formatStr = "%-" + (reportGroup.maxNameLength+4) + "s %" + (reportGroup.maxAmountWidth+2) + ".2f"
-      reportWriter.println(reportGroup.date.formatYYYYMMDD)
-      reportGroup.ledgerEntries foreach { e =>
+  def exportAsLedger(reportWriter: ReportWriter, ledgerClosureRep: Seq[exportLedgerClosure]) = {
+    ledgerClosureRep foreach { ledgerClosureRec =>
+      val ledgerRec = ledgerClosureRec.ledger
+      reportWriter.println(ledgerRec.date.formatYYYYMMDD)
+      val formatStr = "%-" + (ledgerRec.maxNameLength + 4) + "s %" + (ledgerRec.maxAmountWidth + 2) + ".2f"
+      ledgerRec.ledgerEntries foreach { e =>
         val render = formatStr format (e.accountName, e.amount)
+        reportWriter.println("   " + render)
+      }
+
+      val closureRec = ledgerClosureRec.closure
+      reportWriter.println(closureRec.date.formatYYYYMMDD)
+      val formatStr1 = "%-" + (closureRec.maxNameLength + 4) + "s %" + (closureRec.maxAmountWidth + 2) + ".2f"
+      ledgerRec.ledgerEntries foreach { e =>
+        val render = formatStr1 format (e.accountName, e.amount)
         reportWriter.println("   " + render)
       }
     }

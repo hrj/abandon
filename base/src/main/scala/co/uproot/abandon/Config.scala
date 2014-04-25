@@ -109,6 +109,8 @@ object SettingsHelper {
     exportType match {
       case "ledger" =>
         val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
+        val closureConfig = config.optConfigList("closures").getOrElse(Nil)
+        val closure = closureConfig.map(makeClosureSettings)
         LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts)
       case "xml" =>
         val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
@@ -117,6 +119,12 @@ object SettingsHelper {
         val message = s"Found '$exportType'; expected 'ledger' or 'xml'."
         throw new ConfigException.BadValue(config.origin, "type", message)
     }
+  }
+  
+  def makeClosureSettings(config: Config) = {
+    val source = config.optional("source") { _.getStringList(_).asScala }
+    val destination = config.optional("destination") { _.getStringList(_).asScala }.getOrElse(Nil)
+    ClosureExportSettings(source,destination)
   }
 }
 abstract class Constraint {
@@ -178,6 +186,11 @@ abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[St
 }
 
 abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
+}
+
+case class ClosureExportSettings(
+  _source: Option[Seq[String]],
+  _destination: Seq[String]) {
 }
 
 case class LedgerExportSettings(
