@@ -66,7 +66,7 @@ object SettingsHelper {
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
         Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
-        case e: ConfigException   => Left(e.getMessage)
+        case e: ConfigException => Left(e.getMessage)
       }
     } else {
       Left("Config file not found: " + configFileName)
@@ -111,7 +111,7 @@ object SettingsHelper {
         val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
         val closureConfig = config.optConfigList("closures").getOrElse(Nil)
         val closure = closureConfig.map(makeClosureSettings)
-        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts)
+        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
       case "xml" =>
         val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
         XmlExportSettings(accountMatch, outFiles)
@@ -120,11 +120,11 @@ object SettingsHelper {
         throw new ConfigException.BadValue(config.origin, "type", message)
     }
   }
-  
+
   def makeClosureSettings(config: Config) = {
     val source = config.optional("source") { _.getStringList(_).asScala }
-    val destination = config.optional("destination") { _.getStringList(_).asScala }.getOrElse(Nil)
-    ClosureExportSettings(source,destination)
+    val destination = config.optional("destination") { _.getStringList(_).asScala }
+    ClosureExportSettings(source, destination)
   }
 }
 abstract class Constraint {
@@ -135,7 +135,6 @@ trait SignChecker {
   val accName: String
   val signStr: String
   val correctSign: (BigDecimal) => Boolean
-
   def check(appState: AppState) = {
     val txns = appState.accState.txns.filter(_.name.fullPathStr == accName)
     val dailyDeltas = txns.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
@@ -181,6 +180,16 @@ trait AccountMatcher {
     accountMatch.map(patterns => patterns.exists(name matches _)).getOrElse(true)
   }
 }
+trait closureMatcher {
+  val source: Option[Seq[String]]
+  val destination: Option[Seq[String]]
+  def isClosureMatchingSrc(name: String) = {
+    source.map(patterns => patterns.exists(name matches _)).getOrElse(true)
+  }
+  def isClosureMatchingDest(name: String) = {
+    destination.map(patterns => patterns.exists(name matches _)).getOrElse(true)
+  }
+}
 
 abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
@@ -188,15 +197,18 @@ abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[St
 abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
+abstract class ClosureExportSettings1(val source: Option[Seq[String]], val destination: Option[Seq[String]]) extends closureMatcher {
+}
+
 case class ClosureExportSettings(
   _source: Option[Seq[String]],
-  _destination: Seq[String]) {
+  _destination: Option[Seq[String]]) extends ClosureExportSettings1(_source, _destination) {
 }
 
 case class LedgerExportSettings(
   _accountMatch: Option[Seq[String]],
   _outFiles: Seq[String],
-  showZeroAmountAccounts: Boolean) extends ExportSettings(_accountMatch, _outFiles) {
+  showZeroAmountAccounts: Boolean, closure: Seq[ClosureExportSettings]) extends ExportSettings(_accountMatch, _outFiles) {
 }
 
 case class BalanceReportSettings(
