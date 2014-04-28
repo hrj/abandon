@@ -1,4 +1,4 @@
-/* package co.uproot.abandon
+package co.uproot.abandon
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
@@ -21,16 +21,16 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val astEntries = result
         val appState = Processor.process(astEntries)
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false,Nil))
-
         val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
-
         exports.foreach { exportSettings =>
           exportSettings match {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case (Seq(exportLedgerClosure(ledger,closure))) =>
-                inside(ledger)
+                case ledgerRep : exportLedgerClosure => println(ledgerRep.ledger)
+                  val ledger = ledgerRep.ledger
+                inside(ledger) {
+                    case LedgerExportData(date, txns) =>
                   date should be(Date(2013, 1, 1))
                   inside(txns) {
                     case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
@@ -41,9 +41,10 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
                   }
               }
           }
-        }
+          }
+        } 
     }
-  } */
+  }
 /*
   "Processor" should "not export a transaction with zero value when showZeroAmount is False" in {
     val testInput = """
@@ -197,4 +198,4 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     }
 
   } */
-//}
+}
