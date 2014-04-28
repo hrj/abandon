@@ -122,8 +122,8 @@ object SettingsHelper {
   }
 
   def makeClosureSettings(config: Config) = {
-    val source = config.getStringList("source").asScala// { _.getStringList(_).asScala }
-    val destination = config.getStringList("destination").asScala //{ _.getStringList(_).asScala }
+    val source = config.getStringList("source").asScala
+    val destination = config.getStringList("destination").asScala
     ClosureExportSettings(source, destination)
   }
 }
@@ -187,7 +187,7 @@ trait closureMatcher {
     source.exists(name matches _)
   }
   def isClosureMatchingDest(name: String) = {
-  destination.exists(name matches _)
+    destination.exists(name matches _)
   }
 }
 

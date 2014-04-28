@@ -191,7 +191,7 @@ object Reports {
       val sortedByName = entries.toSeq.sortBy(_.accountName.toString)
 
       val closureEntry = reportSettings.closure map { a =>
-        val srcEntries = amounts.toSeq.filter{ name => a.isClosureMatchingSrc(name._1.fullPathStr ) }
+        val srcEntries = amounts.toSeq.filter{ name => a.isClosureMatchingSrc(name._1.fullPathStr) }
         val destEntries = amounts.toSeq.filter{ name => a.isClosureMatchingDest(name._1.fullPathStr) }
         val srcClosure = srcEntries.map {
           case (accountName, amount) => LedgerExportEntry(accountName, -amount)
