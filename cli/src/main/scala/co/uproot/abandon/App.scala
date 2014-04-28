@@ -88,7 +88,7 @@ object AbandonApp extends App {
       val closureRec = ledgerClosureRec.closure
       reportWriter.println(closureRec.date.formatYYYYMMDD)
       val formatStr1 = "%-" + (closureRec.maxNameLength + 4) + "s %" + (closureRec.maxAmountWidth + 2) + ".2f"
-      closureRec.closureEntries foreach { e =>
+      closureRec.ledgerEntries foreach { e =>
         val render = formatStr1 format (e.accountName, e.amount)
         reportWriter.println("   " + render)
       }

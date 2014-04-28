@@ -122,8 +122,8 @@ object SettingsHelper {
   }
 
   def makeClosureSettings(config: Config) = {
-    val source = config.optional("source") { _.getStringList(_).asScala }
-    val destination = config.optional("destination") { _.getStringList(_).asScala }
+    val source = config.getStringList("source").asScala// { _.getStringList(_).asScala }
+    val destination = config.getStringList("destination").asScala //{ _.getStringList(_).asScala }
     ClosureExportSettings(source, destination)
   }
 }
@@ -181,13 +181,13 @@ trait AccountMatcher {
   }
 }
 trait closureMatcher {
-  val source: Option[Seq[String]]
-  val destination: Option[Seq[String]]
+  val source: Seq[String]
+  val destination: Seq[String]
   def isClosureMatchingSrc(name: String) = {
-    source.map(patterns => patterns.exists(name matches _)).getOrElse(true)
+    source.exists(name matches _)
   }
   def isClosureMatchingDest(name: String) = {
-    destination.map(patterns => patterns.exists(name matches _)).getOrElse(true)
+  destination.exists(name matches _)
   }
 }
 
@@ -197,12 +197,12 @@ abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[St
 abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
-abstract class ClosureExportSettings1(val source: Option[Seq[String]], val destination: Option[Seq[String]]) extends closureMatcher {
+abstract class ClosureExportSettings1(val source: Seq[String], val destination: Seq[String]) extends closureMatcher {
 }
 
 case class ClosureExportSettings(
-  _source: Option[Seq[String]],
-  _destination: Option[Seq[String]]) extends ClosureExportSettings1(_source, _destination) {
+  _source: Seq[String],
+  _destination: Seq[String]) extends ClosureExportSettings1(_source, _destination) {
 }
 
 case class LedgerExportSettings(
