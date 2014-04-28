@@ -123,7 +123,7 @@ object SettingsHelper {
 
   def makeClosureSettings(config: Config) = {
     val source = config.getStringList("source").asScala
-    val destination = config.getStringList("destination").asScala
+    val destination = config.getString("destination")
     ClosureExportSettings(source, destination)
   }
 }
@@ -182,12 +182,12 @@ trait AccountMatcher {
 }
 trait closureMatcher {
   val source: Seq[String]
-  val destination: Seq[String]
+  val destination: String
   def isClosureMatchingSrc(name: String) = {
     source.exists(name matches _)
   }
   def isClosureMatchingDest(name: String) = {
-    destination.exists(name matches _)
+    name.matches(destination)
   }
 }
 
@@ -197,12 +197,12 @@ abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[St
 abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
-abstract class ClosureExportSettings1(val source: Seq[String], val destination: Seq[String]) extends closureMatcher {
+abstract class ClosureExportSettings1(val source: Seq[String], val destination: String) extends closureMatcher {
 }
 
 case class ClosureExportSettings(
   _source: Seq[String],
-  _destination: Seq[String]) extends ClosureExportSettings1(_source, _destination) {
+  _destination: String) extends ClosureExportSettings1(_source, _destination) {
 }
 
 case class LedgerExportSettings(

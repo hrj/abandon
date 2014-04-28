@@ -14,4 +14,5 @@ object TestHelper {
   val bankAccount = AccountName(Seq("Bank", "Current"))
   val incomeAccount = AccountName(Seq("Income"))
   val equityAccount = AccountName(Seq("Equity"))
+  val assetsAccount = AccountName(Seq("Assets"))
 }

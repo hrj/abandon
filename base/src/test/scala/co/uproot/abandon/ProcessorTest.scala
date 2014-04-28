@@ -20,17 +20,16 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       case AbandonParser.Success(result, _) =>
         val astEntries = result
         val appState = Processor.process(astEntries)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false,Nil))
+        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
+
         val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+
         exports.foreach { exportSettings =>
           exportSettings match {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case ledgerRep : exportLedgerClosure => println(ledgerRep.ledger)
-                  val ledger = ledgerRep.ledger
-                inside(ledger) {
-                    case LedgerExportData(date, txns) =>
+                case List(LedgerExportData(date, txns)) =>
                   date should be(Date(2013, 1, 1))
                   inside(txns) {
                     case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
@@ -41,11 +40,10 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
                   }
               }
           }
-          }
-        } 
+        }
     }
   }
-/*
+
   "Processor" should "not export a transaction with zero value when showZeroAmount is False" in {
     val testInput = """
     2013/1/1
@@ -58,7 +56,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       case AbandonParser.Success(result, _) =>
         val astEntries = result
         val appState = Processor.process(astEntries)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false,Nil))
+        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
         val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
@@ -94,7 +92,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       case AbandonParser.Success(result, _) =>
         val astEntries = result
         val appState = Processor.process(astEntries)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), true,Nil))
+        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil))
 
         val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
@@ -122,17 +120,13 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
   "Processor" should "export no transaction" in {
     val testInput = """
-      2013/1/1
-      Expense       -200
-      Cash
-      Bank:Current           0000
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
         val astEntries = result
         val appState = Processor.process(astEntries)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false,Nil))
+        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
         val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
@@ -152,6 +146,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Expense       4000
       Income           -1000
       Equity    10000
+      Assets -13000
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
@@ -159,7 +154,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val astEntries = result
         val appState = Processor.process(astEntries)
         val source = Seq("Income", "Expense")
-        val destination = Seq("Equity")
+        val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
@@ -170,20 +165,22 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case List(LedgerExportData(date, txns), ClosureExportData(date1, txns1)) =>
+                case List(LedgerExportData(date, txns), LedgerExportData(date1, txns1)) =>
                   date should be(Date(2013, 1, 1))
                   inside(txns) {
-                    case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
-                      acc1 should be (equityAccount)
-                      acc2 should be (expenseAccount)
-                      acc3 should be (incomeAccount)
-                      expr1 should be (10000)
-                      expr2 should be (-1000)
+                    case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3), LedgerExportEntry(acc4, expr4)) =>
+                      acc1 should be (assetsAccount)
+                      acc2 should be (equityAccount)
+                      acc3 should be (expenseAccount)
+                      acc4 should be (incomeAccount)
+                      expr1 should be (-13000)
+                      expr2 should be (10000)
                       expr3 should be (4000)
+                      expr4 should be (-1000)
                   }
                   date1 should be(Date(2013, 1, 1))
                   inside(txns1) {
-                    case List(closureExportEntry(acc1, expr1), closureExportEntry(acc2, expr2), closureExportEntry(acc3, expr3)) =>
+                    case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
                       acc1 should be (equityAccount)
                       acc2 should be (expenseAccount)
                       acc3 should be (incomeAccount)
@@ -197,5 +194,5 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
     }
 
-  } */
+  }
 }

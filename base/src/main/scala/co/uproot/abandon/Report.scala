@@ -5,7 +5,6 @@ import Helper.{ Zero, maxElseZero, sumDeltas }
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
 case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
-case class exportLedgerClosure(ledger: LedgerExportData, closure: LedgerExportData)
 case class LedgerExportEntry(accountName: AccountName, amount: BigDecimal)
 case class LedgerExportData(date: Date, ledgerEntries: Seq[LedgerExportEntry]) {
   val maxNameLength = maxElseZero(ledgerEntries.map(_.accountName.toString.length))
@@ -172,7 +171,7 @@ object Reports {
     * If a separate closure transaction is requested, this function returns two instances of LedgerExportData.
     * Else, a single instance of LedgerExportData is returned.
     */
-  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings): Seq[exportLedgerClosure] = {
+  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings): Seq[LedgerExportData] = {
     val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
     if (sortedGroup.isEmpty) {
       Nil
@@ -203,11 +202,15 @@ object Reports {
         }
         srcClosure ++: destClosure
       }
-      val closureEntries = closureEntry.head
-      val sortedByName1 = closureEntries.toSeq.sortBy(_.accountName.toString)
       val ledger = LedgerExportData(latestDate, sortedByName)
-      val closure = LedgerExportData(latestDate, sortedByName1)
-      Seq(exportLedgerClosure(ledger, closure))
+      if (closureEntry == Nil) {
+        Seq(ledger)
+      } else {
+        val closureEntries = closureEntry.head
+        val sortedByName1 = closureEntries.toSeq.sortBy(_.accountName.toString)
+        val closure = LedgerExportData(latestDate, sortedByName1)
+        Seq(ledger, closure)
+      }
     }
   }
 
