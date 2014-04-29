@@ -7,7 +7,7 @@ libraryDependencies += "org.rogach" %% "scallop" % "0.9.5"
 
 libraryDependencies += "com.typesafe" % "config" % "1.2.0"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.4" % "test"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.1"
 
