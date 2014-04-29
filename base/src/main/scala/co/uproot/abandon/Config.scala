@@ -180,16 +180,6 @@ trait AccountMatcher {
     accountMatch.map(patterns => patterns.exists(name matches _)).getOrElse(true)
   }
 }
-trait closureMatcher {
-  val source: Seq[String]
-  val destination: String
-  def isClosureMatchingSrc(name: String) = {
-    source.exists(name matches _)
-  }
-  def isClosureMatchingDest(name: String) = {
-    name.matches(destination)
-  }
-}
 
 abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
@@ -197,12 +187,9 @@ abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[St
 abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
-abstract class ClosureExportSettings1(val source: Seq[String], val destination: String) extends closureMatcher {
-}
-
 case class ClosureExportSettings(
   _source: Seq[String],
-  _destination: String) extends ClosureExportSettings1(_source, _destination) {
+  _destination: String) {
 }
 
 case class LedgerExportSettings(

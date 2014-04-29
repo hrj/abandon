@@ -188,29 +188,25 @@ object Reports {
         case (accountName, amount) => LedgerExportEntry(accountName, amount)
       }
       val sortedByName = entries.toSeq.sortBy(_.accountName.toString)
+      val ledger = LedgerExportData(latestDate, sortedByName)
 
-      val closureEntry = reportSettings.closure map { a =>
-        val srcEntries = amounts.toSeq.filter{ name => a.isClosureMatchingSrc(name._1.fullPathStr) }
-        val destEntries = amounts.toSeq.filter{ name => a.isClosureMatchingDest(name._1.fullPathStr) }
+      val closureEntries = reportSettings.closure map { a =>
+        val srcEntries = amounts.toSeq.filter{ name => a._source.exists(name._1.fullPathStr matches _) }
+        val destEntries = amounts.toSeq.filter{ name => (name._1.fullPathStr).matches(a._destination) }
         val srcClosure = srcEntries.map {
           case (accountName, amount) => LedgerExportEntry(accountName, -amount)
         }
+        val srcClosureSort = srcClosure.toSeq.sortBy(_.accountName.toString)
         val destClosure = destEntries.map {
           case (accountName, amount) =>
             val amount1 = srcClosure.map(_.amount).sum
             LedgerExportEntry(accountName, -(amount1))
         }
-        srcClosure ++: destClosure
+        val destClosureSort = destClosure.toSeq.sortBy(_.accountName.toString)
+        srcClosureSort ++: destClosureSort
       }
-      val ledger = LedgerExportData(latestDate, sortedByName)
-      if (closureEntry == Nil) {
-        Seq(ledger)
-      } else {
-        val closureEntries = closureEntry.head
-        val sortedByName1 = closureEntries.toSeq.sortBy(_.accountName.toString)
-        val closure = LedgerExportData(latestDate, sortedByName1)
-        Seq(ledger, closure)
-      }
+      val closure = LedgerExportData(latestDate, closureEntries.head)
+      Seq(ledger, closure)
     }
   }
 
