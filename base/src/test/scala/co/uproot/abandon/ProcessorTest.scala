@@ -181,12 +181,12 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
                   date1 should be(Date(2013, 1, 1))
                   inside(txns1) {
                     case List(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
-                      acc1 should be (equityAccount)
-                      acc2 should be (expenseAccount)
-                      acc3 should be (incomeAccount)
-                      expr1 should be (3000)
-                      expr2 should be (-4000)
-                      expr3 should be (1000)
+                      acc1 should be (expenseAccount)
+                      acc2 should be (incomeAccount)
+                      acc3 should be (equityAccount)
+                      expr1 should be (-4000)
+                      expr2 should be (1000)
+                      expr3 should be (3000)
                   }
               }
           }
