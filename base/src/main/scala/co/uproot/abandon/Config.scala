@@ -66,7 +66,7 @@ object SettingsHelper {
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
         Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
-        case e: ConfigException   => Left(e.getMessage)
+        case e: ConfigException => Left(e.getMessage)
       }
     } else {
       Left("Config file not found: " + configFileName)
@@ -109,7 +109,9 @@ object SettingsHelper {
     exportType match {
       case "ledger" =>
         val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
-        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts)
+        val closureConfig = config.optConfigList("closures").getOrElse(Nil)
+        val closure = closureConfig.map(makeClosureSettings)
+        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
       case "xml" =>
         val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
         XmlExportSettings(accountMatch, outFiles)
@@ -117,6 +119,12 @@ object SettingsHelper {
         val message = s"Found '$exportType'; expected 'ledger' or 'xml'."
         throw new ConfigException.BadValue(config.origin, "type", message)
     }
+  }
+
+  def makeClosureSettings(config: Config) = {
+    val source = config.getStringList("source").asScala
+    val destination = config.getString("destination")
+    ClosureExportSettings(source, destination)
   }
 }
 abstract class Constraint {
@@ -127,7 +135,6 @@ trait SignChecker {
   val accName: String
   val signStr: String
   val correctSign: (BigDecimal) => Boolean
-
   def check(appState: AppState) = {
     val txns = appState.accState.txns.filter(_.name.fullPathStr == accName)
     val dailyDeltas = txns.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
@@ -180,10 +187,26 @@ abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[St
 abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
+case class ClosureExportSettings(
+  _source: Seq[String],
+  _destination: String) {
+  var srcNames = Seq[co.uproot.abandon.AccountName]()
+  def isValidSourceName(sourceNames: Seq[co.uproot.abandon.AccountName], srcEntries: Seq[(co.uproot.abandon.AccountName, BigDecimal)]): Seq[co.uproot.abandon.AccountName] = {
+    srcEntries.foreach { srcEntry =>
+      if (sourceNames.contains(srcEntry._1)) {
+        throw new Exception("Duplicate Source Names")
+      } else {
+        srcNames = sourceNames :+ srcEntry._1
+      }
+    }
+    srcNames
+  }
+}
+
 case class LedgerExportSettings(
   _accountMatch: Option[Seq[String]],
   _outFiles: Seq[String],
-  showZeroAmountAccounts: Boolean) extends ExportSettings(_accountMatch, _outFiles) {
+  showZeroAmountAccounts: Boolean, closure: Seq[ClosureExportSettings]) extends ExportSettings(_accountMatch, _outFiles) {
 }
 
 case class BalanceReportSettings(
