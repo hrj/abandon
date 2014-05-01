@@ -171,6 +171,7 @@ object Reports {
     * If a separate closure transaction is requested, this function returns two instances of LedgerExportData.
     * Else, a single instance of LedgerExportData is returned.
     */
+
   def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings): Seq[LedgerExportData] = {
     val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
     if (sortedGroup.isEmpty) {
@@ -192,13 +193,7 @@ object Reports {
       var sourceNames = Seq[co.uproot.abandon.AccountName]()
       val closureEntries = reportSettings.closure map { a =>
         val srcEntries = amounts.toSeq.filter{ name => a._source.exists(name._1.fullPathStr matches _) }
-        srcEntries.map { srcEntry =>
-          if (sourceNames.contains(srcEntry._1)) {
-            throw new Exception("Duplicate Source Names")
-          } else {
-            sourceNames = sourceNames :+ srcEntry._1
-          }
-        }
+        sourceNames = a.isValidSourceName(sourceNames, srcEntries)
         val destEntry = amounts.toSeq.filter{ name => (name._1.fullPathStr).matches(a._destination) }
         if (destEntry.isEmpty) {
           val message = s"Expected one 'destination'"

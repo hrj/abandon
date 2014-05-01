@@ -190,6 +190,17 @@ abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFile
 case class ClosureExportSettings(
   _source: Seq[String],
   _destination: String) {
+  var srcNames = Seq[co.uproot.abandon.AccountName]()
+  def isValidSourceName(sourceNames: Seq[co.uproot.abandon.AccountName], srcEntries: Seq[(co.uproot.abandon.AccountName, BigDecimal)]): Seq[co.uproot.abandon.AccountName] = {
+    srcEntries.foreach { srcEntry =>
+      if (sourceNames.contains(srcEntry._1)) {
+        throw new Exception("Duplicate Source Names")
+      } else {
+        srcNames = sourceNames :+ srcEntry._1
+      }
+    }
+    srcNames
+  }
 }
 
 case class LedgerExportSettings(
