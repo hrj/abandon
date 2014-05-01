@@ -224,7 +224,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         exports.foreach { exportSettings =>
           exportSettings match {
             case balSettings: LedgerExportSettings =>
-              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+              val ledgerRep = intercept[Exception] {
+                Reports.ledgerExport(appState, settings, balSettings)
+              }
           }
         }
 
