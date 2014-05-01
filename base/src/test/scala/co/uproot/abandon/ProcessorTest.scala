@@ -4,6 +4,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
 import org.scalatest.Matchers
 import org.scalatest.Inside
+import java.lang.Exception
 
 import TestHelper._
 
@@ -189,6 +190,41 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
                       expr3 should be (3000)
                   }
               }
+          }
+        }
+
+    }
+
+  }
+
+  "Processor" should "show Exception when 'source' contains same 'accountName'" in {
+    val testInput = """
+      2013/1/1
+      Expense       4000
+      Income           -1000
+      Equity    10000
+      Assets -13000
+    """
+    val parseResult = AbandonParser.abandon(scanner(testInput))
+    inside(parseResult) {
+      case AbandonParser.Success(result, _) =>
+        val astEntries = result
+        val appState = Processor.process(astEntries)
+        val source = Seq("Income", "Expense")
+        val destination = "Equity"
+        val source1 = Seq("Income", "Expense")
+        val destination1 = "Equity"
+        val closure1 = Seq(ClosureExportSettings(source, destination))
+        val closure2 = Seq(ClosureExportSettings(source1, destination1))
+        val closure = closure1 ++ closure2
+        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
+
+        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+
+        exports.foreach { exportSettings =>
+          exportSettings match {
+            case balSettings: LedgerExportSettings =>
+              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
           }
         }
 

@@ -189,9 +189,16 @@ object Reports {
       }
       val sortedByName = entries.toSeq.sortBy(_.accountName.toString)
       val balanceEntry = LedgerExportData(latestDate, sortedByName)
-
+      var sourceNames = Seq[co.uproot.abandon.AccountName]()
       val closureEntries = reportSettings.closure map { a =>
         val srcEntries = amounts.toSeq.filter{ name => a._source.exists(name._1.fullPathStr matches _) }
+        srcEntries.map { srcEntry =>
+          if (sourceNames.contains(srcEntry._1)) {
+            throw new Exception("Duplicate Source Names")
+          } else {
+            sourceNames = sourceNames :+ srcEntry._1
+          }
+        }
         val destEntry = amounts.toSeq.filter{ name => (name._1.fullPathStr).matches(a._destination) }
         if (destEntry.isEmpty) {
           val message = s"Expected one 'destination'"
