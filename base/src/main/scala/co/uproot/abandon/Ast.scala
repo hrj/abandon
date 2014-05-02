@@ -27,6 +27,10 @@ case class Date(year: Int, month: Int, day: Int) {
     f"$year%4d / $month%d / $day%d"
   }
 
+  def formatCompactYYYYMMDD = {
+    f"$year%4d/$month%d/$day%d"
+  }
+
   def formatYYYYMMMDD = {
     f"$year%4d ${Helper.getShortMonth(month)} $day%d"
   }

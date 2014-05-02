@@ -66,7 +66,7 @@ object SettingsHelper {
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
         Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
-        case e: ConfigException   => Left(e.getMessage)
+        case e: ConfigException => Left(e.getMessage)
       }
     } else {
       Left("Config file not found: " + configFileName)
@@ -109,7 +109,9 @@ object SettingsHelper {
     exportType match {
       case "ledger" =>
         val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
-        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts)
+        val closureConfig = config.optConfigList("closures").getOrElse(Nil)
+        val closure = closureConfig.map(makeClosureSettings)
+        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
       case "xml" =>
         val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
         XmlExportSettings(accountMatch, outFiles)
@@ -118,7 +120,14 @@ object SettingsHelper {
         throw new ConfigException.BadValue(config.origin, "type", message)
     }
   }
+
+  def makeClosureSettings(config: Config) = {
+    val sources = config.getStringList("sources").asScala
+    val destination = config.getString("destination")
+    ClosureExportSettings(sources, destination)
+  }
 }
+
 abstract class Constraint {
   def check(appState: AppState): Boolean
 }
@@ -180,10 +189,15 @@ abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[St
 abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
+case class ClosureExportSettings(
+  sources: Seq[String],
+  destination: String) {
+}
+
 case class LedgerExportSettings(
   _accountMatch: Option[Seq[String]],
   _outFiles: Seq[String],
-  showZeroAmountAccounts: Boolean) extends ExportSettings(_accountMatch, _outFiles) {
+  showZeroAmountAccounts: Boolean, closure: Seq[ClosureExportSettings]) extends ExportSettings(_accountMatch, _outFiles) {
 }
 
 case class BalanceReportSettings(

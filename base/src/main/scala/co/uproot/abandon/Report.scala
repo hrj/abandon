@@ -165,6 +165,23 @@ object Reports {
     reportGroups
   }
 
+  /** Checks whether there are duplicate entries in closure sources.
+    * Throws an exception when a duplicate is found
+    */
+  private def checkSourceNames(closures: Seq[ClosureExportSettings], accountNames: Seq[String]) {
+    var uniqueNames = Set[String]()
+    closures foreach { closure =>
+      val srcEntries = accountNames.filter { name => closure.sources.exists(name matches _) }
+      srcEntries foreach { srcName =>
+        if (uniqueNames.contains(srcName)) {
+          throw new InputError("Found duplicate source entry in closures: " + srcName)
+        } else {
+          uniqueNames += srcName
+        }
+      }
+    }
+  }
+
   /** Returns a Seq of LedgerExportData
     * Each instance of LedgerExportData represents a transaction.
     * If there are no transactions, this function returns Nil
@@ -172,12 +189,15 @@ object Reports {
     * Else, a single instance of LedgerExportData is returned.
     */
   def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings): Seq[LedgerExportData] = {
+    if (reportSettings.accountMatch.isDefined) {
+      throw new NotImplementedError("Filtering of accounts is not yet implemented in ledger export. See https://github.com/hrj/abandon/issues/11")
+    }
     val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
     if (sortedGroup.isEmpty) {
       Nil
     } else {
       val latestDate = sortedGroup.last.date
-      val accAmounts = state.accState.amounts
+      val accAmounts = state.accState.amounts.toSeq
       val amounts =
         if (reportSettings.showZeroAmountAccounts) {
           accAmounts
@@ -187,10 +207,34 @@ object Reports {
       val entries = amounts.map {
         case (accountName, amount) => LedgerExportEntry(accountName, amount)
       }
-      val sortedByName = entries.toSeq.sortBy(_.accountName.toString)
-      Seq(LedgerExportData(
-        latestDate,
-        sortedByName))
+      val sortedByName = entries.sortBy(_.accountName.toString)
+      val balanceEntry = LedgerExportData(latestDate, sortedByName)
+
+      checkSourceNames(reportSettings.closure, amounts.map(_._1.fullPathStr))
+
+      val closureEntries = reportSettings.closure map { closure =>
+        val srcEntries = amounts.filter { name => closure.sources.exists(name._1.fullPathStr matches _) }
+        val srcClosure = srcEntries.map {
+          case (accountName, amount) => LedgerExportEntry(accountName, -amount)
+        }
+        val srcClosureSorted = srcClosure.sortBy(_.accountName.toString)
+
+        val destEntry =
+          amounts.find { case (name, amount) => name.fullPathStr == closure.destination } match {
+            case Some(entry) => entry
+            case None =>
+              val message = s"While exporting to ledger formt, didn't find a matching destination account named: ${closure.destination}"
+              throw new InputError(message)
+          }
+        val destClosure = destEntry match {
+          case (accountName, amount) =>
+            val srcTotal = srcClosure.map(_.amount).sum
+            LedgerExportEntry(accountName, -(srcTotal))
+        }
+
+        LedgerExportData(latestDate, srcClosureSorted :+ destClosure)
+      }
+      balanceEntry +: closureEntries
     }
   }
 

@@ -77,12 +77,13 @@ object AbandonApp extends App {
 
   def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData]) = {
     ledgerRep foreach { reportGroup =>
-      val formatStr = "%-" + (reportGroup.maxNameLength+4) + "s %" + (reportGroup.maxAmountWidth+2) + ".2f"
-      reportWriter.println(reportGroup.date.formatYYYYMMDD)
+      reportWriter.println(reportGroup.date.formatCompactYYYYMMDD)
+      val formatStr = "%-" + (reportGroup.maxNameLength + 4) + "s %" + (reportGroup.maxAmountWidth + 2) + ".2f"
       reportGroup.ledgerEntries foreach { e =>
         val render = formatStr format (e.accountName, e.amount)
         reportWriter.println("   " + render)
       }
+      reportWriter.println("")
     }
   }
   def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
@@ -174,9 +175,11 @@ object AbandonApp extends App {
         }
     }
   } catch {
-    case a: AssertionError  => printErr("Error: " + a.getMessage)
-    case i: InputError      => printErr("Input error: " + i.getMessage)
-    case i: ConstraintError => printErr("Constraint Failed: " + i.getMessage)
+    case a: AssertionError      => printErr("Error: " + a.getMessage)
+    case i: InputError          => printErr("Input error: " + i.getMessage)
+    case i: ConstraintError     => printErr("Constraint Failed: " + i.getMessage)
+    case e: NotImplementedError => printErr("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
+    case e: Error               => printErr("Unexpected error: " + e.getMessage)
   }
 
   def printErr(msg: String) = {
