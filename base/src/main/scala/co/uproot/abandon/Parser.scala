@@ -170,7 +170,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val numericLiteralExpr: PackratParser[NumericExpr] = (number ^^ { case n => NumericLiteralExpr(n) })
   private lazy val numericLiteralFirstExpr: PackratParser[NumericExpr] = (numericLiteralExpr | numericExpr)
-  private lazy val unaryPosExpr: PackratParser[NumericExpr] = ("+" ~> number ^^ { case n => NumericLiteralExpr(n) })
+  private lazy val unaryPosExpr: PackratParser[NumericExpr] = "+" ~> (parenthesizedExpr | numericLiteralExpr)
   private lazy val unaryNegExpr: PackratParser[UnaryNegExpr] = ("-" ~> numericLiteralFirstExpr) ^^ { case expr => UnaryNegExpr(expr) }
   private lazy val parenthesizedExpr: PackratParser[NumericExpr] = (("(" ~> numericExpr) <~ ")") ^^ { case expr => expr }
 
