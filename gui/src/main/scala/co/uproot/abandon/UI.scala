@@ -145,7 +145,7 @@ object AbandonUI extends JFXApp {
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(parameters.raw)
     settingsResult match {
-      case Left(errorMsg) => println("Error: " + errorMsg)
+      case Left(errorMsg) => handleError("Error: " + errorMsg)
       case Right(settings) =>
 
         def updateReports(firstRun: Boolean): Unit = {
@@ -162,7 +162,15 @@ object AbandonUI extends JFXApp {
 
     }
   } catch {
-    case a: AssertionError => println("Error: " + a.getMessage)
-    case i: InputError     => println("Input error: " + i.getMessage)
+    case a: AssertionError      => handleError("Error: " + a.getMessage)
+    case i: InputError          => handleError("Input error: " + i.getMessage)
+    case i: ConstraintError     => handleError("Constraint Failed: " + i.getMessage)
+    case e: NotImplementedError => handleError("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
+    case e: Error               => handleError("Unexpected error: " + e.getMessage)
+  }
+
+  private def handleError(msg:String) {
+    System.err.println(msg)
+    StatusBar.setText(msg) // TODO: Highlight in red
   }
 }
