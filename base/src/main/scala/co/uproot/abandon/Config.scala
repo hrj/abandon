@@ -122,9 +122,9 @@ object SettingsHelper {
   }
 
   def makeClosureSettings(config: Config) = {
-    val source = config.getStringList("source").asScala
+    val sources = config.getStringList("sources").asScala
     val destination = config.getString("destination")
-    ClosureExportSettings(source, destination)
+    ClosureExportSettings(sources, destination)
   }
 }
 abstract class Constraint {
@@ -188,8 +188,8 @@ abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFile
 }
 
 case class ClosureExportSettings(
-  _source: Seq[String],
-  _destination: String) {
+  sources: Seq[String],
+  destination: String) {
 }
 
 case class LedgerExportSettings(

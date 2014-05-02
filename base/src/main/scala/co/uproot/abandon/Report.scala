@@ -170,7 +170,7 @@ object Reports {
   private def checkSourceNames(closures: Seq[ClosureExportSettings], accountNames: Seq[String]) {
     var uniqueNames = Set[String]()
     closures foreach { closure =>
-     val srcEntries = accountNames.filter { name => closure._source.exists(name matches _) }
+     val srcEntries = accountNames.filter { name => closure.sources.exists(name matches _) }
      srcEntries foreach {srcName =>
        if (uniqueNames.contains(srcName)) {
          throw new Exception("Found duplicate source entry in closures: " + srcName)
@@ -209,17 +209,17 @@ object Reports {
       checkSourceNames(reportSettings.closure, amounts.map(_._1.fullPathStr))
 
       val closureEntries = reportSettings.closure map { closure =>
-        val srcEntries = amounts.filter { name => closure._source.exists(name._1.fullPathStr matches _) }
+        val srcEntries = amounts.filter { name => closure.sources.exists(name._1.fullPathStr matches _) }
         val srcClosure = srcEntries.map {
           case (accountName, amount) => LedgerExportEntry(accountName, -amount)
         }
         val srcClosureSorted = srcClosure.sortBy(_.accountName.toString)
 
         val destEntry =
-          amounts.find { case (name,amount) => name.fullPathStr == closure._destination } match {
+          amounts.find { case (name,amount) => name.fullPathStr == closure.destination } match {
             case Some(entry) => entry
             case None =>
-              val message = s"Didn't find a matching destination account named: ${closure._destination}"
+              val message = s"Didn't find a matching destination account named: ${closure.destination}"
               throw new Exception(message)
           }
         val destClosure = destEntry match {
