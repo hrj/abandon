@@ -77,7 +77,7 @@ object AbandonApp extends App {
 
   def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData]) = {
     ledgerRep foreach { reportGroup =>
-      reportWriter.println(reportGroup.date.formatYYYYMMDD)
+      reportWriter.println(reportGroup.date.formatCompactYYYYMMDD)
       val formatStr = "%-" + (reportGroup.maxNameLength + 4) + "s %" + (reportGroup.maxAmountWidth + 2) + ".2f"
       reportGroup.ledgerEntries foreach { e =>
         val render = formatStr format (e.accountName, e.amount)
