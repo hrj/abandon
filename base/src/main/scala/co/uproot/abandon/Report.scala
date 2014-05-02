@@ -166,18 +166,19 @@ object Reports {
   }
 
   /** Checks whether there are duplicate entries in closure sources.
-   *  Throws an exception when a duplicate is found */
+    * Throws an exception when a duplicate is found
+    */
   private def checkSourceNames(closures: Seq[ClosureExportSettings], accountNames: Seq[String]) {
     var uniqueNames = Set[String]()
     closures foreach { closure =>
-     val srcEntries = accountNames.filter { name => closure.sources.exists(name matches _) }
-     srcEntries foreach {srcName =>
-       if (uniqueNames.contains(srcName)) {
-         throw new Exception("Found duplicate source entry in closures: " + srcName)
-       } else {
-         uniqueNames += srcName
-       }
-     }
+      val srcEntries = accountNames.filter { name => closure.sources.exists(name matches _) }
+      srcEntries foreach { srcName =>
+        if (uniqueNames.contains(srcName)) {
+          throw new InputError("Found duplicate source entry in closures: " + srcName)
+        } else {
+          uniqueNames += srcName
+        }
+      }
     }
   }
 
@@ -188,6 +189,9 @@ object Reports {
     * Else, a single instance of LedgerExportData is returned.
     */
   def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings): Seq[LedgerExportData] = {
+    if (reportSettings.accountMatch.isDefined) {
+      throw new NotImplementedError("Filtering of accounts is not yet implemented in ledger export. See https://github.com/hrj/abandon/issues/11")
+    }
     val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
     if (sortedGroup.isEmpty) {
       Nil
@@ -216,11 +220,11 @@ object Reports {
         val srcClosureSorted = srcClosure.sortBy(_.accountName.toString)
 
         val destEntry =
-          amounts.find { case (name,amount) => name.fullPathStr == closure.destination } match {
+          amounts.find { case (name, amount) => name.fullPathStr == closure.destination } match {
             case Some(entry) => entry
             case None =>
-              val message = s"Didn't find a matching destination account named: ${closure.destination}"
-              throw new Exception(message)
+              val message = s"While exporting to ledger formt, didn't find a matching destination account named: ${closure.destination}"
+              throw new InputError(message)
           }
         val destClosure = destEntry match {
           case (accountName, amount) =>

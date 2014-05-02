@@ -175,9 +175,11 @@ object AbandonApp extends App {
         }
     }
   } catch {
-    case a: AssertionError  => printErr("Error: " + a.getMessage)
-    case i: InputError      => printErr("Input error: " + i.getMessage)
-    case i: ConstraintError => printErr("Constraint Failed: " + i.getMessage)
+    case a: AssertionError      => printErr("Error: " + a.getMessage)
+    case i: InputError          => printErr("Input error: " + i.getMessage)
+    case i: ConstraintError     => printErr("Constraint Failed: " + i.getMessage)
+    case e: NotImplementedError => printErr("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
+    case e: Error               => printErr("Unexpected error: " + e.getMessage)
   }
 
   def printErr(msg: String) = {
