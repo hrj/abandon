@@ -83,6 +83,7 @@ object AbandonApp extends App {
         val render = formatStr format (e.accountName, e.amount)
         reportWriter.println("   " + render)
       }
+      reportWriter.println("")
     }
   }
   def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
