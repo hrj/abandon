@@ -127,6 +127,7 @@ object SettingsHelper {
     ClosureExportSettings(sources, destination)
   }
 }
+
 abstract class Constraint {
   def check(appState: AppState): Boolean
 }
@@ -135,6 +136,7 @@ trait SignChecker {
   val accName: String
   val signStr: String
   val correctSign: (BigDecimal) => Boolean
+
   def check(appState: AppState) = {
     val txns = appState.accState.txns.filter(_.name.fullPathStr == accName)
     val dailyDeltas = txns.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
