@@ -201,8 +201,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash          +(0 + 10)
     """
 
-    pending
-
     val parseResult = AbandonParser.abandon(scanner(testInput))
 
     inside(parseResult) {
