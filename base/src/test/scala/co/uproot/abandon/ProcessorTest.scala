@@ -264,4 +264,35 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     }
 
   }
+  "Processor" should "show Exception when 'destination' is present in 'source'" in {
+    val testInput = """
+      2013/1/1
+      Expense       14000
+      Income        -1000
+      Assets       -13000
+    """
+    val parseResult = AbandonParser.abandon(scanner(testInput))
+    inside(parseResult) {
+      case AbandonParser.Success(result, _) =>
+        val astEntries = result
+        val appState = Processor.process(astEntries)
+        val source = Seq("Income", "Equity")
+        val destination = "Equity"
+        val closure = Seq(ClosureExportSettings(source, destination))
+        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
+
+        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+
+        exports.foreach { exportSettings =>
+          exportSettings match {
+            case balSettings: LedgerExportSettings =>
+              val ledgerRep = intercept[InputError] {
+                Reports.ledgerExport(appState, settings, balSettings)
+              }
+          }
+        }
+
+    }
+
+  }
 }

@@ -124,6 +124,10 @@ object SettingsHelper {
   def makeClosureSettings(config: Config) = {
     val sources = config.getStringList("sources").asScala
     val destination = config.getString("destination")
+    if (sources.contains(destination)) {
+      val message = s"Enter valid destination Account name,'destination' Name is present in 'source'"
+      throw new InputError(message)
+    } else {}
     ClosureExportSettings(sources, destination)
   }
 }
