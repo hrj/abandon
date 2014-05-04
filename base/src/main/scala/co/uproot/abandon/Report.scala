@@ -227,7 +227,7 @@ object Reports {
               throw new MissingDestinationError(message)
           }
         if (srcEntries contains destEntry) {
-          val message = s"Destination should not be one of the sources"
+          val message = s"Destination clashed with one of the sources: $destEntry"
           throw new SourceDestinationClashError(message)
         } else {
           val destClosure = destEntry match {
