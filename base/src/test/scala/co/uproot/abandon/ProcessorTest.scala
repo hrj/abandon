@@ -255,7 +255,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         exports.foreach { exportSettings =>
           exportSettings match {
             case balSettings: LedgerExportSettings =>
-              val ledgerRep = intercept[InputError] {
+              val ledgerRep = intercept[MissingDestinationError] {
                 Reports.ledgerExport(appState, settings, balSettings)
               }
           }
@@ -269,7 +269,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       2013/1/1
       Expense       14000
       Income        -1000
-      Assets       -13000
+      Equity       -13000
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
@@ -286,7 +286,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         exports.foreach { exportSettings =>
           exportSettings match {
             case balSettings: LedgerExportSettings =>
-              val ledgerRep = intercept[InputError] {
+              val ledgerRep = intercept[SourceDestinationClashError] {
                 Reports.ledgerExport(appState, settings, balSettings)
               }
           }

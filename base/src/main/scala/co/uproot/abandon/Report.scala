@@ -224,11 +224,11 @@ object Reports {
             case Some(entry) => entry
             case None =>
               val message = s"While exporting to ledger formt, didn't find a matching destination account named: ${closure.destination}"
-              throw new InputError(message)
+              throw new MissingDestinationError(message)
           }
         if (srcEntries contains destEntry) {
           val message = s"Destination should not be one of the sources"
-          throw new InputError(message)
+          throw new SourceDestinationClashError(message)
         } else {
           val destClosure = destEntry match {
             case (accountName, amount) =>

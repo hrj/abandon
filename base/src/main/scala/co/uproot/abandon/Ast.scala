@@ -5,6 +5,8 @@ object ASTHelper {
 }
 
 class InputError(msg: String) extends RuntimeException(msg)
+class MissingDestinationError(msg: String) extends InputError(msg)
+class SourceDestinationClashError(msg: String) extends InputError(msg)
 class ConstraintError(msg: String) extends RuntimeException(msg)
 
 import ASTHelper._
