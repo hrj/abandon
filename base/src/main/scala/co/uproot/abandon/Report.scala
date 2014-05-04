@@ -226,13 +226,18 @@ object Reports {
               val message = s"While exporting to ledger formt, didn't find a matching destination account named: ${closure.destination}"
               throw new InputError(message)
           }
-        val destClosure = destEntry match {
-          case (accountName, amount) =>
-            val srcTotal = srcClosure.map(_.amount).sum
-            LedgerExportEntry(accountName, -(srcTotal))
+        if (srcEntries contains destEntry) {
+          val message = s"Destination should not be one of the sources"
+          throw new InputError(message)
+        } else {
+          val destClosure = destEntry match {
+            case (accountName, amount) =>
+              val srcTotal = srcClosure.map(_.amount).sum
+              LedgerExportEntry(accountName, -(srcTotal))
+          }
+          LedgerExportData(latestDate, srcClosureSorted :+ destClosure)
         }
 
-        LedgerExportData(latestDate, srcClosureSorted :+ destClosure)
       }
       balanceEntry +: closureEntries
     }
