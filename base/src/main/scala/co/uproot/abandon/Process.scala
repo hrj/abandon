@@ -94,7 +94,7 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
 }
 
 object Processor {
-  def parseAll(inputFiles: Seq[String], settings: Seq[AliasSettings]) = {
+  def parseAll(inputFiles: Seq[String]) = {
     var astEntries = List[ASTEntry]()
     var inputQueue = inputFiles
     var processedFiles = List[String]()
@@ -118,27 +118,7 @@ object Processor {
           case AbandonParser.Success(result, _) =>
             val includes = filterByType[IncludeDirective](result)
             inputQueue ++= includes.map(id => mkRelativeFileName(id.fileName, input))
-            if (!settings.isEmpty) {
-              settings.map { setting =>
-                val result1 = result match {
-                  case List(Transaction(date, txns, txns1, txns2, txns3)) =>
-                    txns.map { singleTransaction =>
-                      singleTransaction match {
-                        case SingleTransaction(acc1, expr1, expr2) =>
-                          if (acc1.toString.equals(setting.alias)) {
-                            transactions :+= SingleTransaction(AccountName(Seq(setting.name)), expr1, expr2)
-                          } else {
-                            transactions :+= SingleTransaction(acc1, expr1, expr2)
-                          }
-                      }
-                    }
-                    List(Transaction(date, transactions, txns1, txns2, txns3))
-                }
-                astEntries ++= result1
-              }
-            } else {
-              astEntries ++= result
-            }
+            astEntries ++= result
           case n: AbandonParser.NoSuccess =>
             println("Error while parsing %s:\n%s" format (bold(input), n))
             parseError = true
@@ -185,13 +165,28 @@ object Processor {
     new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
-  def process(entries: Seq[ASTEntry]) = {
+  def process(entries: Seq[ASTEntry], settings: Seq[AccountSettings]) = {
     val definitions = filterByType[Definition[BigDecimal]](entries)
     val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
 
     val transactions = filterByType[Transaction](entries)
     val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
     val accState = new AccountState()
+    def checkAlias(accName: AccountName): AccountName = {
+      var accountName = accName
+      settings.map { a =>
+        a.alias match {
+          case Some(x) =>
+            if (accName.toString.equals(x)) {
+              accountName = AccountName(Seq(a.name))
+            } else {
+              accountName
+            }
+          case None => accountName
+        }
+      }
+      accountName
+    }
     sortedTxns foreach { tx =>
       val (txWithAmount, txNoAmount) = tx.transactions.partition(t => t.amount.isDefined)
       assert(txNoAmount.length <= 1, "More than one account with unspecified amount: " + txNoAmount)
@@ -200,12 +195,12 @@ object Processor {
       txWithAmount foreach { t =>
         val delta = t.amount.get.evaluate(evaluationContext)
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(checkAlias(t.accName), delta, t.commentOpt)
       }
       txNoAmount foreach { t =>
         val delta = -txTotal
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(checkAlias(t.accName), delta, t.commentOpt)
       }
       accState.updateAmounts(new TxnGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")

@@ -120,12 +120,12 @@ object AbandonApp extends App {
     settingsResult match {
       case Left(errorMsg) => Console.err.println("Error: " + errorMsg)
       case Right(settings) =>
-        var aliasSet = Seq[co.uproot.abandon.AliasSettings]()
+        var aliasSet = Seq[co.uproot.abandon.AccountSettings]()
         settings.alias.foreach { aliasSettings =>
           aliasSet :+= aliasSettings
         }
-        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, aliasSet)
-        val appState = Processor.process(astEntries)
+        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
+        val appState = Processor.process(astEntries, aliasSet)
         Processor.checkConstaints(appState, settings.eodConstraints)
         settings.exports.foreach { exportSettings =>
           val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
@@ -175,8 +175,6 @@ object AbandonApp extends App {
           }
           reportWriter.close
         }
-      //}
-
     }
   } catch {
     case a: AssertionError      => printErr("Error: " + a.getMessage)

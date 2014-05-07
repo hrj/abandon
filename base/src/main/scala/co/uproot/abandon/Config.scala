@@ -64,7 +64,7 @@ object SettingsHelper {
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
         val exports = exportConfigs.map(makeExportSettings)
         val aliasConfigs = config.optConfigList("accounts").getOrElse(Nil)
-        val alias = aliasConfigs.map(makeAliasSettings)
+        val alias = aliasConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
         Right(Settings(inputs, eodConstraints, alias, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
@@ -128,10 +128,14 @@ object SettingsHelper {
     val destination = config.getString("destination")
     ClosureExportSettings(sources, destination)
   }
-  def makeAliasSettings(config: Config) = {
+  def makeAccountSettings(config: Config) = {
     val name = config.getString("name")
     val alias = config.getString("alias")
-    AliasSettings(name, alias)
+    if (alias.isEmpty) {
+      AccountSettings(name, None)
+    } else {
+      AccountSettings(name, Some(alias))
+    }
   }
 }
 
@@ -174,7 +178,7 @@ case class NegativeConstraint(val accName: String) extends Constraint with SignC
 case class Settings(
   inputs: Seq[String],
   eodConstraints: Seq[Constraint],
-  alias: Seq[AliasSettings],
+  alias: Seq[AccountSettings],
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
@@ -201,9 +205,9 @@ case class ClosureExportSettings(
   sources: Seq[String],
   destination: String) {
 }
-case class AliasSettings(
+case class AccountSettings(
   name: String,
-  alias: String) {
+  alias: Option[String]) {
 }
 case class LedgerExportSettings(
   _accountMatch: Option[Seq[String]],
