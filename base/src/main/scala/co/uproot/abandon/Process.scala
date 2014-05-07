@@ -121,7 +121,7 @@ object Processor {
             if (!settings.isEmpty) {
               settings.map { setting =>
                 val result1 = result match {
-                  case List(Transaction(date, txns, b, c, d)) =>
+                  case List(Transaction(date, txns, txns1, txns2, txns3)) =>
                     txns.map { singleTransaction =>
                       singleTransaction match {
                         case SingleTransaction(acc1, expr1, expr2) =>
@@ -132,7 +132,7 @@ object Processor {
                           }
                       }
                     }
-                    List(Transaction(date, transactions, b, c, d))
+                    List(Transaction(date, transactions, txns1, txns2, txns3))
                 }
                 astEntries ++= result1
               }
