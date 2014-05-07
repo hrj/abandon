@@ -3,6 +3,7 @@ package co.uproot.abandon
 import Helper._
 import scala.util.parsing.input.PagedSeqReader
 import scala.collection.immutable.PagedSeq
+import java.io.FileNotFoundException
 
 case class AppState(accState: AccountState, accDeclarations: Seq[AccountDeclaration])
 
@@ -105,36 +106,41 @@ object Processor {
       if (!processedFiles.contains(input)) {
         processedFiles :+= input
         println("Processing:" + input)
-        val source = getSource(input)
+        val sourceOpt = getSource(input)
+        sourceOpt match {
+          case Some(source) =>
 
-        /*
-          val scanner = new AbandonParser.lexical.Scanner(StreamReader(source.reader))
-          println(Stream.iterate(scanner)(_.rest).takeWhile(!_.atEnd).map(_.first).toList)
-          exit
-        */
+          /*
+            val scanner = new AbandonParser.lexical.Scanner(StreamReader(source.reader))
+            println(Stream.iterate(scanner)(_.rest).takeWhile(!_.atEnd).map(_.first).toList)
+            exit
+          */
 
-        val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(readerForFile(input)))
-        parseResult match {
-          case AbandonParser.Success(result, _) =>
-            val includes = filterByType[IncludeDirective](result)
-            inputQueue ++= includes.map(id => mkRelativeFileName(id.fileName, input))
-            astEntries ++= result
-          case n: AbandonParser.NoSuccess =>
-            println("Error while parsing %s:\n%s" format (bold(input), n))
-            parseError = true
+          val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(readerForFile(input)))
+          parseResult match {
+            case AbandonParser.Success(result, _) =>
+              val includes = filterByType[IncludeDirective](result)
+              inputQueue ++= includes.map(id => mkRelativeFileName(id.fileName, input))
+              astEntries ++= result
+            case n: AbandonParser.NoSuccess =>
+              println("Error while parsing %s:\n%s" format (bold(input), n))
+              parseError = true
+          }
+          source.close
+          case None =>
+            throw new InputFileNotFoundError("File not found: " + input)
         }
-        source.close
       }
     }
     (parseError, astEntries, processedFiles.toSet)
   }
 
-  def getSource(fileName: String): io.Source = {
+  def getSource(fileName: String): Option[io.Source] = {
     var retryCount = 0
-    var source: io.Source = null
+    var source: Option[io.Source] = None
     while (retryCount < 10) {
       try {
-        source = io.Source.fromFile(fileName)
+        source = Some(io.Source.fromFile(fileName))
         retryCount = 10
       } catch {
         case e: java.io.FileNotFoundException =>

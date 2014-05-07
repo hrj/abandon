@@ -7,6 +7,8 @@ object ASTHelper {
 class InputError(msg: String) extends RuntimeException(msg)
 class MissingDestinationError(msg: String) extends InputError(msg)
 class SourceDestinationClashError(msg: String) extends InputError(msg)
+class InputFileNotFoundError(fileName:String) extends InputError("File not found: " + fileName)
+
 class ConstraintError(msg: String) extends RuntimeException(msg)
 
 import ASTHelper._

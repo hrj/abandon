@@ -179,10 +179,15 @@ object AbandonApp extends App {
     case i: InputError          => printErr("Input error: " + i.getMessage)
     case i: ConstraintError     => printErr("Constraint Failed: " + i.getMessage)
     case e: NotImplementedError => printErr("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
-    case e: Error               => printErr("Unexpected error: " + e.getMessage)
+    case e: Error               => printErr("Unexpected error", e)
   }
 
   def printErr(msg: String) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
+  }
+
+  def printErr(msg: String, err:Error) = {
+    println(Console.RED + Console.BOLD + msg + Console.RESET)
+    err.printStackTrace(Console.out)
   }
 }
