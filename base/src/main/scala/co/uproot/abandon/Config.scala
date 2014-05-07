@@ -36,7 +36,7 @@ object SettingsHelper {
       case _ =>
         val inputs = cliConf.inputs.get.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
+        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
     }
   }
 
@@ -63,8 +63,10 @@ object SettingsHelper {
         val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
         val exports = exportConfigs.map(makeExportSettings)
+        val aliasConfigs = config.optConfigList("accounts").getOrElse(Nil)
+        val alias = aliasConfigs.map(makeAliasSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-        Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
+        Right(Settings(inputs, eodConstraints, alias, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -126,6 +128,11 @@ object SettingsHelper {
     val destination = config.getString("destination")
     ClosureExportSettings(sources, destination)
   }
+  def makeAliasSettings(config: Config) = {
+    val name = config.getString("name")
+    val alias = config.getString("alias")
+    AliasSettings(name, alias)
+  }
 }
 
 abstract class Constraint {
@@ -167,6 +174,7 @@ case class NegativeConstraint(val accName: String) extends Constraint with SignC
 case class Settings(
   inputs: Seq[String],
   eodConstraints: Seq[Constraint],
+  alias: Seq[AliasSettings],
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
@@ -193,7 +201,10 @@ case class ClosureExportSettings(
   sources: Seq[String],
   destination: String) {
 }
-
+case class AliasSettings(
+  name: String,
+  alias: String) {
+}
 case class LedgerExportSettings(
   _accountMatch: Option[Seq[String]],
   _outFiles: Seq[String],
