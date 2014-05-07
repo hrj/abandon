@@ -120,59 +120,63 @@ object AbandonApp extends App {
     settingsResult match {
       case Left(errorMsg) => Console.err.println("Error: " + errorMsg)
       case Right(settings) =>
-        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
-        if (!parseError) {
-          val appState = Processor.process(astEntries)
-          Processor.checkConstaints(appState, settings.eodConstraints)
-          settings.exports.foreach { exportSettings =>
-            val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
-            exportSettings match {
-              case balSettings: LedgerExportSettings =>
-                val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-                exportAsLedger(reportWriter, ledgerRep)
-              case xmlSettings: XmlExportSettings =>
-                val xmlData = Reports.xmlExport(appState, exportSettings)
-                reportWriter.printXml(xmlData)
-            }
-            reportWriter.close
-          }
-          settings.reports.foreach { reportSettings =>
-            val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
-
-            println()
-            reportWriter.filePaths foreach { filePath =>
-              println(s"Writing ${reportSettings.title} to: $filePath")
-            }
-            if (reportWriter.writesToScreen) {
-              println()
-            }
-
-            reportWriter.printHeading(reportSettings.title)
-            reportSettings match {
-              case balSettings: BalanceReportSettings =>
-                val (leftEntries, rightEntries, totalLeft, totalRight) = Reports.balanceReport(appState, settings, balSettings)
-                val left = leftEntries.map(_.render)
-                val right = rightEntries.map(_.render)
-
-                val lines = left.zipAll(right, "", "")
-                val maxLeftLength = maxElseZero(left.map(_.length))
-
-                def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
-                val balRender = lines.map { case (left, right) => renderBoth(left, right) }
-                reportWriter.println(balRender.mkString("\n"))
-                val totalLine = renderBoth(totalLeft, totalRight)
-                reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
-                reportWriter.println(totalLine)
-              case regSettings: RegisterReportSettings =>
-                val regReport = Reports.registerReport(appState, regSettings)
-                printRegReport(reportWriter, regReport)
-              case bookSettings: BookReportSettings =>
-                val bookReport = Reports.bookReport(appState, bookSettings)
-                printBookReport(reportWriter, bookSettings, bookReport)
-            }
-            reportWriter.close
-          }
+        var aliasSet = Seq[co.uproot.abandon.AliasSettings]()
+        settings.alias.foreach { aliasSettings =>
+          aliasSet :+= aliasSettings
         }
+        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, aliasSet)
+        val appState = Processor.process(astEntries)
+        Processor.checkConstaints(appState, settings.eodConstraints)
+        settings.exports.foreach { exportSettings =>
+          val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
+          exportSettings match {
+            case balSettings: LedgerExportSettings =>
+              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+              exportAsLedger(reportWriter, ledgerRep)
+            case xmlSettings: XmlExportSettings =>
+              val xmlData = Reports.xmlExport(appState, exportSettings)
+              reportWriter.printXml(xmlData)
+          }
+          reportWriter.close
+        }
+        settings.reports.foreach { reportSettings =>
+          val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
+
+          println()
+          reportWriter.filePaths foreach { filePath =>
+            println(s"Writing ${reportSettings.title} to: $filePath")
+          }
+          if (reportWriter.writesToScreen) {
+            println()
+          }
+
+          reportWriter.printHeading(reportSettings.title)
+          reportSettings match {
+            case balSettings: BalanceReportSettings =>
+              val (leftEntries, rightEntries, totalLeft, totalRight) = Reports.balanceReport(appState, settings, balSettings)
+              val left = leftEntries.map(_.render)
+              val right = rightEntries.map(_.render)
+
+              val lines = left.zipAll(right, "", "")
+              val maxLeftLength = maxElseZero(left.map(_.length))
+
+              def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
+              val balRender = lines.map { case (left, right) => renderBoth(left, right) }
+              reportWriter.println(balRender.mkString("\n"))
+              val totalLine = renderBoth(totalLeft, totalRight)
+              reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
+              reportWriter.println(totalLine)
+            case regSettings: RegisterReportSettings =>
+              val regReport = Reports.registerReport(appState, regSettings)
+              printRegReport(reportWriter, regReport)
+            case bookSettings: BookReportSettings =>
+              val bookReport = Reports.bookReport(appState, bookSettings)
+              printBookReport(reportWriter, bookSettings, bookReport)
+          }
+          reportWriter.close
+        }
+      //}
+
     }
   } catch {
     case a: AssertionError      => printErr("Error: " + a.getMessage)

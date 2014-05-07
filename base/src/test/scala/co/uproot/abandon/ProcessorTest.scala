@@ -23,7 +23,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries)
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {
@@ -59,7 +59,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries)
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {
@@ -95,7 +95,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries)
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {
@@ -129,7 +129,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries)
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {
@@ -159,7 +159,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = Seq(ClosureExportSettings(source, destination))
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {
@@ -219,7 +219,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = closure1 ++ closure2
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {
@@ -250,7 +250,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = Seq(ClosureExportSettings(source, destination))
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {
@@ -281,7 +281,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = Seq(ClosureExportSettings(source, destination))
         val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
-        val settings = Settings(Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
 
         exports.foreach { exportSettings =>
           exportSettings match {

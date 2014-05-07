@@ -94,7 +94,7 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
 }
 
 object Processor {
-  def parseAll(inputFiles: Seq[String]) = {
+  def parseAll(inputFiles: Seq[String], settings: Seq[AliasSettings]) = {
     var astEntries = List[ASTEntry]()
     var inputQueue = inputFiles
     var processedFiles = List[String]()
@@ -112,13 +112,33 @@ object Processor {
           println(Stream.iterate(scanner)(_.rest).takeWhile(!_.atEnd).map(_.first).toList)
           exit
         */
-
+        var transactions = List[co.uproot.abandon.SingleTransaction]()
         val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(readerForFile(input)))
         parseResult match {
           case AbandonParser.Success(result, _) =>
             val includes = filterByType[IncludeDirective](result)
             inputQueue ++= includes.map(id => mkRelativeFileName(id.fileName, input))
-            astEntries ++= result
+            if (!settings.isEmpty) {
+              settings.map { setting =>
+                val result1 = result match {
+                  case List(Transaction(date, txns, txns1, txns2, txns3)) =>
+                    txns.map { singleTransaction =>
+                      singleTransaction match {
+                        case SingleTransaction(acc1, expr1, expr2) =>
+                          if (acc1.toString.equals(setting.alias)) {
+                            transactions :+= SingleTransaction(AccountName(Seq(setting.name)), expr1, expr2)
+                          } else {
+                            transactions :+= SingleTransaction(acc1, expr1, expr2)
+                          }
+                      }
+                    }
+                    List(Transaction(date, transactions, txns1, txns2, txns3))
+                }
+                astEntries ++= result1
+              }
+            } else {
+              astEntries ++= result
+            }
           case n: AbandonParser.NoSuccess =>
             println("Error while parsing %s:\n%s" format (bold(input), n))
             parseError = true
