@@ -112,7 +112,6 @@ object Processor {
           println(Stream.iterate(scanner)(_.rest).takeWhile(!_.atEnd).map(_.first).toList)
           exit
         */
-        var transactions = List[co.uproot.abandon.SingleTransaction]()
         val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(readerForFile(input)))
         parseResult match {
           case AbandonParser.Success(result, _) =>
@@ -165,27 +164,22 @@ object Processor {
     new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
-  def process(entries: Seq[ASTEntry], settings: Seq[AccountSettings]) = {
+  def process(entries: Seq[ASTEntry], settings: Seq[accountSettings]) = {
     val definitions = filterByType[Definition[BigDecimal]](entries)
     val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
 
     val transactions = filterByType[Transaction](entries)
     val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
     val accState = new AccountState()
-    def checkAlias(accName: AccountName): AccountName = {
-      var accountName = accName
-      settings.map { a =>
-        a.alias match {
-          case Some(x) =>
-            if (accName.toString.equals(x)) {
-              accountName = AccountName(Seq(a.name))
-            } else {
-              accountName
-            }
-          case None => accountName
-        }
+    val aliasMap = scala.collection.mutable.Map[String, AccountName]()
+    settings.map { a =>
+      a.alias match {
+        case Some(x) => aliasMap += (x -> AccountName(Seq(a.name)))
+        case None    => aliasMap += (a.name -> AccountName(Seq(a.name)))
       }
-      accountName
+    }
+    def checkAlias(accName: AccountName): AccountName = {
+      aliasMap.get(accName.toString).getOrElse(accName)
     }
     sortedTxns foreach { tx =>
       val (txWithAmount, txNoAmount) = tx.transactions.partition(t => t.amount.isDefined)
