@@ -130,12 +130,8 @@ object SettingsHelper {
   }
   def makeAccountSettings(config: Config) = {
     val name = config.getString("name")
-    val alias = config.getString("alias")
-    if (alias.isEmpty) {
-      accountSettings(name, None)
-    } else {
-      accountSettings(name, Some(alias))
-    }
+    val alias = config.optional("alias") { _.getString(_) }
+    AccountSettings(name, alias)
   }
 }
 
@@ -178,7 +174,7 @@ case class NegativeConstraint(val accName: String) extends Constraint with SignC
 case class Settings(
   inputs: Seq[String],
   eodConstraints: Seq[Constraint],
-  accounts: Seq[accountSettings],
+  accounts: Seq[AccountSettings],
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
@@ -205,7 +201,7 @@ case class ClosureExportSettings(
   sources: Seq[String],
   destination: String) {
 }
-case class accountSettings(
+case class AccountSettings(
   name: String,
   alias: Option[String]) {
 }

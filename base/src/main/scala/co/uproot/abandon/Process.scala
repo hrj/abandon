@@ -164,7 +164,7 @@ object Processor {
     new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
-  def process(entries: Seq[ASTEntry], settings: Seq[accountSettings]) = {
+  def process(entries: Seq[ASTEntry], settings: Seq[AccountSettings]) = {
     val definitions = filterByType[Definition[BigDecimal]](entries)
     val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
 
