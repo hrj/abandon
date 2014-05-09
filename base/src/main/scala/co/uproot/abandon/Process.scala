@@ -110,23 +110,23 @@ object Processor {
         sourceOpt match {
           case Some(source) =>
 
-          /*
+            /*
             val scanner = new AbandonParser.lexical.Scanner(StreamReader(source.reader))
             println(Stream.iterate(scanner)(_.rest).takeWhile(!_.atEnd).map(_.first).toList)
             exit
           */
 
-          val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(readerForFile(input)))
-          parseResult match {
-            case AbandonParser.Success(result, _) =>
-              val includes = filterByType[IncludeDirective](result)
-              inputQueue ++= includes.map(id => mkRelativeFileName(id.fileName, input))
-              astEntries ++= result
-            case n: AbandonParser.NoSuccess =>
-              println("Error while parsing %s:\n%s" format (bold(input), n))
-              parseError = true
-          }
-          source.close
+            val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(readerForFile(input)))
+            parseResult match {
+              case AbandonParser.Success(result, _) =>
+                val includes = filterByType[IncludeDirective](result)
+                inputQueue ++= includes.map(id => mkRelativeFileName(id.fileName, input))
+                astEntries ++= result
+              case n: AbandonParser.NoSuccess =>
+                println("Error while parsing %s:\n%s" format (bold(input), n))
+                parseError = true
+            }
+            source.close
           case None =>
             throw new InputFileNotFoundError("File not found: " + input)
         }
@@ -171,13 +171,19 @@ object Processor {
     new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
-  def process(entries: Seq[ASTEntry]) = {
+  def process(entries: Seq[ASTEntry], accountSettings: Seq[AccountSettings]) = {
     val definitions = filterByType[Definition[BigDecimal]](entries)
     val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
 
     val transactions = filterByType[Transaction](entries)
     val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
     val accState = new AccountState()
+    val aliasMap = accountSettings.collect{ case AccountSettings(name, Some(alias)) => alias -> name }.toMap
+
+    def transformAlias(accName: AccountName): AccountName = {
+      aliasMap.get(accName.toString).getOrElse(accName)
+    }
+
     sortedTxns foreach { tx =>
       val (txWithAmount, txNoAmount) = tx.transactions.partition(t => t.amount.isDefined)
       assert(txNoAmount.length <= 1, "More than one account with unspecified amount: " + txNoAmount)
@@ -186,12 +192,12 @@ object Processor {
       txWithAmount foreach { t =>
         val delta = t.amount.get.evaluate(evaluationContext)
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(transformAlias(t.accName), delta, t.commentOpt)
       }
       txNoAmount foreach { t =>
         val delta = -txTotal
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(t.accName, delta, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(transformAlias(t.accName), delta, t.commentOpt)
       }
       accState.updateAmounts(new TxnGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")
