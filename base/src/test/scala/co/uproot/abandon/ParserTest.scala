@@ -4,6 +4,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
 import org.scalatest.Matchers
 import org.scalatest.Inside
+import ParserHelper._
 import TestHelper._
 
 class ParserTest extends FlatSpec with Matchers with Inside {

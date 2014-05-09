@@ -115,6 +115,8 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   lexical.reserved += tagKeyword
   lexical.delimiters ++= List("+", "-", "*", "/", "=", "(", ")", ":", ",", "&", ".")
 
+  val nameSeparator = ":"
+
   private lazy val integer = numericLit ^^ { case x => x.toInt }
   private lazy val number: PackratParser[BigDecimal] = accept("number", { case lexical.NumericLit(n) => BigDecimal(n) })
   private lazy val eol = accept("<eol>", { case lexical.EOL => })
@@ -133,6 +135,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private def eolComment = (comment?) <~ eol
 
   lazy val abandon: Parser[Seq[ASTEntry]] = phrase((fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators)
+  lazy val accountName: Parser[AccountName] = rep1sep(ident, nameSeparator) ^^ { case path => AccountName(path) }
 
   private lazy val fragment: Parser[ASTEntry] = (txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
   private lazy val includeFrag = (includeKeyword ~> fileName) ^^ { case name => IncludeDirective(name) }
@@ -207,7 +210,6 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val txDetails: PackratParser[SingleTransaction] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
     case name ~ amount ~ commentOpt => SingleTransaction(name, amount, commentOpt)
   }
-  private lazy val accountName = rep1sep(ident, ":") ^^ { case path => AccountName(path) }
 
   private lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
     case y ~ (m: Int) ~ d if (isValidDate(y, m, d)) =>
@@ -228,4 +230,13 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
       case _: org.joda.time.IllegalFieldValueException => false
     }
   }
+}
+
+object ParserHelper {
+  import scala.util.parsing.input.PagedSeqReader
+  import scala.collection.immutable.PagedSeq
+
+  def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
+  def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
+  def scanner(s: String) = mkScanner(reader(s))
 }

@@ -7,6 +7,7 @@ import org.scalatest.Inside
 import java.lang.Exception
 
 import TestHelper._
+import ParserHelper._
 
 class ProcessorTest extends FlatSpec with Matchers with Inside {
 

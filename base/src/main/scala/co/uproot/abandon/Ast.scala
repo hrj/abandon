@@ -2,6 +2,13 @@ package co.uproot.abandon
 
 object ASTHelper {
   type NumericExpr = Expr[BigDecimal]
+
+  def parseAccountName(name:String):AccountName = {
+    AbandonParser.accountName(ParserHelper.scanner(name)) match {
+      case AbandonParser.Success(result, _) => result
+      case _ => throw new InputError("Couldn't parse accountName: " + name)
+    }
+  }
 }
 
 class InputError(msg: String) extends RuntimeException(msg)
