@@ -131,7 +131,7 @@ object SettingsHelper {
   def makeAccountSettings(config: Config) = {
     val name = config.getString("name")
     val alias = config.optional("alias") { _.getString(_) }
-    AccountSettings(name, alias)
+    AccountSettings(AccountName(Seq(name)), alias)
   }
 }
 
@@ -202,7 +202,7 @@ case class ClosureExportSettings(
   destination: String) {
 }
 case class AccountSettings(
-  name: String,
+  name: AccountName,
   alias: Option[String]) {
 }
 case class LedgerExportSettings(

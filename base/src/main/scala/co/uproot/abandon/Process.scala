@@ -164,7 +164,7 @@ object Processor {
     new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
-  def process(entries: Seq[ASTEntry], settings: Seq[AccountSettings]) = {
+  def process(entries: Seq[ASTEntry], accountSettings: Seq[AccountSettings]) = {
     val definitions = filterByType[Definition[BigDecimal]](entries)
     val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
 
@@ -172,13 +172,13 @@ object Processor {
     val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
     val accState = new AccountState()
     val aliasMap = scala.collection.mutable.Map[String, AccountName]()
-    settings.map { a =>
+    accountSettings.foreach { a =>
       a.alias match {
-        case Some(x) => aliasMap += (x -> AccountName(Seq(a.name)))
-        case None    => aliasMap += (a.name -> AccountName(Seq(a.name)))
+        case Some(x) => aliasMap += (x -> a.name)
+        case None    => aliasMap
       }
     }
-    def checkAlias(accName: AccountName): AccountName = {
+    def transformAlias(accName: AccountName): AccountName = {
       aliasMap.get(accName.toString).getOrElse(accName)
     }
     sortedTxns foreach { tx =>
@@ -189,12 +189,12 @@ object Processor {
       txWithAmount foreach { t =>
         val delta = t.amount.get.evaluate(evaluationContext)
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(checkAlias(t.accName), delta, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(transformAlias(t.accName), delta, t.commentOpt)
       }
       txNoAmount foreach { t =>
         val delta = -txTotal
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(checkAlias(t.accName), delta, t.commentOpt)
+        detailedTxns :+= DetailedTransaction(transformAlias(t.accName), delta, t.commentOpt)
       }
       accState.updateAmounts(new TxnGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")
