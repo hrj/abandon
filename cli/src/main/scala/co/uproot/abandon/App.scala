@@ -122,7 +122,7 @@ object AbandonApp extends App {
       case Right(settings) =>
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
-          val appState = Processor.process(astEntries)
+          val appState = Processor.process(astEntries,settings.accounts)
           Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)

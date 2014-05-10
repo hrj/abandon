@@ -36,7 +36,7 @@ object SettingsHelper {
       case _ =>
         val inputs = cliConf.inputs.get.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
+        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
     }
   }
 
@@ -63,8 +63,10 @@ object SettingsHelper {
         val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
         val exports = exportConfigs.map(makeExportSettings)
+        val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
+        val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-        Right(Settings(inputs, eodConstraints, reports, ReportOptions(isRight), exports, Some(file)))
+        Right(Settings(inputs, eodConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -126,6 +128,11 @@ object SettingsHelper {
     val destination = config.getString("destination")
     ClosureExportSettings(sources, destination)
   }
+  def makeAccountSettings(config: Config) = {
+    val name = config.getString("name")
+    val alias = config.optional("alias") { _.getString(_) }
+    AccountSettings(ASTHelper.parseAccountName(name), alias)
+  }
 }
 
 abstract class Constraint {
@@ -167,6 +174,7 @@ case class NegativeConstraint(val accName: String) extends Constraint with SignC
 case class Settings(
   inputs: Seq[String],
   eodConstraints: Seq[Constraint],
+  accounts: Seq[AccountSettings],
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
@@ -193,7 +201,10 @@ case class ClosureExportSettings(
   sources: Seq[String],
   destination: String) {
 }
-
+case class AccountSettings(
+  name: AccountName,
+  alias: Option[String]) {
+}
 case class LedgerExportSettings(
   _accountMatch: Option[Seq[String]],
   _outFiles: Seq[String],
@@ -216,4 +227,3 @@ case class BookReportSettings(_title: String, account: String, _outFiles: Seq[St
 case class XmlExportSettings(_accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])
-
