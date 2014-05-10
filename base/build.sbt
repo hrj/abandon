@@ -5,7 +5,7 @@ libraryDependencies += "org.joda" % "joda-convert" % "1.6"
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.5"
 
-libraryDependencies += "com.typesafe" % "config" % "1.2.0"
+libraryDependencies += "com.typesafe" % "config" % "1.2.1"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.4" % "test"
 
