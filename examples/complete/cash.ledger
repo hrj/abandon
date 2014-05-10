@@ -1,15 +1,15 @@
 2013/March/06
   ; For office cleaning labour
   Expenses                         -250
-  Assets:Current:Cash
+  cash
 
 2013/March/06
   ; For glass decorations
   Expenses:Consumables             -400
-  Assets:Current:Cash
+  cash
 
 2013/March/06
   ; For Snacks
   Expenses                         -180
-  Assets:Current:Cash
+  cash
 
