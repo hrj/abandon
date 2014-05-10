@@ -51,7 +51,7 @@ The `Expense` account shows a value of `-600` which is the total of its own amou
 
 The last line shows the total of the top level accounts, which in this case is `0.00`.
 
-Note: The second `0.00` is for accounts that get printed on right. In this simple example there is nothing to show on the right side of the report.
+> *Note:* The second `0.00` is for accounts that get printed on right. In this simple example there is nothing to show on the right side of the report.
 
 
 ### Features at a glance
