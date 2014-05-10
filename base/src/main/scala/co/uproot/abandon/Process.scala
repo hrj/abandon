@@ -181,7 +181,7 @@ object Processor {
     val aliasMap = accountSettings.collect{ case AccountSettings(name, Some(alias)) => alias -> name }.toMap
 
     def transformAlias(accName: AccountName): AccountName = {
-      aliasMap.get(accName.toString).getOrElse(accName)
+      aliasMap.get(accName.fullPathStr).getOrElse(accName)
     }
 
     sortedTxns foreach { tx =>
