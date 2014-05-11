@@ -169,7 +169,7 @@ object AbandonUI extends JFXApp {
     case e: Error               => handleError("Unexpected error: " + e.getMessage)
   }
 
-  private def handleError(msg: String) {
+  private def handleError(msg:String) {
     System.err.println(msg)
     StatusBar.setText(msg) // TODO: Highlight in red
   }
