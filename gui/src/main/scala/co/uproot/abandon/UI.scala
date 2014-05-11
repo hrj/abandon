@@ -129,7 +129,7 @@ object AbandonUI extends JFXApp {
   def createReportTabs(firstRun: Boolean, settings: Settings) = {
     val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
     if (!parseError) {
-      val appState = Processor.process(astEntries)
+      val appState = Processor.process(astEntries, settings.accounts)
       if (firstRun) {
         settings.reports.foreach(CurrReports.addReport(appState, settings, _))
       } else {
@@ -169,7 +169,7 @@ object AbandonUI extends JFXApp {
     case e: Error               => handleError("Unexpected error: " + e.getMessage)
   }
 
-  private def handleError(msg:String) {
+  private def handleError(msg: String) {
     System.err.println(msg)
     StatusBar.setText(msg) // TODO: Highlight in red
   }
