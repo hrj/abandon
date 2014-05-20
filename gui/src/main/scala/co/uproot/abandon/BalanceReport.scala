@@ -8,23 +8,14 @@ import scalafx.scene.input.KeyEvent
 import scalafx.scene.control.ListCell
 import javafx.scene.input.MouseEvent
 import javafx.event.EventHandler
-
 import scalafx.scene.chart.{ AreaChart, NumberAxis, XYChart }
 import scalafx.collections.ObservableBuffer
 import scalafx.scene.chart.Axis
-
 import scalafx.application.JFXApp
 import scalafx.collections.ObservableBuffer
 import scalafx.scene.Scene
-
-//import javafx.scene.{ chart => jfxsc }
-//import scalafx.Includes._
-//import scalafx.application.JFXApp
-//import scalafx.application.JFXApp.PrimaryStage
-//import scalafx.collections.ObservableBuffer
-//import scalafx.scene.Scene
 import scalafx.scene.chart._
-//import scalafx.scene.layout.StackPane
+import Helper.{ Zero, maxElseZero, sumDeltas, minElseZero }
 
 object BalanceReport extends Report {
 
@@ -40,37 +31,50 @@ object BalanceReport extends Report {
         override def handle(even: MouseEvent) {
           val selectedItems = selectionModel().getSelectedItems()
           selectedItems.collect{
-            case BalanceReportEntry(Some(acc), render) => println(selectedItems); StackedBarChartDemo.aChart
+            case BalanceReportEntry(Some(acc), render) => BarChart.aChart(acc)
           }
         }
       }
 
-      object StackedBarChartDemo extends JFXApp {
-        def aChart = {
-          val years = Seq("2007", "2008", "2009")
-          val xAxis = CategoryAxis(ObservableBuffer(years))
-          val yAxis = NumberAxis(
-            axisLabel = "Units Sold",
-            lowerBound = 0,
-            upperBound = 8000,
-            tickUnit = 1000
-          )
-
-          stage = new JFXApp.PrimaryStage {
-            title = "Bar Chart"
-            scene = new Scene(500, 500) {
-              root = new BarChart(xAxis, yAxis) {
-                title = "Bar Chart"
-                categoryGap = 25
-                data = ObservableBuffer(
-                  xySeries("Region 1", Seq(567, 1292, 1290)),
-                  xySeries("Region 2", Seq(956, 1665, 2559)),
-                  xySeries("Region 3", Seq(1154, 1927, 2774))
-                )
+      object BarChart extends JFXApp {
+        def aChart(acc: AccountName) = {
+          val sortedGroup = appState.accState.txnGroups.sortBy(_.date.toInt)
+          var years = Seq[String]()
+          var acc1 = Seq[Int]()
+          if (sortedGroup.isEmpty) {
+            Nil
+          } else {
+            val accAmounts = appState.accState.amounts.toSeq
+            val maxAmount = maxElseZero(accAmounts.map(_._2.toInt))
+            val minAmount = minElseZero(accAmounts.map(_._2.toInt))
+            sortedGroup.map { a =>
+              a.children.map { b =>
+                if (b.name.equals(acc)) {
+                  acc1 :+= b.delta.toInt
+                  years :+= a.date.formatCompact
+                }
+              }
+            }
+            val xAxis = CategoryAxis(ObservableBuffer(years))
+            val yAxis = NumberAxis(
+              axisLabel = "Amounts",
+              lowerBound = minAmount,
+              upperBound = maxAmount,
+              tickUnit = 20000
+            )
+            stage = new JFXApp.PrimaryStage {
+              title = "Bar Chart"
+              scene = new Scene(500, 500) {
+                root = new BarChart(xAxis, yAxis) {
+                  title = "Bar Chart"
+                  categoryGap = 25
+                  data = ObservableBuffer(
+                    xySeries("Region 1", acc1)
+                  )
+                }
               }
             }
           }
-
           /** Create XYChart.Series from a sequence of numbers matching year strings. */
           def xySeries(name: String, data: Seq[Int]) = {
             val series = years zip data
