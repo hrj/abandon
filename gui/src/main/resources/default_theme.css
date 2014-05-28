@@ -1,12 +1,13 @@
 .report {
-  -fx-font-family:Monospace;
-  -fx-font-size:15pt;
+  -fx-font-family: 'Monospaced', 'Droid Sans Mono', 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', 'Ubuntu Mono';
+  -fx-font-size:11pt;
 }
 
 .txn-date-line {
   -fx-font-weight: bold;
   -fx-text-fill: #444;
 }
+
 .txn-comment {
   -fx-font-weight: bold;
   -fx-text-fill: #4169e1;
