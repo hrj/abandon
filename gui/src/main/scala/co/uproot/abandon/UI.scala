@@ -168,8 +168,7 @@ object AbandonUI extends JFXApp {
     case e: NotImplementedError => handleError("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
     case e: Error               => handleError("Unexpected error: " + e.getMessage)
   }
-
-  private def handleError(msg:String) {
+  private def handleError(msg: String) {
     System.err.println(msg)
     StatusBar.setText(msg) // TODO: Highlight in red
   }

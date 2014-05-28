@@ -3,6 +3,7 @@ package co.uproot.abandon
 object Helper {
   val Zero = BigDecimal(0)
   def maxElseZero(s: Iterable[Int]) = if (s.nonEmpty) s.max else 0
+  def minElseZero(s: Iterable[Int]) = if (s.nonEmpty) s.min else 0
   def sum(s: Iterable[BigDecimal]) = s.foldLeft(Zero)(_ + _)
   def sumDeltas(s: Iterable[DetailedTransaction]) = s.foldLeft(Zero)(_ + _.delta)
 
