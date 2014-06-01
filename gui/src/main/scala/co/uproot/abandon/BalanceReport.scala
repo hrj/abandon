@@ -41,118 +41,24 @@ object BalanceReport extends Report {
         def aChart(accName1: AccountName) = {
           var years = Seq[String]()
           var acc1 = Seq[Int]()
-          var accTreeState = Seq[AccountTreeState]()
-          var accName = Seq[AccountName]()
-          var flag2 = 0
-          def isRenderable(accTree: AccountTreeState): Boolean = {
-            if (accTree.countRenderableChildren(accTree => true) != 0) {
-              true
-            } else {
-              false
+          val accAmounts = appState.accState.amounts.toSeq
+          val maxAmount = maxElseZero(accAmounts.map(_._2.toInt))
+          val minAmount = minElseZero(accAmounts.map(_._2.toInt))
+          val monthlyGroups1 = appState.accState.txnGroups
+          monthlyGroups1.foreach { a =>
+            a.children.map { b =>
+              if (b.name.fullPathStr.matches(accName1.fullPathStr)) {
+                acc1 :+= b.delta.toInt
+                years :+= b.date.formatCompact
+              }
             }
 
-          }
-          def trace(accTreeState1: AccountTreeState): Seq[AccountName] = {
-            accTreeState1.childStates.map { c =>
-              if (flag2 == 0) {
-                if (c.name.fullPathStr.matches("""^""" + accName1.fullPathStr + """.*""") == true) {
-                  if (isRenderable(c)) {
-                    if (c.amount.toInt >= 0) {
-                      acc1 :+= c.amount.toInt
-                      accName :+= c.name
-                    }
-                    trace(c)
-                  } else {
-                    acc1 :+= c.total.toInt
-                    accName :+= c.name
-
-                  }
-                } else {
-              if (isRenderable(c)) {
-                trace(c)
-              }
-                }
-              }
-              if (c.name.fullPathStr.equals(accName1.fullPathStr) && isRenderable(c) == false) {
-                acc1 = Seq(c.total.toInt)
-                accName = Seq(c.name)
-                flag2 = 1
-              }
-            }
-            accName
-          }
-          def childCheck(z: AccountTreeState, acc: Seq[AccountName]): Seq[Int] = {
-            accTreeState = Seq(z)
-            if (z.name.fullPathStr.equals(accName1.fullPathStr)) {
-              if (z.amount.toInt != 0) {
-                acc1 :+= z.amount.toInt
-                accName :+= z.name
-                accTreeState = Seq(z)
-              }
-            }
-            accTreeState.map { A =>
-              if (accName1.fullPathStr.matches("""^""" + A.name.fullPathStr + """.*""") == true) {
-                A.childStates.map { c =>
-                  if (c.name.fullPathStr.equals(accName1.fullPathStr) && isRenderable(c) == false) {
-                    acc1 = Seq(c.total.toInt)
-                    accName = Seq(c.name)
-                    flag2 = 1
-                  }
-                  if (flag2 == 0) {
-                    if (isRenderable(c)) { 
-                      if (c.amount.toInt != 0) {
-                        if(c.name.fullPathStr.equals(accName1.fullPathStr) || c.name.fullPathStr.matches("""^""" + accName1.fullPathStr + """.*""")) {
-                        acc1 :+= c.amount.toInt
-                        accName :+= c.name
-                        }
-                      }
-                      trace(c)
-                    } else {
-                    if(c.name.fullPathStr.equals(accName1.fullPathStr) || c.name.fullPathStr.matches("""^""" + accName1.fullPathStr + """.*""")) {
-                      acc1 :+= c.total.toInt
-                      accName :+= c.name
-                    }
-                    }
-                  }
-                }
-              }
-            }
-            acc1
-          }
-          val sortedGroup = appState.accState.txnGroups.sortBy(_.date.toInt)
-          val txnGroups = appState.accState.mkTree(_.exists(c => reportSettings.isAccountMatching(accName1.fullPathStr)))
-          txnGroups.childStates.map { a =>
-            childCheck(a, accName)
-          }
-          if (sortedGroup.isEmpty) {
-            Nil
-          } else {
-            val accAmounts = appState.accState.amounts.toSeq
-            val maxAmount = maxElseZero(accAmounts.map(_._2.toInt))
-            val minAmount = minElseZero(accAmounts.map(_._2.toInt))
-            var flag = 0
-            sortedGroup.map { a =>
-              a.children.map { b =>
-                accName.map { B =>
-                  if (B.fullPathStr.equals(b.name.fullPathStr) && flag == 0) {
-                    years :+= b.date.formatCompact
-                    flag = flag + 1
-                  } else {
-                    if (B.fullPathStr.equals(b.name.fullPathStr) && flag != 0) {
-                      years = (flag + 1).toString +: years
-                      flag = flag + 2
-                    }
-                  }
-
-                }
-              }
-            }
             //   val xAxis = CategoryAxis(ObservableBuffer(years))
             val xAxis = CategoryAxis(years)
             val yAxis = NumberAxis(
               axisLabel = "Amounts",
               lowerBound = minAmount - 1000,
-              upperBound = maxAmount,
+              upperBound = maxAmount + 1000,
               tickUnit = 1000
             )
             stage = new JFXApp.PrimaryStage {
