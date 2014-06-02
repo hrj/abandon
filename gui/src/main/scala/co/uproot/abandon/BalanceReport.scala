@@ -16,6 +16,8 @@ import scalafx.collections.ObservableBuffer
 import scalafx.scene.Scene
 import scalafx.scene.chart._
 import Helper._
+import scalafx.stage.Stage
+import javafx.embed.swing.JFXPanel
 
 object BalanceReport extends Report {
 
@@ -37,52 +39,48 @@ object BalanceReport extends Report {
         }
       }
 
-      object BarChart extends JFXApp {
-        def aChart(accName1: AccountName) = {
-          var years = Seq[String]()
-          var acc1 = Seq[Int]()
+      object BarChart {
+        def aChart(accName: AccountName) = {
           val accAmounts = appState.accState.amounts.toSeq
           val maxAmount = maxElseZero(accAmounts.map(_._2.toInt))
           val minAmount = minElseZero(accAmounts.map(_._2.toInt))
-          val monthlyGroups1 = appState.accState.txnGroups
-          monthlyGroups1.foreach { a =>
-            a.children.foreach { b =>
-              if (b.name.fullPathStr.matches(accName1.fullPathStr)) {
-                acc1 :+= b.delta.toInt
-                years :+= b.date.formatCompact
-              }
-            }
-             
 
-            //   val xAxis = CategoryAxis(ObservableBuffer(years))
-            val xAxis = CategoryAxis(years)
-            val yAxis = NumberAxis(
-              axisLabel = "Amounts",
-              lowerBound = minAmount,
-              upperBound = maxAmount,
-              tickUnit = 1000
-            )
-            stage = new JFXApp.PrimaryStage {
-              title = accName1.fullPathStr
-              scene = new Scene(1200, 1200) {
-                root = new BarChart(xAxis, yAxis) {
-                  title = "Balance v/s Time"
-                  categoryGap = 25
-                  data = ObservableBuffer(
-                    xySeries("Region 1", acc1)
-                  )
-                }
-              }
-            }
-          }
+          val monthlyGroups = appState.accState.txnGroups
+          val accounts = monthlyGroups.flatMap(_.children).filter(_.name equals accName).map{ a => (a.delta, a.date) }
+          val accAmount = accounts.map(_._1.toInt)
+          val dates = accounts.map(_._2.formatCompact)
+
           /** Create XYChart.Series from a sequence of numbers matching year strings. */
           def xySeries(name: String, data: Seq[Int]) = {
-            val series = years zip data
+            val series = dates zip data
             XYChart.Series[String, Number](
               name,
               ObservableBuffer(series.map { case (x, y) => XYChart.Data[String, Number](x, y) })
             )
           }
+
+          //   val xAxis = CategoryAxis(ObservableBuffer(years))
+          val xAxis = CategoryAxis(dates)
+          val yAxis = NumberAxis(
+            axisLabel = "Amounts",
+            lowerBound = minAmount,
+            upperBound = maxAmount,
+            tickUnit = 1000
+          )
+          new JFXPanel()
+          val dialogStage = new Stage {
+            title = accName.fullPathStr
+            scene = new Scene(1200, 1200) {
+              root = new BarChart(xAxis, yAxis) {
+                title = "Balance v/s Time"
+                categoryGap = 25
+                data = ObservableBuffer(
+                  xySeries("Region 1", accAmount)
+                )
+              }
+            }
+          }
+          dialogStage.show
         }
       }
 
