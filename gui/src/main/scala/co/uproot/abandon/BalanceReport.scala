@@ -6,6 +6,16 @@ import scalafx.scene.control.ListView
 import scalafx.scene.layout.Priority
 import scalafx.scene.input.KeyEvent
 import scalafx.scene.control.ListCell
+import javafx.scene.input.MouseEvent
+import javafx.event.EventHandler
+import scalafx.scene.chart.{ AreaChart, NumberAxis, XYChart }
+import scalafx.collections.ObservableBuffer
+import scalafx.scene.chart.Axis
+import scalafx.application.JFXApp
+import scalafx.collections.ObservableBuffer
+import scalafx.scene.Scene
+import scalafx.scene.chart._
+import Helper._
 
 object BalanceReport extends Report {
 
@@ -17,6 +27,65 @@ object BalanceReport extends Report {
 
     class BalanceView(entries: Seq[BalanceReportEntry]) extends ListView(entries) {
       hgrow = Priority.ALWAYS
+      onMouseClicked = new EventHandler[MouseEvent] {
+        override def handle(even: MouseEvent) {
+          val selectedItems = selectionModel().getSelectedItems()
+          selectedItems.collect{
+            case BalanceReportEntry(Some(acc), render) =>
+              BarChart.aChart(acc)
+          }
+        }
+      }
+
+      object BarChart extends JFXApp {
+        def aChart(accName1: AccountName) = {
+          var years = Seq[String]()
+          var acc1 = Seq[Int]()
+          val accAmounts = appState.accState.amounts.toSeq
+          val maxAmount = maxElseZero(accAmounts.map(_._2.toInt))
+          val minAmount = minElseZero(accAmounts.map(_._2.toInt))
+          val monthlyGroups1 = appState.accState.txnGroups
+          monthlyGroups1.foreach { a =>
+            a.children.foreach { b =>
+              if (b.name.fullPathStr.matches(accName1.fullPathStr)) {
+                acc1 :+= b.delta.toInt
+                years :+= b.date.formatCompact
+              }
+            }
+             
+
+            //   val xAxis = CategoryAxis(ObservableBuffer(years))
+            val xAxis = CategoryAxis(years)
+            val yAxis = NumberAxis(
+              axisLabel = "Amounts",
+              lowerBound = minAmount,
+              upperBound = maxAmount,
+              tickUnit = 1000
+            )
+            stage = new JFXApp.PrimaryStage {
+              title = accName1.fullPathStr
+              scene = new Scene(1200, 1200) {
+                root = new BarChart(xAxis, yAxis) {
+                  title = "Balance v/s Time"
+                  categoryGap = 25
+                  data = ObservableBuffer(
+                    xySeries("Region 1", acc1)
+                  )
+                }
+              }
+            }
+          }
+          /** Create XYChart.Series from a sequence of numbers matching year strings. */
+          def xySeries(name: String, data: Seq[Int]) = {
+            val series = years zip data
+            XYChart.Series[String, Number](
+              name,
+              ObservableBuffer(series.map { case (x, y) => XYChart.Data[String, Number](x, y) })
+            )
+          }
+        }
+      }
+
       onKeyTyped = { e: KeyEvent =>
         // println ("Typed key", e.character, e.code, jfxKeyCode.ENTER, e.delegate.code)
         // if (e.code equals jfxKeyCode.ENTER) {
