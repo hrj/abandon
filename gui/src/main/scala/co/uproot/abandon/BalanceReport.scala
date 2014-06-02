@@ -46,26 +46,27 @@ object BalanceReport extends Report {
           val minAmount = minElseZero(accAmounts.map(_._2.toInt))
           val monthlyGroups1 = appState.accState.txnGroups
           monthlyGroups1.foreach { a =>
-            a.children.map { b =>
+            a.children.foreach { b =>
               if (b.name.fullPathStr.matches(accName1.fullPathStr)) {
                 acc1 :+= b.delta.toInt
                 years :+= b.date.formatCompact
               }
             }
+             
 
             //   val xAxis = CategoryAxis(ObservableBuffer(years))
             val xAxis = CategoryAxis(years)
             val yAxis = NumberAxis(
               axisLabel = "Amounts",
-              lowerBound = minAmount - 1000,
-              upperBound = maxAmount + 1000,
+              lowerBound = minAmount,
+              upperBound = maxAmount,
               tickUnit = 1000
             )
             stage = new JFXApp.PrimaryStage {
-              title = "Bar Chart"
+              title = accName1.fullPathStr
               scene = new Scene(1200, 1200) {
                 root = new BarChart(xAxis, yAxis) {
-                  title = "Bar Chart"
+                  title = "Balance v/s Time"
                   categoryGap = 25
                   data = ObservableBuffer(
                     xySeries("Region 1", acc1)
