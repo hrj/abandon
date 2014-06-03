@@ -32,34 +32,34 @@ object BalanceReport extends Report {
       onMouseClicked = new EventHandler[MouseEvent] {
         override def handle(even: MouseEvent) {
           val selectedItems = selectionModel().getSelectedItems()
-          selectedItems.collect{
-            case BalanceReportEntry(Some(acc), render) =>
-              BarChart.aChart(acc)
+          selectedItems.foreach { a =>
+            a match {
+              case BalanceReportEntry(Some(acc), render) =>
+                BarChart.aChart(acc)
+            }
           }
         }
       }
 
       object BarChart {
+        def xySeries(name: String, data: Seq[Double], dates: Seq[String]) = {
+          val series = dates zip data
+          XYChart.Series[String, Number](
+            name,
+            ObservableBuffer(series.map { case (x, y) => XYChart.Data[String, Number](x, y) })
+          )
+        }
+
         def aChart(accName: AccountName) = {
-          val accAmounts = appState.accState.amounts.toSeq
-          val maxAmount = maxElseZero(accAmounts.map(_._2.toInt))
-          val minAmount = minElseZero(accAmounts.map(_._2.toInt))
+          val accAmounts = appState.accState.amounts.map(_._2.toDouble).toSeq
+          val maxAmount = maxElseZero(accAmounts)
+          val minAmount = minElseZero(accAmounts)
 
           val monthlyGroups = appState.accState.txnGroups
           val accounts = monthlyGroups.flatMap(_.children).filter(_.name equals accName).map{ a => (a.delta, a.date) }
-          val accAmount = accounts.map(_._1.toInt)
+          val accAmount = accounts.map(_._1.toDouble)
           val dates = accounts.map(_._2.formatCompact)
 
-          /** Create XYChart.Series from a sequence of numbers matching year strings. */
-          def xySeries(name: String, data: Seq[Int]) = {
-            val series = dates zip data
-            XYChart.Series[String, Number](
-              name,
-              ObservableBuffer(series.map { case (x, y) => XYChart.Data[String, Number](x, y) })
-            )
-          }
-
-          //   val xAxis = CategoryAxis(ObservableBuffer(years))
           val xAxis = CategoryAxis(dates)
           val yAxis = NumberAxis(
             axisLabel = "Amounts",
@@ -67,7 +67,6 @@ object BalanceReport extends Report {
             upperBound = maxAmount,
             tickUnit = 1000
           )
-          new JFXPanel()
           val dialogStage = new Stage {
             title = accName.fullPathStr
             scene = new Scene(1200, 1200) {
@@ -75,7 +74,7 @@ object BalanceReport extends Report {
                 title = "Balance v/s Time"
                 categoryGap = 25
                 data = ObservableBuffer(
-                  xySeries("Region 1", accAmount)
+                  xySeries("Region 1", accAmount, dates)
                 )
               }
             }
