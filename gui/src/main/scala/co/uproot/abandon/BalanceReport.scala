@@ -36,6 +36,7 @@ object BalanceReport extends Report {
             a match {
               case BalanceReportEntry(Some(acc), render) =>
                 BarChart.aChart(acc)
+              case _ =>
             }
           }
         }
@@ -58,12 +59,14 @@ object BalanceReport extends Report {
           }
           val amounts = accounts.map(_._1.toDouble)
 
-          var maxAmount = maxElseZero(amounts)
-          var minAmount = minElseZero(amounts)
-          if (maxAmount equals minAmount) {
-            if (maxAmount > 0) minAmount = 0 else maxAmount = 0
-          }
-          if (maxAmount < 0 && minAmount < 0) maxAmount = 0
+          val maxAmount = maxElseZero(amounts)
+          val minAmount = minElseZero(amounts)
+          val (adjustedMaxAmount, adjustedMinAmount) =
+            if (maxAmount equals minAmount) {
+              if (maxAmount > 0) (maxAmount, 0.0) else (0.0, minAmount)
+            } else if (maxAmount < 0 && minAmount < 0) (0.0, minAmount)
+            else if (maxAmount > 0 && minAmount > 0) (maxAmount, 0.0)
+            else (maxAmount, minAmount)
 
           val accAmount = accounts.map(_._1.toDouble)
           val dates = accounts.map(_._2.formatCompact)
@@ -71,8 +74,8 @@ object BalanceReport extends Report {
           val xAxis = CategoryAxis(dates)
           val yAxis = NumberAxis(
             axisLabel = "Amounts",
-            lowerBound = minAmount,
-            upperBound = maxAmount,
+            lowerBound = adjustedMinAmount,
+            upperBound = adjustedMaxAmount,
             tickUnit = 1000
           )
           val dialogStage = new Stage {
