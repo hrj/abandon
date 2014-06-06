@@ -51,12 +51,20 @@ object BalanceReport extends Report {
         }
 
         def aChart(accName: AccountName) = {
-          val accAmounts = appState.accState.amounts.map(_._2.toDouble).toSeq
-          val maxAmount = maxElseZero(accAmounts)
-          val minAmount = minElseZero(accAmounts)
+          val reportGroups = appState.accState.txnGroups
+          val accountsGroups = reportGroups.flatMap(_.children).filter(_.name equals accName).groupBy(_.date).toSeq
+          val accounts = accountsGroups.map{ acc =>
+            (acc._2.last.delta, acc._1)
+          }
+          val amounts = accounts.map(_._1.toDouble)
 
-          val monthlyGroups = appState.accState.txnGroups
-          val accounts = monthlyGroups.flatMap(_.children).filter(_.name equals accName).map{ a => (a.delta, a.date) }
+          var maxAmount = maxElseZero(amounts)
+          var minAmount = minElseZero(amounts)
+          if (maxAmount equals minAmount) {
+            if (maxAmount > 0) minAmount = 0 else maxAmount = 0
+          }
+          if (maxAmount < 0 && minAmount < 0) maxAmount = 0
+
           val accAmount = accounts.map(_._1.toDouble)
           val dates = accounts.map(_._2.formatCompact)
 
