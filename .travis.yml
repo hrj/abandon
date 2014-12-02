@@ -4,3 +4,5 @@
  jdk:
    - oraclejdk8
    - openjdk8
+ script: "sbt clean base/coverage base/test"
+ after_success: "sbt base/coveralls"
