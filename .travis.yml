@@ -3,6 +3,6 @@
    - "2.11.4"
  jdk:
    - oraclejdk8
-   - openjdk8
+   - openjdk7
  script: "sbt clean base/coverage base/test"
  after_success: "sbt base/coveralls"
