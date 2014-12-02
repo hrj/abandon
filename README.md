@@ -103,5 +103,6 @@ Look at the issue list for a complete road map.
 Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 (free to use, share, modify, but attribution is required)
 
-### Coverage
+### Build & Coverage status
+[![Build Status](https://travis-ci.org/hrj/abandon.svg?branch=master)](https://travis-ci.org/hrj/abandon)
 [![Coverage Status](https://img.shields.io/coveralls/hrj/abandon.svg)](https://coveralls.io/r/hrj/abandon?branch=master)
