@@ -1,6 +1,7 @@
  language: scala
  scala:
    - "2.11.4"
+ sbt_args: "-sbt-version 0.13.7"
  jdk:
    - oraclejdk8
    - openjdk7
