@@ -1,9 +1,8 @@
  language: scala
  scala:
    - "2.11.4"
- sbt_args: "-sbt-version 0.13.7"
  jdk:
    - oraclejdk8
    - openjdk7
- script: "sbt clean base/coverage base/test"
- after_success: "sbt base/coveralls"
+ script: "sbt -sbt-version 0.13.7 clean base/coverage base/test"
+ after_success: "sbt -sbt-version 0.13.7 base/coveralls"
