@@ -102,3 +102,6 @@ Look at the issue list for a complete road map.
 ### License
 Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 (free to use, share, modify, but attribution is required)
+
+### Coverage
+[![Coverage Status](https://img.shields.io/coveralls/hrj/abandon.svg)](https://coveralls.io/r/hrj/abandon?branch=master)
