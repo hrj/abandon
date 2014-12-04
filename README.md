@@ -104,7 +104,8 @@ Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 (free to use, share, modify, but attribution is required)
 
 ### Contact
-Join us in the [![Gitter chat room](https://badges.gitter.im/hrj/abandon.png)](https://gitter.im/hrj/abandon).
+Join us in the chat room here: [![Gitter chat room](https://badges.gitter.im/hrj/abandon.png)](https://gitter.im/hrj/abandon).
+
 Or simply raise an issue in GitHub.
 
 ### Build & Coverage status
