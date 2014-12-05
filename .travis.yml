@@ -6,3 +6,4 @@
    - openjdk7
  script: "sbt -sbt-version 0.13.7 clean base/coverage base/test"
  after_success: "sbt -sbt-version 0.13.7 base/coveralls"
+ sudo: false
