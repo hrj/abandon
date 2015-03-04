@@ -16,7 +16,7 @@ object BalanceReport extends Report {
     val right = rightRender.padTo(padLength, BalanceReportEntry(None, "")) :+ BalanceReportEntry(None, totalRight)
 
     class BalanceView(entries: Seq[BalanceReportEntry]) extends ListView(entries) {
-      hgrow = Priority.ALWAYS
+      hgrow = Priority.Always
       onKeyTyped = { e: KeyEvent =>
         // println ("Typed key", e.character, e.code, jfxKeyCode.ENTER, e.delegate.code)
         // if (e.code equals jfxKeyCode.ENTER) {
@@ -46,9 +46,9 @@ object BalanceReport extends Report {
 
     new HBox {
       def getWidth = width
-      hgrow = Priority.ALWAYS
+      hgrow = Priority.Always
       styleClass += styleClassName
-      content = Seq(
+      children = Seq(
         new BalanceView(left),
         new BalanceView(right)
       )

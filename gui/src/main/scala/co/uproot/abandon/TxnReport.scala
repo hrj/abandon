@@ -28,14 +28,14 @@ object TxnReport extends Report {
         ("  %-" + maxNameLength + "s %20.2f %s") format (c.name, c.delta, commentStr)
       }.map(new Label(_))
       padding = Insets(10, 10, 10, 10)
-      content = (grpLabel +: grpCommentLabels) ++ childLabels
+      children = (grpLabel +: grpCommentLabels) ++ childLabels
     })
   }
 
   def mkTxnView(txns: Seq[DetailedTransaction]) = {
     new VBox {
       styleClass += styleClassName
-      content = mkTxnGroupViews(txns)
+      children = mkTxnGroupViews(txns)
     }
   }
 }

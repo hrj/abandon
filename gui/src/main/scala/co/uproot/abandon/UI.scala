@@ -53,7 +53,7 @@ object AbandonUI extends JFXApp {
       text = "Info"
       closable = false
       content = new Label("Please Wait: Processing input files") {
-        alignmentInParent = Pos.CENTER
+        alignmentInParent = Pos.Center
         style = "-fx-font:16 Sans;"
       }
     }
@@ -96,7 +96,7 @@ object AbandonUI extends JFXApp {
     style = "-fx-font:14 Sans; -fx-background-color:#ddd"
     val label = new Label("Ready")
     padding = Insets(10, 10, 10, 10)
-    content = Seq(
+    children = Seq(
       label
     )
 
