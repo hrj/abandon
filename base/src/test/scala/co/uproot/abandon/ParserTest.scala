@@ -398,4 +398,25 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         }
     }
   }
+
+  "parser" should "parse month names in date" in {
+    val testInput = List(
+      "2013/January/1",
+      "2013/january/1",
+      "2013/jaNuAry/1",
+      "2013/Jan/1",
+      "2013/jan/1"
+    )
+
+    testInput foreach {input =>
+      val parseResult = AbandonParser.dateFrag(scanner(input))
+
+      inside(parseResult) {
+        case AbandonParser.Success(date, _) =>
+          date should be(Date(2013, 1, 1))
+      }
+    }
+
+  }
+
 }

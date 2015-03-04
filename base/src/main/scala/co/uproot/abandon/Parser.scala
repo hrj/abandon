@@ -211,7 +211,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
     case name ~ amount ~ commentOpt => SingleTransaction(name, amount, commentOpt)
   }
 
-  private lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
+  lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
     case y ~ (m: Int) ~ d if (isValidDate(y, m, d)) =>
       Date(y, m, d)
     case y ~ (m: String) ~ d if (isValidDate(y, m, d)) =>
