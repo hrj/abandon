@@ -2,7 +2,7 @@ import AssemblyKeys._ // put this at the top of the file
 
 assemblySettings
 
-libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.31-R7"
+libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.40-R8"
 
 unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/jfxrt.jar"))
 
