@@ -4,7 +4,7 @@ object Helper {
   val Zero = BigDecimal(0)
   def maxElseZero(s: Iterable[Int]) = if (s.nonEmpty) s.max else 0
   def sum(s: Iterable[BigDecimal]) = s.foldLeft(Zero)(_ + _)
-  def sumDeltas(s: Iterable[DetailedTransaction]) = s.foldLeft(Zero)(_ + _.delta)
+  def sumDeltas(s: Iterable[DetailedPost]) = s.foldLeft(Zero)(_ + _.delta)
 
   def filterByType[T](s: Seq[_ >: T])(implicit m: Manifest[T]) = s.collect({ case t: T => t })
 

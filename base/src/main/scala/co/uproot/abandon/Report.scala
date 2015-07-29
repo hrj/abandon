@@ -3,7 +3,7 @@ package co.uproot.abandon
 import Helper.{ Zero, maxElseZero, sumDeltas }
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
-case class RegisterReportEntry(txns: Seq[DetailedTransaction], render: String)
+case class RegisterReportEntry(txns: Seq[DetailedPost], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
 case class LedgerExportEntry(accountName: AccountName, amount: BigDecimal)
 case class LedgerExportData(date: Date, ledgerEntries: Seq[LedgerExportEntry]) {

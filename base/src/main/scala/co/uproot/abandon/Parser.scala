@@ -137,7 +137,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   lazy val abandon: Parser[Seq[ASTEntry]] = phrase((fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators)
   lazy val accountName: Parser[AccountName] = rep1sep(ident, nameSeparator) ^^ { case path => AccountName(path) }
 
-  private lazy val fragment: Parser[ASTEntry] = (txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
+  private lazy val fragment: Parser[ASTEntry] = (pstFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
   private lazy val includeFrag = (includeKeyword ~> fileName) ^^ { case name => IncludeDirective(name) }
   private lazy val payeeDefFrag = (payeeKeyword ~> stringOrAllUntilEOL) ^^ { case payee => PayeeDef(payee.mkString("")) }
   private lazy val tagDefFrag = (tagKeyword ~> stringOrAllUntilEOL) ^^ { case tag => TagDef(tag.mkString("")) }
@@ -200,15 +200,15 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val booleanExpression: PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
 
-  private lazy val txFrag = ((dateFrag ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (txDetails+) ^^ {
-    case date ~ annotationOpt ~ optPayee ~ optComment ~ transactions =>
+  private lazy val pstFrag = ((dateFrag ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (pstDetails+) ^^ {
+    case date ~ annotationOpt ~ optPayee ~ optComment ~ posts =>
       val annotationStrOpt = annotationOpt.map(_.mkString(""))
-      Transaction(date, transactions, annotationStrOpt, optPayee, optComment.flatten)
+      Transaction(date, posts, annotationStrOpt, optPayee, optComment.flatten)
   }
   private lazy val annotation = (("(" ~> (ident | numericLit)+) <~ ")")
   private lazy val payee = ((allButEOL)+) ^^ { case x => x.mkString(" ") }
-  private lazy val txDetails: PackratParser[SingleTransaction] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
-    case name ~ amount ~ commentOpt => SingleTransaction(name, amount, commentOpt)
+  private lazy val pstDetails: PackratParser[Post] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
+    case name ~ amount ~ commentOpt => Post(name, amount, commentOpt)
   }
 
   lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
