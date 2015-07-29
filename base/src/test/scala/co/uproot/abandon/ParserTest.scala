@@ -34,7 +34,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _)) =>
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     expr1 should be (Some(nlit(200)))
@@ -62,7 +62,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, None), SingleTransaction(acc2, expr2, None), SingleTransaction(acc3, expr3, None)) =>
+                  case List(Post(acc1, expr1, None), Post(acc2, expr2, None), Post(acc3, expr3, None)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (bankAccount)
@@ -97,7 +97,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _)) =>
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (bankAccount)
@@ -110,7 +110,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 6, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, None), SingleTransaction(acc2, expr2, Some(comment)), SingleTransaction(acc3, expr3, None)) =>
+                  case List(Post(acc1, expr1, None), Post(acc2, expr2, Some(comment)), Post(acc3, expr3, None)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (bankAccount)
@@ -141,7 +141,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _)) =>
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     expr1 should be (Some(UnaryNegExpr(AddExpr(nlit(200), nlit(40)))))
@@ -174,7 +174,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _), SingleTransaction(acc4, expr4, _), SingleTransaction(acc5, expr5, _), SingleTransaction(acc6, expr6, _), SingleTransaction(acc7, expr7, _)) =>
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _), Post(acc5, expr5, _), Post(acc6, expr6, _), Post(acc7, expr7, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (cashAccount)
@@ -212,7 +212,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 9, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _)) =>
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (cashAccount)
@@ -244,7 +244,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 9, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _), SingleTransaction(acc4, expr4, _)) =>
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _)) =>
                     acc1 should be(expenseAccount)
                     acc2 should be(cashAccount)
                     acc3 should be(cashAccount)
@@ -278,7 +278,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case Transaction(date, txns, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
                 inside(txns) {
-                  case List(SingleTransaction(acc1, expr1, _), SingleTransaction(acc2, expr2, _), SingleTransaction(acc3, expr3, _), SingleTransaction(acc4, expr4, _)) =>
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
                     acc3 should be (cashAccount)
