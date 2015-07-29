@@ -6,11 +6,11 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
     cp filter {_.data.getName == "jfxrt.jar"}
 }
 
-proguardSettings
+// proguardSettings
 
-ProguardKeys.options in Proguard ++= Seq("-dontwarn", "-ignorewarnings", "-verbose", "-dontoptimize", "-dontobfuscate")
+// ProguardKeys.options in Proguard ++= Seq("-dontwarn", "-ignorewarnings", "-verbose", "-dontoptimize", "-dontobfuscate")
 
-ProguardKeys.options in Proguard += ProguardOptions.keepMain("co.uproot.abandon.AbandonApp")
+// ProguardKeys.options in Proguard += ProguardOptions.keepMain("co.uproot.abandon.AbandonApp")
 
 name := "abandon"
 
