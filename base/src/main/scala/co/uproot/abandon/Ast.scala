@@ -68,7 +68,7 @@ case class AccountName(fullPath: Seq[String]) {
   val depth = fullPath.length
 }
 
-case class SingleTransaction(accName: AccountName, amount: Option[NumericExpr], commentOpt: Option[String])
+case class Post(accName: AccountName, amount: Option[NumericExpr], commentOpt: Option[String])
 
 sealed class ASTEntry
 
@@ -77,7 +77,7 @@ case class TagDef(name: String) extends ASTEntry
 
 sealed class ASTTangibleEntry extends ASTEntry
 
-case class Transaction(date: Date, transactions: Seq[SingleTransaction], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
+case class Transaction(date: Date, posts: Seq[Post], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
 
 case class Definition[T](name: String, params: List[String], rhs: Expr[T]) extends ASTTangibleEntry {
   def prettyPrint = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)

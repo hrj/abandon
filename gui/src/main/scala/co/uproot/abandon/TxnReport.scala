@@ -7,7 +7,7 @@ import Helper._
 
 import scalafx.Includes._
 object TxnReport extends Report {
-  def mkTxnGroupViews(txns: Seq[DetailedTransaction]) = {
+  def mkTxnGroupViews(txns: Seq[DetailedPost]) = {
     val groups = txns.map(t => new RefWrap(t.parentOpt.get)).distinct.map(_.t)
     val sortedGroups = groups.sortBy(_.date)(DateOrdering)
 
@@ -32,7 +32,7 @@ object TxnReport extends Report {
     })
   }
 
-  def mkTxnView(txns: Seq[DetailedTransaction]) = {
+  def mkTxnView(txns: Seq[DetailedPost]) = {
     new VBox {
       styleClass += styleClassName
       children = mkTxnGroupViews(txns)
