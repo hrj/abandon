@@ -11,7 +11,7 @@ import scalafx.scene.control.ScrollPane
 import scalafx.stage.Modality
 
 object RegReport extends Report {
-  private def getNestedTxns(item: TreeItem[RegisterReportEntry]): Seq[DetailedTransaction] = {
+  private def getNestedTxns(item: TreeItem[RegisterReportEntry]): Seq[DetailedPost] = {
     item.getValue.txns ++ item.children.flatMap(getNestedTxns(_))
   }
 

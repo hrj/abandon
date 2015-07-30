@@ -7,8 +7,8 @@ import java.io.FileNotFoundException
 
 case class AppState(accState: AccountState, accDeclarations: Seq[AccountDeclaration])
 
-class TxnGroup(
-  _children: Seq[DetailedTransaction],
+class PostGroup(
+  _children: Seq[DetailedPost],
   val date: Date,
   val annotationOpt: Option[String],
   val payeeOpt: Option[String],
@@ -21,7 +21,7 @@ class TxnGroup(
     s"${date.formatYYYYMMMDD}$annotationStr$payeeStr"
   }
 }
-case class DetailedTransaction(name: AccountName, delta: BigDecimal, commentOpt: Option[String], parentOpt: Option[TxnGroup] = None) {
+case class DetailedPost(name: AccountName, delta: BigDecimal, commentOpt: Option[String], parentOpt: Option[PostGroup] = None) {
   def date = parentOpt.get.date
   var resultAmount = Zero
 }
@@ -29,20 +29,20 @@ case class DetailedTransaction(name: AccountName, delta: BigDecimal, commentOpt:
 class AccountState {
 
   private var _amounts = Map[AccountName, BigDecimal]() // initAmounts
-  private var _txns = Seq[DetailedTransaction]() // initTxns
-  private var _txnGroups = Seq[TxnGroup]() // initTxns
+  private var _posts = Seq[DetailedPost]() 
+  private var _postGroups = Seq[PostGroup]() 
 
   def amounts = _amounts
-  def txns = _txns
-  def txnGroups = _txnGroups
+  def txns = _posts
+  def txnGroups = _postGroups
 
-  def updateAmounts(txnGroup: TxnGroup) = {
+  def updateAmounts(txnGroup: PostGroup) = {
     txnGroup.children foreach { txn =>
       val updatedAmount = updateAmountTxn(txn.name, txn.delta, txn.date)
       txn.resultAmount = updatedAmount
-      _txns :+= txn
+      _posts :+= txn
     }
-    _txnGroups :+= txnGroup
+    _postGroups :+= txnGroup
   }
 
   private def updateAmountTxn(name: AccountName, delta: BigDecimal, date: Date) = {
@@ -185,21 +185,21 @@ object Processor {
     }
 
     sortedTxns foreach { tx =>
-      val (txWithAmount, txNoAmount) = tx.transactions.partition(t => t.amount.isDefined)
+      val (txWithAmount, txNoAmount) = tx.posts.partition(t => t.amount.isDefined)
       assert(txNoAmount.length <= 1, "More than one account with unspecified amount: " + txNoAmount)
       var txTotal = Zero
-      var detailedTxns = Seq[DetailedTransaction]()
+      var detailedTxns = Seq[DetailedPost]()
       txWithAmount foreach { t =>
         val delta = t.amount.get.evaluate(evaluationContext)
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(transformAlias(t.accName), delta, t.commentOpt)
+        detailedTxns :+= DetailedPost(transformAlias(t.accName), delta, t.commentOpt)
       }
       txNoAmount foreach { t =>
         val delta = -txTotal
         txTotal += delta
-        detailedTxns :+= DetailedTransaction(transformAlias(t.accName), delta, t.commentOpt)
+        detailedTxns :+= DetailedPost(transformAlias(t.accName), delta, t.commentOpt)
       }
-      accState.updateAmounts(new TxnGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
+      accState.updateAmounts(new PostGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)
