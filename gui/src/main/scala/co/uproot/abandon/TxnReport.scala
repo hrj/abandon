@@ -7,8 +7,8 @@ import Helper._
 
 import scalafx.Includes._
 object TxnReport extends Report {
-  def mkTxnGroupViews(txns: Seq[DetailedPost]) = {
-    val groups = txns.map(t => new RefWrap(t.parentOpt.get)).distinct.map(_.t)
+  def mkTxnGroupViews(posts: Seq[DetailedPost]) = {
+    val groups = posts.map(t => new RefWrap(t.parentOpt.get)).distinct.map(_.t)
     val sortedGroups = groups.sortBy(_.date)(DateOrdering)
 
     sortedGroups.map(grp => new VBox {
@@ -22,7 +22,7 @@ object TxnReport extends Report {
           styleClass += "txn-comment"
         })
 
-      val maxNameLength = maxElseZero(txns.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))
+      val maxNameLength = maxElseZero(posts.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))
       val childLabels = grp.children.map { c =>
         val commentStr = c.commentOpt.map("  ; " + _).getOrElse("")
         ("  %-" + maxNameLength + "s %20.2f %s") format (c.name, c.delta, commentStr)
@@ -32,10 +32,10 @@ object TxnReport extends Report {
     })
   }
 
-  def mkTxnView(txns: Seq[DetailedPost]) = {
+  def mkTxnView(posts: Seq[DetailedPost]) = {
     new VBox {
       styleClass += styleClassName
-      children = mkTxnGroupViews(txns)
+      children = mkTxnGroupViews(posts)
     }
   }
 }
