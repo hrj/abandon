@@ -7,7 +7,7 @@ import java.io.FileNotFoundException
 
 case class AppState(accState: AccountState, accDeclarations: Seq[AccountDeclaration])
 
-class PostingGroup(
+class PostGroup(
   _children: Seq[DetailedPost],
   val date: Date,
   val annotationOpt: Option[String],
@@ -21,7 +21,7 @@ class PostingGroup(
     s"${date.formatYYYYMMMDD}$annotationStr$payeeStr"
   }
 }
-case class DetailedPost(name: AccountName, delta: BigDecimal, commentOpt: Option[String], parentOpt: Option[PostingGroup] = None) {
+case class DetailedPost(name: AccountName, delta: BigDecimal, commentOpt: Option[String], parentOpt: Option[PostGroup] = None) {
   def date = parentOpt.get.date
   var resultAmount = Zero
 }
@@ -29,20 +29,20 @@ case class DetailedPost(name: AccountName, delta: BigDecimal, commentOpt: Option
 class AccountState {
 
   private var _amounts = Map[AccountName, BigDecimal]() // initAmounts
-  private var _txns = Seq[DetailedPost]() // initTxns
-  private var _txnGroups = Seq[PostingGroup]() // initTxns
+  private var _posts = Seq[DetailedPost]() 
+  private var _postGroups = Seq[PostGroup]() 
 
   def amounts = _amounts
-  def txns = _txns
-  def txnGroups = _txnGroups
+  def txns = _posts
+  def txnGroups = _postGroups
 
-  def updateAmounts(txnGroup: PostingGroup) = {
+  def updateAmounts(txnGroup: PostGroup) = {
     txnGroup.children foreach { txn =>
       val updatedAmount = updateAmountTxn(txn.name, txn.delta, txn.date)
       txn.resultAmount = updatedAmount
-      _txns :+= txn
+      _posts :+= txn
     }
-    _txnGroups :+= txnGroup
+    _postGroups :+= txnGroup
   }
 
   private def updateAmountTxn(name: AccountName, delta: BigDecimal, date: Date) = {
@@ -199,7 +199,7 @@ object Processor {
         txTotal += delta
         detailedTxns :+= DetailedPost(transformAlias(t.accName), delta, t.commentOpt)
       }
-      accState.updateAmounts(new PostingGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
+      accState.updateAmounts(new PostGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)
