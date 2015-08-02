@@ -5,3 +5,6 @@ project/target/
 .project
 .classpath
 .settings
+/base/bin/
+/cli/bin/
+/gui/bin/
