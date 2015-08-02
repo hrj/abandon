@@ -31,9 +31,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case Seq(LedgerExportData(date, txns)) =>
+                case Seq(LedgerExportData(date, ledgerEntries)) =>
                   date should be(Date(2013, 1, 1))
-                  inside(txns) {
+                  inside(ledgerEntries) {
                     case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
                       acc1 should be (cashAccount)
                       acc2 should be (expenseAccount)
@@ -67,9 +67,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case Seq(LedgerExportData(date, txns)) =>
+                case Seq(LedgerExportData(date, ledgerEntries)) =>
                   date should be(Date(2013, 1, 1))
-                  inside(txns) {
+                  inside(ledgerEntries) {
                     case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
                       acc1 should be (cashAccount)
                       acc2 should be (expenseAccount)
@@ -103,9 +103,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case Seq(LedgerExportData(date, txns)) =>
+                case Seq(LedgerExportData(date, ledgerEntries)) =>
                   date should be(Date(2013, 1, 1))
-                  inside(txns) {
+                  inside(ledgerEntries) {
                     case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
                       acc1 should be (bankAccount)
                       acc2 should be (cashAccount)
@@ -167,9 +167,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case Seq(LedgerExportData(date, txns), LedgerExportData(date1, txns1)) =>
+                case Seq(LedgerExportData(date, ledgerEntries), LedgerExportData(date1, ledgerEntries1)) =>
                   date should be(Date(2013, 1, 1))
-                  inside(txns) {
+                  inside(ledgerEntries) {
                     case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3), LedgerExportEntry(acc4, expr4)) =>
                       acc1 should be (assetsAccount)
                       acc2 should be (equityAccount)
@@ -181,7 +181,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
                       expr4 should be (-1000)
                   }
                   date1 should be(Date(2013, 1, 1))
-                  inside(txns1) {
+                  inside(ledgerEntries1) {
                     case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
                       acc1 should be (expenseAccount)
                       acc2 should be (incomeAccount)
@@ -320,9 +320,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
             case balSettings: LedgerExportSettings =>
               val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
               inside(ledgerRep) {
-                case Seq(LedgerExportData(date, txns)) =>
+                case Seq(LedgerExportData(date, ledgerEntries)) =>
                   date should be(Date(2013, 1, 1))
-                  inside(txns) {
+                  inside(ledgerEntries) {
                     case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
                       acc1 should be (bankAccount)
                       acc2 should be (equityAccount)

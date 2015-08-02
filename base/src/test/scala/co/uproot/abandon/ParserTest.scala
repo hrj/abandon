@@ -31,9 +31,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
@@ -45,7 +45,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse human readable dates and more than two transactions in a group" in {
+  "parser" should "parse human readable dates and more than two posts in a transaction" in {
     val testInput = """
     2013/March/1
       Expense       200
@@ -59,9 +59,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, None), Post(acc2, expr2, None), Post(acc3, expr3, None)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
@@ -75,7 +75,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse short human readable dates and transactions with empty value field" in {
+  "parser" should "parse short human readable dates and posts with empty value field" in {
     val testInput = """
     2013/Mar/1
       Expense       200
@@ -94,9 +94,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup1, txnGroup2) =>
             inside(txnGroup1) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
@@ -107,9 +107,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                 }
             }
             inside(txnGroup2) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 6, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, None), Post(acc2, expr2, Some(comment)), Post(acc3, expr3, None)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
@@ -138,9 +138,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
@@ -152,7 +152,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a transaction with zero value" in {
+  "parser" should "parse posts with zero value" in {
     val testInput = """
     2013/1/1
       Expense       200
@@ -171,9 +171,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _), Post(acc5, expr5, _), Post(acc6, expr6, _), Post(acc7, expr7, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
@@ -194,7 +194,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a transaction with Unary plus(+) zero value" in {
+  "parser" should "parse a post with Unary plus(+) zero value" in {
     val testInput = """
      2013/9/1
       Expense       200
@@ -209,9 +209,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 9, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
@@ -225,7 +225,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a transaction with Unary minus(-) zero value" in {
+  "parser" should "parse a post with Unary minus(-) zero value" in {
     val testInput = """
       2013/9/1
        Expense       200
@@ -241,9 +241,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 9, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _)) =>
                     acc1 should be(expenseAccount)
                     acc2 should be(cashAccount)
@@ -275,9 +275,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result) {
           case List(txnGroup1) =>
             inside(txnGroup1) {
-              case Transaction(date, txns, None, None, Nil) =>
+              case Transaction(date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
-                inside(txns) {
+                inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
