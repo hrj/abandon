@@ -33,16 +33,16 @@ class AccountState {
   private var _postGroups = Seq[PostGroup]() 
 
   def amounts = _amounts
-  def txns = _posts
-  def txnGroups = _postGroups
+  def posts = _posts
+  def postGroups = _postGroups
 
-  def updateAmounts(txnGroup: PostGroup) = {
-    txnGroup.children foreach { txn =>
-      val updatedAmount = updateAmountTxn(txn.name, txn.delta, txn.date)
-      txn.resultAmount = updatedAmount
-      _posts :+= txn
+  def updateAmounts(postGroup: PostGroup) = {
+    postGroup.children foreach { post =>
+      val updatedAmount = updateAmountTxn(post.name, post.delta, post.date)
+      post.resultAmount = updatedAmount
+      _posts :+= post
     }
-    _postGroups :+= txnGroup
+    _postGroups :+= postGroup
   }
 
   private def updateAmountTxn(name: AccountName, delta: BigDecimal, date: Date) = {
@@ -185,21 +185,21 @@ object Processor {
     }
 
     sortedTxns foreach { tx =>
-      val (txWithAmount, txNoAmount) = tx.posts.partition(t => t.amount.isDefined)
-      assert(txNoAmount.length <= 1, "More than one account with unspecified amount: " + txNoAmount)
+      val (postsWithAmount, postsNoAmount) = tx.posts.partition(p => p.amount.isDefined)
+      assert(postsNoAmount.length <= 1, "More than one account with unspecified amount: " + postsNoAmount)
       var txTotal = Zero
-      var detailedTxns = Seq[DetailedPost]()
-      txWithAmount foreach { t =>
-        val delta = t.amount.get.evaluate(evaluationContext)
+      var detailedPosts = Seq[DetailedPost]()
+      postsWithAmount foreach { p =>
+        val delta = p.amount.get.evaluate(evaluationContext)
         txTotal += delta
-        detailedTxns :+= DetailedPost(transformAlias(t.accName), delta, t.commentOpt)
+        detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }
-      txNoAmount foreach { t =>
+      postsNoAmount foreach { p =>
         val delta = -txTotal
         txTotal += delta
-        detailedTxns :+= DetailedPost(transformAlias(t.accName), delta, t.commentOpt)
+        detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }
-      accState.updateAmounts(new PostGroup(detailedTxns, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
+      accState.updateAmounts(new PostGroup(detailedPosts, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)

@@ -145,8 +145,8 @@ trait SignChecker {
   val correctSign: (BigDecimal) => Boolean
 
   def check(appState: AppState) = {
-    val txns = appState.accState.txns.filter(_.name.fullPathStr == accName)
-    val dailyDeltas = txns.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
+    val posts = appState.accState.posts.filter(_.name.fullPathStr == accName)
+    val dailyDeltas = posts.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
 
     var acc = Helper.Zero
     dailyDeltas.toSeq.sortBy(_._1).foreach {

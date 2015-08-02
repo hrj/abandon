@@ -104,8 +104,8 @@ object Reports {
   }
 
   def registerReport(state: AppState, reportSettings: RegisterReportSettings): Seq[RegisterReportGroup] = {
-    val txnGroups = state.accState.txnGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
-    val monthlyGroups = txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+    val postGroups = state.accState.postGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
+    val monthlyGroups = postGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
 
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
@@ -136,7 +136,7 @@ object Reports {
   }
 
   def bookReport(state: AppState, reportSettings: BookReportSettings): Seq[RegisterReportGroup] = {
-    val monthlyGroups = state.accState.txnGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+    val monthlyGroups = state.accState.postGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
 
@@ -192,7 +192,7 @@ object Reports {
     if (reportSettings.accountMatch.isDefined) {
       throw new NotImplementedError("Filtering of accounts is not yet implemented in ledger export. See https://github.com/hrj/abandon/issues/11")
     }
-    val sortedGroup = state.accState.txnGroups.sortBy(_.date.toInt)
+    val sortedGroup = state.accState.postGroups.sortBy(_.date.toInt)
     if (sortedGroup.isEmpty) {
       Nil
     } else {
@@ -245,7 +245,7 @@ object Reports {
 
   def xmlExport(state: AppState, exportSettings: ExportSettings): xml.Node = {
     <abandon><transactions>{
-      val sortedGroups = state.accState.txnGroups.sortBy(_.date.toInt)
+      val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
       sortedGroups.map { txnGroup =>
         <txnGroup date={ txnGroup.date.formatCompact }>
           { txnGroup.payeeOpt.map(payee => <payee>{ payee }</payee>).getOrElse(xml.Null) }
