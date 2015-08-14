@@ -4,6 +4,10 @@
  jdk:
    - oraclejdk8
    - openjdk7
- script: "sbt clean base/coverage base/test && sbt base/coverageAggregate"
+ script: "sbt clean coverage test && sbt coverageAggregate"
  after_success: "sbt coveralls"
  sudo: false
+ addons:
+  apt:
+    packages:
+      - oracle-java8-installer
