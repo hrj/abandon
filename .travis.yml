@@ -3,8 +3,11 @@
    - "2.11.7"
  jdk:
    - oraclejdk8
+     env: COMMAND="sbt clean coverage test && sbt coverageAggregate"
    - openjdk7
- script: "sbt clean coverage test && sbt coverageAggregate"
+     env: COMMAND="sbt clean base/coverage test"
+
+ script: $COMMAND
  after_success: "sbt coveralls"
  sudo: false
  addons:
