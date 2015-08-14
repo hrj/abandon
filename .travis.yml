@@ -1,9 +1,17 @@
  language: scala
- scala:
-   - "2.11.7"
- jdk:
-   - oraclejdk8
-   - openjdk7
- script: "sbt clean base/coverage base/test && sbt base/coverageAggregate"
+ matrix:
+   include:
+     - jdk: oraclejdk8
+       scala: "2.11.7"
+       env: COMMAND="sbt clean coverage test" COMMAND2="sbt coverageAggregate"
+     - jdk: openjdk7
+       scala: "2.11.7"
+       env: COMMAND="sbt clean base/coverage base/test" COMMAND2="sbt coverageAggregate"
+
+ script: "$COMMAND && $COMMAND2"
  after_success: "sbt coveralls"
  sudo: false
+ addons:
+  apt:
+    packages:
+      - oracle-java8-installer
