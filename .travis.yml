@@ -3,12 +3,14 @@
    include:
      - jdk: oraclejdk8
        scala: "2.11.7"
-       env: COMMAND=sbt clean coverage test && sbt coverageAggregate
+       env: COMMAND="sbt clean coverage test"
+       env: COMMAND2="sbt coverageAggregate"
      - jdk: openjdk7
        scala: "2.11.7"
-       env: COMMAND=sbt clean base/coverage test
+       env: COMMAND="sbt clean base/coverage test"
+       env: COMMAND2="sbt coverageAggregate"
 
- script: $COMMAND
+ script: $COMMAND && $COMMAND2
  after_success: "sbt coveralls"
  sudo: false
  addons:
