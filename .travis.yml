@@ -1,11 +1,12 @@
  language: scala
  scala:
    - "2.11.7"
- jdk:
-   - oraclejdk8
-     env: COMMAND="sbt clean coverage test && sbt coverageAggregate"
-   - openjdk7
-     env: COMMAND="sbt clean base/coverage test"
+ matrix:
+   include:
+     - jdk: oraclejdk8
+       env: COMMAND="sbt clean coverage test && sbt coverageAggregate"
+     - jdk: openjdk7
+       env: COMMAND="sbt clean base/coverage test"
 
  script: $COMMAND
  after_success: "sbt coveralls"
