@@ -10,7 +10,7 @@
        env: COMMAND="sbt clean base/coverage test"
        env: COMMAND2="sbt coverageAggregate"
 
- script: $COMMAND && $COMMAND2
+ script: "$COMMAND && $COMMAND2"
  after_success: "sbt coveralls"
  sudo: false
  addons:
