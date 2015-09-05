@@ -126,6 +126,10 @@ object AbandonApp extends App {
           Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
+            println()
+            reportWriter.filePaths foreach { filePath =>
+              println(s"Exporting to: $filePath")
+            }
             exportSettings match {
               case balSettings: LedgerExportSettings =>
                 val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
