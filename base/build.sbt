@@ -1,7 +1,7 @@
 
-libraryDependencies += "joda-time" % "joda-time" % "2.8.2"
+libraryDependencies += "joda-time" % "joda-time" % "2.9"
 
-libraryDependencies += "org.joda" % "joda-convert" % "1.7"
+libraryDependencies += "org.joda" % "joda-convert" % "1.8.1"
 
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.5"
 
