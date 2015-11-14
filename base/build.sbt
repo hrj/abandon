@@ -1,5 +1,5 @@
 
-libraryDependencies += "joda-time" % "joda-time" % "2.9"
+libraryDependencies += "joda-time" % "joda-time" % "2.9.1"
 
 libraryDependencies += "org.joda" % "joda-convert" % "1.8.1"
 
