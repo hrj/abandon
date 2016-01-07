@@ -200,7 +200,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val booleanExpression: PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
 
-  private lazy val txFrag = ((dateFrag ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+) ^^ {
+  private lazy val txFrag = (((dateFrag | isoDateFrag) ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+) ^^ {
     case date ~ annotationOpt ~ optPayee ~ optComment ~ posts =>
       val annotationStrOpt = annotationOpt.map(_.mkString(""))
       Transaction(date, posts, annotationStrOpt, optPayee, optComment.flatten)
@@ -210,6 +210,11 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val post: PackratParser[Post] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
     case name ~ amount ~ commentOpt => Post(name, amount, commentOpt)
   }
+
+  lazy val isoDateFrag = ((((integer <~ "-") ~ integer) <~ "-") ~ integer) ^? ({
+    case y ~ m ~ d if (isValidDate(y, m, d)) =>
+      Date(y, m, d)
+  }, { case y ~ m ~ d => List(y, m, d).mkString("-") + " is not a valid ISO 8601 date" })
 
   lazy val dateFrag = ((((integer <~ "/") ~ (integer | ident)) <~ "/") ~ integer) ^? ({
     case y ~ (m: Int) ~ d if (isValidDate(y, m, d)) =>
