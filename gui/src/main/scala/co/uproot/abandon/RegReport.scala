@@ -10,7 +10,7 @@ import scalafx.scene.Scene
 import scalafx.scene.control.ScrollPane
 import scalafx.stage.Modality
 
-object RegReport extends Report {
+object RegUIReport extends UIReport {
   private def getNestedTxns(item: TreeItem[RegisterReportEntry]): Seq[DetailedPost] = {
     item.getValue.txns ++ item.children.flatMap(getNestedTxns(_))
   }
@@ -37,7 +37,7 @@ object RegReport extends Report {
             val txStage = new Stage() {
               scene = new Scene(800, 600) {
                 root = new ScrollPane {
-                  content = TxnReport.mkTxnView(getNestedTxns(selectedItem))
+                  content = TxnUIReport.mkTxnView(getNestedTxns(selectedItem))
                 }
                 stylesheets += "default_theme.css"
               }

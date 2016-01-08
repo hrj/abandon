@@ -6,7 +6,7 @@ import scalafx.geometry.Insets
 import Helper._
 
 import scalafx.Includes._
-object TxnReport extends Report {
+object TxnUIReport extends UIReport {
   def mkTxnGroupViews(posts: Seq[DetailedPost]) = {
     val groups = posts.map(t => new RefWrap(t.parentOpt.get)).distinct.map(_.t)
     val sortedGroups = groups.sortBy(_.date)(DateOrdering)

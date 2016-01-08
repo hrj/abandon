@@ -13,7 +13,7 @@ import scalafx.application.Platform
 import collection.JavaConverters._
 import scalafx.geometry.Pos
 
-trait Report {
+trait UIReport {
   protected val styleClassName = "report"
 }
 
@@ -34,12 +34,12 @@ object CurrReports {
   def showReport(appState: AppState, settings: Settings, rs: ReportSettings, canClose: Boolean) = {
     val reportRender = rs match {
       case regSettings: RegisterReportSettings =>
-        RegReport.mkRegisterReport(appState, regSettings)
+        RegUIReport.mkRegisterReport(appState, regSettings)
       case balSettings: BalanceReportSettings =>
-        BalanceReport.mkBalanceReport(appState, settings, balSettings)
+        BalanceUIReport.mkBalanceReport(appState, settings, balSettings)
       case bookSettings: BookReportSettings =>
         // TODO
-        RegReport.mkRegisterReport(appState, RegisterReportSettings(bookSettings.title, bookSettings.accountMatch, Nil))
+        RegUIReport.mkRegisterReport(appState, RegisterReportSettings(bookSettings.title, bookSettings.accountMatch, Nil))
     }
     AbandonUI.tabPane.addOrSetTab(rs.title, reportRender, canClose)
   }

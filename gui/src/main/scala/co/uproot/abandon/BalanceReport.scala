@@ -7,13 +7,14 @@ import scalafx.scene.layout.Priority
 import scalafx.scene.input.KeyEvent
 import scalafx.scene.control.ListCell
 
-object BalanceReport extends Report {
+object BalanceUIReport extends UIReport {
 
   def mkBalanceReport(appState: AppState, settings: Settings, reportSettings: BalanceReportSettings) = {
-    val (leftRender, rightRender, totalLeft, totalRight) = Reports.balanceReport(appState, settings, reportSettings)
-    val padLength = Math.max(leftRender.length, rightRender.length) + 1
-    val left = leftRender.padTo(padLength, BalanceReportEntry(None, "")) :+ BalanceReportEntry(None, totalLeft)
-    val right = rightRender.padTo(padLength, BalanceReportEntry(None, "")) :+ BalanceReportEntry(None, totalRight)
+    val balReport = Reports.balanceReport(appState, settings, reportSettings)
+
+    val padLength = Math.max(balReport.leftEntries.length, balReport.rightEntries.length) + 1
+    val left = balReport.leftEntries.padTo(padLength, BalanceReportEntry(None, "")) :+ BalanceReportEntry(None, balReport.totalLeft)
+    val right = balReport.rightEntries.padTo(padLength, BalanceReportEntry(None, "")) :+ BalanceReportEntry(None, balReport.totalRight)
 
     class BalanceView(entries: Seq[BalanceReportEntry]) extends ListView(entries) {
       hgrow = Priority.Always
