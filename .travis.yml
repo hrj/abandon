@@ -1,4 +1,10 @@
  language: scala
+
+ cache:
+   directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
  matrix:
    include:
      - jdk: oraclejdk8
@@ -8,7 +14,11 @@
        scala: "2.11.7"
        env: COMMAND="sbt clean base/coverage base/test" COMMAND2="sbt coverageAggregate"
 
- script: "$COMMAND && $COMMAND2"
+ script:
+   - "$COMMAND && $COMMAND2"
+   - find $HOME/.sbt -name "*.lock" | xargs rm
+   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+
  after_success: "sbt coveralls"
  sudo: false
  addons:
