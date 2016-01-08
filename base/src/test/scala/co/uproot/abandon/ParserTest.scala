@@ -377,6 +377,30 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
+  "parser" should "do something about divide by zero" in {
+    val tests = Map(
+      "1 / 0" -> (bd("0"), DivExpr(nlit(1), nlit(0)))
+    )
+
+    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+
+    tests foreach {
+      case (testInput, expectedOutput) =>
+        val parseResult = AbandonParser.numericParser(scanner(testInput))
+
+        inside(parseResult) {
+          case AbandonParser.Success(result, _) =>
+            inside(result) {
+              case ne: NumericExpr =>
+                ne should be(expectedOutput._2)
+                intercept[java.lang.ArithmeticException] {
+                    ne.evaluate(context)
+                }
+            }
+        }
+    }
+  }
+
   "parser" should "ensure precedence of operators" in {
     val tests = Map(
       "1 + 2 * 3" -> (bd("7"), AddExpr(nlit(1), MulExpr(nlit(2), nlit(3)))),
