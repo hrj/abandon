@@ -19,29 +19,23 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-              inside(ledgerRep) {
-                case Seq(LedgerExportData(date, ledgerEntries)) =>
-                  date should be(Date(2013, 1, 1))
-                  inside(ledgerEntries) {
-                    case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
-                      acc1 should be (cashAccount)
-                      acc2 should be (expenseAccount)
-                      expr1 should be (240)
-                      expr2 should be (-240)
-                  }
-              }
-          }
+        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        inside(ledgerRep) {
+          case Seq(LedgerExportData(date, ledgerEntries)) =>
+            date should be(Date(2013, 1, 1))
+            inside(ledgerEntries) {
+              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
+                acc1 should be (cashAccount)
+                acc2 should be (expenseAccount)
+                expr1 should be (240)
+                expr2 should be (-240)
+            }
         }
     }
   }
@@ -55,29 +49,23 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-              inside(ledgerRep) {
-                case Seq(LedgerExportData(date, ledgerEntries)) =>
-                  date should be(Date(2013, 1, 1))
-                  inside(ledgerEntries) {
-                    case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
-                      acc1 should be (cashAccount)
-                      acc2 should be (expenseAccount)
-                      expr1 should be (240)
-                      expr2 should be (-240)
-                  }
-              }
-          }
+        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        inside(ledgerRep) {
+          case Seq(LedgerExportData(date, ledgerEntries)) =>
+            date should be(Date(2013, 1, 1))
+            inside(ledgerEntries) {
+              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
+                acc1 should be (cashAccount)
+                acc2 should be (expenseAccount)
+                expr1 should be (240)
+                expr2 should be (-240)
+            }
         }
     }
   }
@@ -91,54 +79,42 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil))
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-              inside(ledgerRep) {
-                case Seq(LedgerExportData(date, ledgerEntries)) =>
-                  date should be(Date(2013, 1, 1))
-                  inside(ledgerEntries) {
-                    case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
-                      acc1 should be (bankAccount)
-                      acc2 should be (cashAccount)
-                      acc3 should be (expenseAccount)
-                      expr1 should be (0)
-                      expr2 should be (200)
-                      expr3 should be (-200)
-                  }
-              }
-          }
+        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        inside(ledgerRep) {
+          case Seq(LedgerExportData(date, ledgerEntries)) =>
+            date should be(Date(2013, 1, 1))
+            inside(ledgerEntries) {
+              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
+                acc1 should be (bankAccount)
+                acc2 should be (cashAccount)
+                acc3 should be (expenseAccount)
+                expr1 should be (0)
+                expr2 should be (200)
+                expr3 should be (-200)
+            }
         }
     }
   }
 
-  "Processor" should "export no transaction" in {
+  "Processor" should "export no transaction for empty input" in {
     val testInput = """
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-              ledgerRep should be (Nil)
-          }
-        }
+        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        ledgerRep should be (Nil)
     }
   }
 
@@ -152,46 +128,40 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-              inside(ledgerRep) {
-                case Seq(LedgerExportData(date, ledgerEntries), LedgerExportData(date1, ledgerEntries1)) =>
-                  date should be(Date(2013, 1, 1))
-                  inside(ledgerEntries) {
-                    case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3), LedgerExportEntry(acc4, expr4)) =>
-                      acc1 should be (assetsAccount)
-                      acc2 should be (equityAccount)
-                      acc3 should be (expenseAccount)
-                      acc4 should be (incomeAccount)
-                      expr1 should be (-13000)
-                      expr2 should be (10000)
-                      expr3 should be (4000)
-                      expr4 should be (-1000)
-                  }
-                  date1 should be(Date(2013, 1, 1))
-                  inside(ledgerEntries1) {
-                    case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
-                      acc1 should be (expenseAccount)
-                      acc2 should be (incomeAccount)
-                      acc3 should be (equityAccount)
-                      expr1 should be (-4000)
-                      expr2 should be (1000)
-                      expr3 should be (3000)
-                  }
-              }
-          }
+        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        inside(ledgerRep) {
+          case Seq(LedgerExportData(date, ledgerEntries), LedgerExportData(date1, ledgerEntries1)) =>
+            date should be(Date(2013, 1, 1))
+            inside(ledgerEntries) {
+              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3), LedgerExportEntry(acc4, expr4)) =>
+                acc1 should be (assetsAccount)
+                acc2 should be (equityAccount)
+                acc3 should be (expenseAccount)
+                acc4 should be (incomeAccount)
+                expr1 should be (-13000)
+                expr2 should be (10000)
+                expr3 should be (4000)
+                expr4 should be (-1000)
+            }
+            date1 should be(Date(2013, 1, 1))
+            inside(ledgerEntries1) {
+              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
+                acc1 should be (expenseAccount)
+                acc2 should be (incomeAccount)
+                acc3 should be (equityAccount)
+                expr1 should be (-4000)
+                expr2 should be (1000)
+                expr3 should be (3000)
+            }
         }
 
     }
@@ -208,8 +178,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
@@ -218,22 +187,17 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure1 = Seq(ClosureExportSettings(source, destination))
         val closure2 = Seq(ClosureExportSettings(source1, destination1))
         val closure = closure1 ++ closure2
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = intercept[InputError] {
-                Reports.ledgerExport(appState, settings, balSettings)
-              }
-          }
+        val ledgerRep = intercept[InputError] {
+          Reports.ledgerExport(appState, settings, balSettings)
         }
-
     }
 
   }
+
   "Processor" should "show Exception when 'destination' is not Present" in {
     val testInput = """
       2013/1/1
@@ -243,28 +207,22 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = intercept[MissingDestinationError] {
-                Reports.ledgerExport(appState, settings, balSettings)
-              }
-          }
+        val ledgerRep = intercept[MissingDestinationError] {
+          Reports.ledgerExport(appState, settings, balSettings)
         }
 
     }
-
   }
+
   "Processor" should "show Exception when 'destination' is present in 'source'" in {
     val testInput = """
       2013/1/1
@@ -274,23 +232,17 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
-        val astEntries = result
+      case AbandonParser.Success(astEntries, _) =>
         val appState = Processor.process(astEntries, Nil)
         val source = Seq("Income", "Equity")
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure))
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), exports, None)
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = intercept[SourceDestinationClashError] {
-                Reports.ledgerExport(appState, settings, balSettings)
-              }
-          }
+        val ledgerRep = intercept[SourceDestinationClashError] {
+          Reports.ledgerExport(appState, settings, balSettings)
         }
 
     }
@@ -300,39 +252,35 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
   "Processor" should "process Alias name" in {
     val testInput = """
       2013/1/1
-      Cash       14000
+      MyBank       14000
       Income        -1000
       Equity       -13000
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case AbandonParser.Success(astEntries, _) =>
         val name = AccountName(Seq("Bank","Current"))
-        val alias = "Cash"
+        val alias = "MyBank"
         val accounts = Seq(AccountSettings(name, Some(alias)))
-        val exports = Seq(LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil))
 
-        val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), exports, None)
-        val astEntries = result
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
+        val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None)
+
         val appState = Processor.process(astEntries, settings.accounts)
-        exports.foreach { exportSettings =>
-          exportSettings match {
-            case balSettings: LedgerExportSettings =>
-              val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-              inside(ledgerRep) {
-                case Seq(LedgerExportData(date, ledgerEntries)) =>
-                  date should be(Date(2013, 1, 1))
-                  inside(ledgerEntries) {
-                    case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
-                      acc1 should be (bankAccount)
-                      acc2 should be (equityAccount)
-                      acc3 should be (incomeAccount)
-                      expr1 should be (14000)
-                      expr2 should be (-13000)
-                      expr3 should be (-1000)
-                  }
-              }
-          }
+
+        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        inside(ledgerRep) {
+          case Seq(LedgerExportData(date, ledgerEntries)) =>
+            date should be(Date(2013, 1, 1))
+            inside(ledgerEntries) {
+              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
+                acc1 should be (bankAccount)
+                acc2 should be (equityAccount)
+                acc3 should be (incomeAccount)
+                expr1 should be (14000)
+                expr2 should be (-13000)
+                expr3 should be (-1000)
+            }
         }
 
     }
