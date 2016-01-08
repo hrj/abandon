@@ -354,6 +354,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "10.5 - (2.5 * 2)" -> (bd("5.5"), SubExpr(nlit(10.5), MulExpr(nlit(2.5), nlit(2)))),
       "10.5 - (2.5 * -2)" -> (bd("15.5"), SubExpr(nlit(10.5), MulExpr(nlit(2.5), UnaryNegExpr(nlit(2))))),
       "10.5 + -(2.5 * 2)" -> (bd("5.5"), AddExpr(nlit(10.5), UnaryNegExpr(MulExpr(nlit(2.5), nlit(2))))),
+      "10.5 - (10.0 / 2)" -> (bd("5.5"), SubExpr(nlit(10.5), DivExpr(nlit(10.0), nlit(2)))),
+      "10.5 + (10.0 / -2)" -> (bd("5.5"), AddExpr(nlit(10.5), DivExpr(nlit(10.0), UnaryNegExpr(nlit(2))))),
       "-20 + 30" -> (bd("10"), AddExpr(UnaryNegExpr(nlit(20)), nlit(30))),
       "-20 + 30*-5.0" -> (bd("-170"), AddExpr(UnaryNegExpr(nlit(20)), MulExpr(nlit(30), UnaryNegExpr(nlit(5)))))
     )
@@ -379,9 +381,14 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     val tests = Map(
       "1 + 2 * 3" -> (bd("7"), AddExpr(nlit(1), MulExpr(nlit(2), nlit(3)))),
       "1 * 2 + 3" -> (bd("5"), AddExpr(MulExpr(nlit(1), nlit(2)), nlit(3))),
+      "2 + 1 / 4" -> (bd("2.25"), AddExpr(nlit(2), DivExpr(nlit(1), nlit(4)))),
+      "1 / 2 + 3" -> (bd("3.5"), AddExpr(DivExpr(nlit(1), nlit(2)), nlit(3))),
       "1 * 2 + 3 * 4 - 2" -> (bd("12"), SubExpr(AddExpr(MulExpr(nlit(1), nlit(2)), MulExpr(nlit(3), nlit(4))), nlit(2))),
       "1 + 2 * 3 * 4 - 2" -> (bd("23"), SubExpr(AddExpr(nlit(1), MulExpr(MulExpr(nlit(2), nlit(3)), nlit(4))), nlit(2))),
-      "1 + 2 * -3 * 4 - 2" -> (bd("-25"), SubExpr(AddExpr(nlit(1), MulExpr(MulExpr(nlit(2), UnaryNegExpr(nlit(3))), nlit(4))), nlit(2)))
+      "1 / 2 + 3 / 4 - 2" -> (bd("-0.75"), SubExpr(AddExpr(DivExpr(nlit(1), nlit(2)), DivExpr(nlit(3), nlit(4))), nlit(2))),
+      "1 + 2 / 5 / 4 - 2" -> (bd("-0.9"), SubExpr(AddExpr(nlit(1), DivExpr(DivExpr(nlit(2), nlit(5)), nlit(4))), nlit(2))),
+      "1 + 2 * -3 * 4 - 2" -> (bd("-25"), SubExpr(AddExpr(nlit(1), MulExpr(MulExpr(nlit(2), UnaryNegExpr(nlit(3))), nlit(4))), nlit(2))),
+      "1 / 2 * 3" -> (bd("1.5"), MulExpr(DivExpr(nlit(1), nlit(2)), nlit(3)))
     )
 
     val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
