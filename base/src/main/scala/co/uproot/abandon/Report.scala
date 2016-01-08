@@ -3,8 +3,11 @@ package co.uproot.abandon
 import Helper.{ Zero, maxElseZero, sumDeltas }
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
+case class BalanceReport(leftEntries:Seq[BalanceReportEntry], rightEntries:Seq[BalanceReportEntry], totalLeft:String, totalRight:String)
+
 case class RegisterReportEntry(txns: Seq[DetailedPost], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
+
 case class LedgerExportEntry(accountName: AccountName, amount: BigDecimal)
 case class LedgerExportData(date: Date, ledgerEntries: Seq[LedgerExportEntry]) {
   val maxNameLength = maxElseZero(ledgerEntries.map(_.accountName.toString.length))
@@ -13,7 +16,7 @@ case class LedgerExportData(date: Date, ledgerEntries: Seq[LedgerExportEntry]) {
 
 object Reports {
 
-  def balanceReport(state: AppState, settings: Settings, reportSettings: BalanceReportSettings) = {
+  def balanceReport(state: AppState, settings: Settings, reportSettings: BalanceReportSettings):BalanceReport = {
     def show(width: Int, a: AccountTreeState, maxNameLength: Int, treePrefix: String = "", isLastChild: Boolean = false, isParentLastChild: Boolean = false, prefix: Option[String] = None, forceIndent: Option[Int] = None): Seq[BalanceReportEntry] = {
       val indent = forceIndent.getOrElse(a.name.depth)
       val amountIsZero = a.amount equals Zero
@@ -94,7 +97,7 @@ object Reports {
       } else {
         total.toString
       }
-    (leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
+    BalanceReport(leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
   }
 
   private def formatMonth(monthYear: Int) = {

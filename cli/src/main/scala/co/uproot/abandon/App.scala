@@ -66,6 +66,21 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
 }
 
 object AbandonApp extends App {
+  def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
+    val left = balanceReport.leftEntries.map(_.render)
+    val right = balanceReport.rightEntries.map(_.render)
+
+    val lines = left.zipAll(right, "", "")
+    val maxLeftLength = maxElseZero(left.map(_.length))
+
+    def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
+    val balRender = lines.map { case (left, right) => renderBoth(left, right) }
+    reportWriter.println(balRender.mkString("\n"))
+    val totalLine = renderBoth(balanceReport.totalLeft, balanceReport.totalRight)
+    reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
+    reportWriter.println(totalLine)
+  }
+
   def printRegReport(reportWriter: ReportWriter, regReport: Seq[RegisterReportGroup]) = {
     regReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
@@ -86,6 +101,7 @@ object AbandonApp extends App {
       reportWriter.println("")
     }
   }
+
   def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
     val txnIndent = " " * 49
 
@@ -115,6 +131,7 @@ object AbandonApp extends App {
     }
     reportWriter.endCodeBlock()
   }
+
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
@@ -152,21 +169,11 @@ object AbandonApp extends App {
             }
 
             reportWriter.printHeading(reportSettings.title)
+
             reportSettings match {
               case balSettings: BalanceReportSettings =>
-                val (leftEntries, rightEntries, totalLeft, totalRight) = Reports.balanceReport(appState, settings, balSettings)
-                val left = leftEntries.map(_.render)
-                val right = rightEntries.map(_.render)
-
-                val lines = left.zipAll(right, "", "")
-                val maxLeftLength = maxElseZero(left.map(_.length))
-
-                def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
-                val balRender = lines.map { case (left, right) => renderBoth(left, right) }
-                reportWriter.println(balRender.mkString("\n"))
-                val totalLine = renderBoth(totalLeft, totalRight)
-                reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
-                reportWriter.println(totalLine)
+                val balanceReport = Reports.balanceReport(appState, settings, balSettings)
+                printBalReport(reportWriter, balanceReport)
               case regSettings: RegisterReportSettings =>
                 val regReport = Reports.registerReport(appState, regSettings)
                 printRegReport(reportWriter, regReport)
@@ -174,6 +181,7 @@ object AbandonApp extends App {
                 val bookReport = Reports.bookReport(appState, bookSettings)
                 printBookReport(reportWriter, bookSettings, bookReport)
             }
+
             reportWriter.close
           }
         }
