@@ -20,7 +20,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   "parser" should "parse a simple transaction" in {
     val testInput = """
-    2013/1/1
+    2013/1/2
       Expense       200
       Cash          -200
     """
@@ -32,7 +32,34 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
-                date should be(Date(2013, 1, 1))
+                date should be(Date(2013, 1, 2))
+                inside(posts) {
+                  case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
+                    acc1 should be (expenseAccount)
+                    acc2 should be (cashAccount)
+                    expr1 should be (Some(nlit(200)))
+                    expr2 should be (Some(UnaryNegExpr(nlit(200))))
+                }
+            }
+        }
+    }
+  }
+
+  "parser" should "parse a simple transaction with ISO 8601 date" in {
+    val testInput = """
+    2013-01-02
+      Expense       200
+      Cash          -200
+    """
+    val parseResult = AbandonParser.abandon(scanner(testInput))
+
+    inside(parseResult) {
+      case AbandonParser.Success(result, _) =>
+        inside(result) {
+          case List(txnGroup) =>
+            inside(txnGroup) {
+              case Transaction(date, posts, None, None, Nil) =>
+                date should be(Date(2013, 1, 2))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
@@ -126,7 +153,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   "parser" should "parse a simple expression" in {
     val testInput = """
-    2013/1/1
+    2013/1/2
       Expense       -(200 + 40)
       Cash
     """
@@ -139,7 +166,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
-                date should be(Date(2013, 1, 1))
+                date should be(Date(2013, 1, 2))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
@@ -419,4 +446,19 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   }
 
+  "parser" should "parse dates in ISO 8601" in {
+    val testInput = List(
+      "2013-01-02"
+    )
+
+    testInput foreach {input =>
+      val parseResult = AbandonParser.isoDateFrag(scanner(input))
+
+      inside(parseResult) {
+        case AbandonParser.Success(date, _) =>
+          date should be(Date(2013, 1, 2))
+      }
+    }
+
+  }
 }
