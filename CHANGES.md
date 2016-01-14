@@ -5,6 +5,7 @@
 #### Update Note for 0.2.X
  - XML format has been changed
    - Renamed elemet "txn" to "posting"
+   - Renamed element "txnGroup" to "txn"
    - Transaction dates are in extended ISO 8601 format
    - XML contains new top level element "appstate"
 
