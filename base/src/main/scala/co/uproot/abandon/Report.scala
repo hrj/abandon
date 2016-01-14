@@ -246,21 +246,27 @@ object Reports {
     }
   }
 
-  def xmlExport(state: AppState, exportSettings: ExportSettings): xml.Node = {
-    <abandon><transactions>{
+  def xmlExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+    <abandon>
+       <appstate>
+        <accounttree>
+          { state.accState.mkTree({ x => true }).toXML }
+        </accounttree>
+      </appstate>
+      <transactions>{
       val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
       sortedGroups.map { txnGroup =>
-        <txnGroup date={ txnGroup.date.formatCompact }>
+        <txn date={ txnGroup.date.formatISO8601Ext }>
           { txnGroup.payeeOpt.map(payee => <payee>{ payee }</payee>).getOrElse(xml.Null) }
           { txnGroup.annotationOpt.map(annotation => <annotation>{ annotation }</annotation>).getOrElse(xml.Null) }
           { txnGroup.groupComments.map { comment => <comment>{ comment }</comment> } }
           {
             txnGroup.children.map(txn =>
-              <txn name={ txn.name.fullPathStr } delta={ txn.delta.toString }>{
+              <posting delta={ txn.delta.toString } name={ txn.name.fullPathStr }>{
                 txn.commentOpt.map { comment => <comment>{ comment }</comment> }.getOrElse(xml.Null)
-              }</txn>)
+             }</posting>)
           }
-        </txnGroup>
+        </txn>
       }
     }</transactions></abandon>
   }
