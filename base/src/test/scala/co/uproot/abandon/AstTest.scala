@@ -70,6 +70,11 @@ class AstTest extends FlatSpec with Matchers {
         "2014 / 1 / 10",
         "2015 / 11 / 12")
 
+    val refISO8601ExtDates = List(
+        "2013-06-01",
+        "2014-01-10",
+        "2015-11-12")
+
     val refCompactYYYYMMDD = List(
         "2013/6/1",
         "2014/1/10",
@@ -110,6 +115,10 @@ class AstTest extends FlatSpec with Matchers {
 
     dates.zip(refCompactYYYYMMDD).forall({
         case (date, refDate) => date.formatCompactYYYYMMDD == refDate
+      }) should be(true)
+
+    dates.zip(refISO8601ExtDates).forall({
+        case (date, refDate) => date.formatISO8601Ext == refDate
       }) should be(true)
 
     dates.zip(refYYYYMMDD).forall({
