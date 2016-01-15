@@ -90,11 +90,19 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
   def compare(that: AccountTreeState) = this.name.fullPathStr.compare(that.name.fullPathStr)
 
   def toXML: xml.Node = {
+    if (name.fullPath.isEmpty) {
+      // This is root-node
+      <accounttree>
+        { childStates.sorted.map(_.toXML) }
+      </accounttree>
+    }
+    else {
       <account cumulative={total.toString()} sum={amount.toString()}>
         <name>{name.name}</name>
         <fullpath>{name.fullPathStr}</fullpath>
-      { childStates.sorted.map(_.toXML) }
+        { childStates.sorted.map(_.toXML) }
       </account>
+    }
   }
   def maxNameLength: Int = {
     math.max(name.name.length + name.depth * 2, if (childStates.nonEmpty) childStates.map(_.maxNameLength).max else 0)

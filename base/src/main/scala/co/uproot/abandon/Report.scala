@@ -246,14 +246,18 @@ object Reports {
     }
   }
 
-  def xmlExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+  def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     <abandon>
-       <appstate>
-        <accounttree>
-          { state.accState.mkTree({ x => true }).toXML }
-        </accounttree>
-      </appstate>
-      <transactions>{
+       <balance>
+          { state.accState.mkTree(exportSettings.isAccountMatching).toXML }
+       </balance>
+    </abandon>
+  }
+
+  def xmlTxnExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+    <abandon>
+      <journal>
+       <transactions>{
       val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
       sortedGroups.map { txnGroup =>
         <txn date={ txnGroup.date.formatISO8601Ext }>
@@ -268,6 +272,11 @@ object Reports {
           }
         </txn>
       }
-    }</transactions></abandon>
+    }</transactions>
+    </journal>
+   </abandon>
+  }
+  def xmlExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+    xmlTxnExport(state, exportSettings)
   }
 }

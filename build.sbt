@@ -14,7 +14,7 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
 
 name := "abandon"
 
-version := "0.2.1"
+version := "0.3.0-dev"
 
 scalaVersion in ThisBuild := "2.11.7"
 

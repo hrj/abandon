@@ -2,12 +2,13 @@
 
 ### Current Release
 
-#### Update Note for 0.2.X
+#### Update Note for 0.3.0
  - XML format has been changed
+   - New container element "abandon:journal"
    - Renamed elemet "txn" to "posting"
    - Renamed element "txnGroup" to "txn"
    - Transaction dates are in extended ISO 8601 format
-   - XML contains new top level element "appstate"
+   - Account balance export in XML "abandon:balance"
 
 
 #### fixes

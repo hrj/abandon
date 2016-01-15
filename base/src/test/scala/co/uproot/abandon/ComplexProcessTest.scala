@@ -22,14 +22,18 @@ class ComplexProcessTest extends FlatSpec with Matchers with Inside {
 
 	  val appState = Processor.process(astEntries,settings.accounts)
 	  //TODO: Processor.checkConstaints(appState, settings.eodConstraints)
-	  val xmlData = Reports.xmlExport(appState, xmlSettings)
 
-	  val prettyPrinter = new scala.xml.PrettyPrinter(1024,2)
-	  val refXML = scala.xml.XML.loadFile("testCases/refSmall.xml")
+	  val xmlBalance = Reports.xmlBalanceExport(appState, xmlSettings)
+	  val xmlJournal = Reports.xmlTxnExport(appState, xmlSettings)
+
+	  val refXMLBalance = scala.xml.XML.loadFile("testCases/refSmallBalance.xml")
+	  val refXMLJournal = scala.xml.XML.loadFile("testCases/refSmallJournal.xml")
 	  
+	  //val prettyPrinter = new scala.xml.PrettyPrinter(1024,2)
 	  //println(prettyPrinter.format(xmlData))
 	  //println(prettyPrinter.format(refXML))
 	  
-	  assert(xmlData === refXML)
+	  assert(xmlBalance === refXMLBalance)
+	  assert(xmlJournal === refXMLJournal)
 	}
 }

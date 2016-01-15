@@ -1,9 +1,6 @@
 <abandon>
-  <appstate>
+  <balance>
     <accounttree>
-      <account cumulative="0" sum="0">
-        <name/>
-        <fullpath/>
         <account cumulative="-400" sum="-400">
           <name>Assets</name>
           <fullpath>Assets</fullpath>
@@ -12,13 +9,6 @@
           <name>Expenses</name>
           <fullpath>Expenses</fullpath>
         </account>
-      </account>
     </accounttree>
-  </appstate>
-  <transactions>
-    <txn date="2013-04-01">
-      <posting delta="400" name="Expenses"/>
-      <posting delta="-400" name="Assets"/>
-    </txn>
-  </transactions>
+  </balance>
 </abandon>
