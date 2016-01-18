@@ -106,19 +106,40 @@ object SettingsHelper {
 
   def makeExportSettings(config: Config) = {
     val exportType = config.getString("type")
+    val exportFormat = config.getString("format")
+
     val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
     val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
+
     exportType match {
-      case "ledger" =>
-        val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
-        val closureConfig = config.optConfigList("closures").getOrElse(Nil)
-        val closure = closureConfig.map(makeClosureSettings)
-        LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
-      case "xml" =>
-        val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-        XmlExportSettings(accountMatch, outFiles)
+      case "journal" =>
+        exportFormat match {
+        case "ledger" =>
+            val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
+            val closureConfig = config.optConfigList("closures").getOrElse(Nil)
+            val closure = closureConfig.map(makeClosureSettings)
+            LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
+        case "xml" =>
+            val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+            XmlExportSettings(JournalType, accountMatch, outFiles)
+        case _ =>
+            val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
+            throw new ConfigException.BadValue(config.origin, "type", message)
+      }
+      case "balance" =>
+        exportFormat match {
+        case "ledger" =>
+            val message = s"Found type: '$exportType' format: '$exportFormat'; This is not implemented."
+            throw new NotImplementedError(message)
+        case "xml" =>
+            val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+            XmlExportSettings(BalanceType, accountMatch, outFiles)
+        case _ =>
+            val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
+            throw new ConfigException.BadValue(config.origin, "type", message)
+      }
       case _ =>
-        val message = s"Found '$exportType'; expected 'ledger' or 'xml'."
+        val message = s"Found '$exportType'; expected 'journal' or 'balance'."
         throw new ConfigException.BadValue(config.origin, "type", message)
     }
   }
@@ -191,6 +212,15 @@ trait AccountMatcher {
   }
 }
 
+sealed trait OutputType
+object BalanceType extends OutputType
+object JournalType extends OutputType
+
+sealed trait FormatType
+object LedgerType extends FormatType
+object XMLType extends FormatType
+
+
 abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
 }
 
@@ -224,6 +254,6 @@ case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[Stri
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
-case class XmlExportSettings(_accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_accountMatch, _outFiles)
+case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])

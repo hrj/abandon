@@ -254,7 +254,7 @@ object Reports {
     </abandon>
   }
 
-  def xmlTxnExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+  def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     <abandon>
       <journal>
        <transactions>{
@@ -277,6 +277,9 @@ object Reports {
    </abandon>
   }
   def xmlExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
-    xmlTxnExport(state, exportSettings)
+    exportSettings.exportType match {
+      case JournalType => xmlJournalExport(state, exportSettings)
+      case BalanceType => xmlBalanceExport(state, exportSettings)
+    }
   }
 }

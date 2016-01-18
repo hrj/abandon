@@ -97,9 +97,7 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
       </accounttree>
     }
     else {
-      <account cumulative={total.toString()} sum={amount.toString()}>
-        <name>{name.name}</name>
-        <fullpath>{name.fullPathStr}</fullpath>
+      <account sum={amount.toString()} cumulative={total.toString()} name={name.fullPathStr} >
         { childStates.sorted.map(_.toXML) }
       </account>
     }

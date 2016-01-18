@@ -10,6 +10,9 @@
    - Transaction dates are in extended ISO 8601 format
    - Account balance export in XML "abandon:balance"
 
+ - Clarified reporting and exporting (https://github.com/hrj/abandon/issues/71)
+   - Clarified meaning of "type": it could be either "journal" or "balance"
+   - New configuration keyword "format": which could be "ledger" or "xml"
 
 #### fixes
  - TBD
