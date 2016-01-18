@@ -12,3 +12,4 @@ project/target/
 /cli/.cache-main
 /gui/bin/
 /gui/.cache-main
+/testCases/*/out.*

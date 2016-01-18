@@ -1,0 +1,32 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2016-01-16">
+        <posting delta="10000" name="E:e:e:e:e"></posting>
+        <posting delta="-10000" name="A:c:c:c:c"></posting>
+        <posting delta="100" name="E:e:e"></posting>
+        <posting delta="-100" name="A:c:c"></posting>
+        <posting delta="1000" name="E:e:e:e"></posting>
+        <posting delta="-1000" name="A:c:c:c"></posting>
+        <posting delta="10000" name="E:e:e:e:e"></posting>
+        <posting delta="-10000" name="A:c:c:c:c"></posting>
+        <posting delta="10000" name="E:e:e:e:e"></posting>
+        <posting delta="-10000" name="A:c:c:c:c"></posting>
+        <posting delta="10" name="E:e"></posting>
+        <posting delta="-10" name="A:c"></posting>
+        <posting delta="1000" name="E:e:e:e"></posting>
+        <posting delta="-1000" name="A:c:c:c"></posting>
+        <posting delta="9" name="E:z"></posting>
+        <posting delta="-9" name="A:x"></posting>
+        <posting delta="1000" name="E:e:e:e"></posting>
+        <posting delta="-1000" name="A:c:c:c"></posting>
+        <posting delta="10000" name="E:e:e:e:e"></posting>
+        <posting delta="-10000" name="A:c:c:c:c"></posting>
+        <posting delta="0.1" name="E"></posting>
+        <posting delta="-0.1" name="A"></posting>
+        <posting delta="100" name="E:e:e"></posting>
+        <posting delta="-100" name="A:c:c"></posting>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

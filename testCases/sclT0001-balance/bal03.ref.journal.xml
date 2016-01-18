@@ -1,0 +1,54 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2015-01-02">
+        <posting delta="0.1" name="Expenses"></posting>
+        <posting delta="-0.1" name="Assets"></posting>
+      </txn>
+      <txn date="2015-01-12">
+        <posting delta="10000" name="Expenses:e:e:e:e"></posting>
+        <posting delta="-10000" name="Assets:c:c:c:c"></posting>
+      </txn>
+      <txn date="2015-01-22">
+        <posting delta="9" name="Expenses:z"></posting>
+        <posting delta="-9" name="Assets:x"></posting>
+      </txn>
+      <txn date="2015-02-01">
+        <posting delta="100" name="Expenses:e:e"></posting>
+        <posting delta="-100" name="Assets:c:c"></posting>
+      </txn>
+      <txn date="2015-02-03">
+        <posting delta="1000" name="Expenses:e:e:e"></posting>
+        <posting delta="-1000" name="Assets:c:c:c"></posting>
+      </txn>
+      <txn date="2015-02-05">
+        <posting delta="100" name="Expenses:e:e"></posting>
+        <posting delta="-100" name="Assets:c:c"></posting>
+      </txn>
+      <txn date="2015-02-06">
+        <posting delta="10000" name="Expenses:e:e:e:e"></posting>
+        <posting delta="-10000" name="Assets:c:c:c:c"></posting>
+      </txn>
+      <txn date="2015-02-06">
+        <posting delta="10000" name="Expenses:e:e:e:e"></posting>
+        <posting delta="-10000" name="Assets:c:c:c:c"></posting>
+      </txn>
+      <txn date="2015-02-07">
+        <posting delta="1000" name="Expenses:e:e:e"></posting>
+        <posting delta="-1000" name="Assets:c:c:c"></posting>
+      </txn>
+      <txn date="2015-02-08">
+        <posting delta="1000" name="Expenses:e:e:e"></posting>
+        <posting delta="-1000" name="Assets:c:c:c"></posting>
+      </txn>
+      <txn date="2015-02-09">
+        <posting delta="10000" name="Expenses:e:e:e:e"></posting>
+        <posting delta="-10000" name="Assets:c:c:c:c"></posting>
+      </txn>
+      <txn date="2015-02-12">
+        <posting delta="10" name="Expenses:e"></posting>
+        <posting delta="-10" name="Assets:c"></posting>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

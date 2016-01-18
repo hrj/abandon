@@ -1,0 +1,11 @@
+All
+
+  30000.00   Equity:Shares                  -31000.00   Assets                  
+  -1000.00   Expenses                       -10000.00    ├╴Capital:ReservesAndSurplus
+   -600.00    ├╴Clothing                    -21000.00    └╴Current              
+   -400.00    └╴Food                        -21000.00       ├╴Bank              
+   1000.00   Liabilities:ProfessionalTax       400.00       ├╴Branch            
+                                              -400.00       ├╴Cash              
+                                              1000.00   Income                  
+─────────────────────────────────────────────────────────────────────────────────────
+  30000.00                                  -30000.00 = Zero

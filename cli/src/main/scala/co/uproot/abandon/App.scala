@@ -64,8 +64,8 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     Console.flush
   }
 }
-
-object AbandonApp extends App {
+package co.uproot.abandon {
+object AbandonApp0  {
   def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
     val left = balanceReport.leftEntries.map(_.render)
     val right = balanceReport.rightEntries.map(_.render)
@@ -132,6 +132,7 @@ object AbandonApp extends App {
     reportWriter.endCodeBlock()
   }
 
+  def runApp(args: Array[String]) {
   try {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
@@ -193,6 +194,7 @@ object AbandonApp extends App {
     case e: NotImplementedError => printErr("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
     case e: Error               => printErr("Unexpected error", e)
   }
+  }
 
   def printErr(msg: String) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
@@ -202,4 +204,8 @@ object AbandonApp extends App {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
     err.printStackTrace(Console.out)
   }
+}
+}
+object AbandonApp extends App {
+   co.uproot.abandon.AbandonApp0.runApp(args)
 }
