@@ -64,8 +64,8 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     Console.flush
   }
 }
-package co.uproot.abandon {
-object AbandonApp0  {
+
+object CLIMain  {
   def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
     val left = balanceReport.leftEntries.map(_.render)
     val right = balanceReport.rightEntries.map(_.render)
@@ -132,8 +132,7 @@ object AbandonApp0  {
     reportWriter.endCodeBlock()
   }
 
-  def runApp(args: Array[String]) {
-  try {
+  def runAppThrows(args: Array[String]) {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
       case Left(errorMsg) => Console.err.println("Error: " + errorMsg)
@@ -187,6 +186,10 @@ object AbandonApp0  {
           }
         }
     }
+  }
+  def runApp(args: Array[String]) {
+  try {
+	runAppThrows(args)
   } catch {
     case a: AssertionError      => printErr("Error: " + a.getMessage)
     case i: InputError          => printErr("Input error: " + i.getMessage)
@@ -205,7 +208,7 @@ object AbandonApp0  {
     err.printStackTrace(Console.out)
   }
 }
-}
-object AbandonApp extends App {
-   co.uproot.abandon.AbandonApp0.runApp(args)
+
+object CLIApp extends App {
+   co.uproot.abandon.CLIMain.runApp(args)
 }

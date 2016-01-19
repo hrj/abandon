@@ -30,24 +30,27 @@ class CliTestRunner extends FlatSpec with Matchers with Inside {
 	        val output = "out." + basename + "." + ref.stripPrefix(basename + ".ref.")
 	        
 	        if (ref.endsWith(".xml"))
-	           new TestVec(testDir.toString + "/" + output, 
+	          TestVec(testDir.toString + "/" + output,
 	               testDir.toString + "/" + ref, TestComparator.xmlComparator)
 	        else 
-	          new TestVec(testDir.toString + "/" + output, 
+	          TestVec(testDir.toString + "/" + output,
 	              testDir.toString + "/" + ref, TestComparator.txtComparator)	        
 	      }
-	      new TestCase(f.toPath().toString, testVecs.toList)
+	      TestCase(f.toPath().toString, testVecs.toList)
 	  }
 	  
 	  for (tc <- testCases) {
 	   
-	    co.uproot.abandon.AbandonApp0.runApp(Array("-c", tc.conf))
-	    
+            try {
+	       co.uproot.abandon.CLIMain.runAppThrows(Array("-c", tc.conf))
+	    } catch {
+               case _: Throwable => assert(false)
+            }
 	    for (testfiles <- tc.testVec) {
-	      println("reference: " + testfiles.ref)
+	      println("reference: " + testfiles.reference)
 	      println("output:    " + testfiles.output)
 	      
-	      assert(testfiles.comparator(testfiles.output, testfiles.ref))
+	      assert(testfiles.comparator(testfiles.output, testfiles.reference))
 	    }
 	  }
 	}

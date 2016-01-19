@@ -2,23 +2,32 @@
 
 This folder contains functional tests for Abandon.
 
-Test folders use following naming convention:
+## Testrunner
 
-    <scl|cli>T<ID>-subject
+Test framework implements automatic Testrunner framework.
+
+Testrunner will look test cases under certain directories
+based on following naming convention:
+
+    sclT<ID>-<Subject>
 
 where: 
-   - scl denotes tests which are integrated and implemented in Scala code
-   - cli denotes tests which are run by external program
+   - sclT denotes tests which are run by Testrunner
    - ID is unique, test id (digits only)
-   - subject is very short mnemonic about test topic
+   - Subject is very short mnemonic about test topic
 
-Inside a test directory, there is:
+Inside a test directory, there must be:
 
  - at least one conf-file, (e.g. bal01.conf)
  - reference output files, filenames MUST follow convention: 
    (e.g. bal01.ref.balance.xml and bal01.ref.journal.xml)
 
-Configuration MUST output one file per reference file, in following filename format:
-e.g. bal01.conf -> bal01.ref.balance.xml -> out.bal01.balance.xml
+Abandon configuration MUST output one file per reference file
+in following filename format:
+   e.g. bal01.conf -> bal01.ref.balance.xml -> out.bal01.balance.xml
 
+where:
+   bal01.conf := Abandon configuration
+   bal01.ref.balance.xml := one of reference files
+   out.bal01.balance.xml := one of output files
 

@@ -1,8 +1,6 @@
 package co.uproot.abandon
 
-
 import org.scalatest.FlatSpec
-import org.scalatest.StreamlinedXmlEquality._
 
 import java.io.File
 
@@ -30,7 +28,7 @@ object TestComparator extends FlatSpec  {
   }
 }
 
-case class TestVec(output: String, ref: String, comparator: (String, String) => Boolean) 
+case class TestVec(output: String, reference: String, comparator: (String, String) => Boolean)
 
 case class TestCase(conf: String, testVec: List[TestVec])
 	  
