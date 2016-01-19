@@ -1,0 +1,20 @@
+All
+
+  -25714.10   Assets                   8500.00   Capital                 
+  -13714.10    ├╴Current              -1500.00    ├╴Reserves_And_Surplus 
+   -1100.00    │  ├╴AdvanceTax        10000.00    └╴Share                
+   -4344.10    │  ├╴BankAccount           0.00       ├╴Amy               
+   -4344.10    │  │  └╴Account1        4000.00       ├╴Bailey            
+   -4770.00    │  ├╴Cash               6000.00       └╴Hary              
+       0.00    │  ├╴Sundry_Debtors    35000.00   Income                  
+   -3500.00    │  └╴TDS               35000.00    └╴Receipts             
+  -12000.00    └╴Fixed                -5000.00   Liability               
+  -10600.00       ├╴Computer          -5000.00    └╴Expenses_Payable     
+   -1400.00       └╴Furniture         -5000.00       └╴Audit_Fees        
+  -12785.90   Expenses (-430)       
+    -280.90    ├╴Bank_Charges       
+   -4475.00    ├╴Consumables        
+   -4500.00    ├╴Rent               
+   -3100.00    └╴Salaries           
+─────────────────────────────────────────────────────────────────────────
+  -38500.00                           38500.00 = Zero

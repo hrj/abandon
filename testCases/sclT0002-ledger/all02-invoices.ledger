@@ -1,0 +1,21 @@
+2013/1/4
+  ; Invoice a
+  Assets:Current:Sundry_Debtors:Vikings         -25,000
+  Income:Receipts               
+
+2013/Feb/4
+  ; Invoice b
+  Assets:Current:Sundry_Debtors:Greeks          -10,000
+  Income:Receipts               
+
+2013/Jan/19
+  ; payment for invoice a
+  bank1                                         -22,500
+  Assets:Current:TDS                            -2,500
+  Assets:Current:Sundry_Debtors:Vikings
+
+2013/Feb/9
+  ; payment for invoice b
+  bank1                                         -9,000
+  Assets:Current:TDS                            -1,000
+  Assets:Current:Sundry_Debtors:Greeks

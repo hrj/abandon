@@ -1,0 +1,94 @@
+include all02-opening.ledger
+
+; Oct 2012
+2012/Oct/5
+  Expenses:Bank_Charges                               -280.90
+  bank1
+
+; Jan 2013
+2013/Jan/15  (89000) Alice Enterprises
+  ; For Office Stationary
+  Expenses:Consumables                                -485
+  bank1
+
+
+2013/1/29 (89001) Bob Traders
+  ; For 22" monitor
+  Assets:Fixed:Computer                            -7,250
+  bank1
+
+2013/1/29 (89002) Bob Traders
+  ; For 50 DVD set
+  Expenses:Consumables                              -1,100
+  bank1
+
+; Feb 2013
+2013/Feb/1  (89003) Bob Traders
+  ; For modem
+  Expenses:Consumables                              -2,090
+  bank1
+
+2013/Feb/14  (89004) Cherry Auditors
+  ; Audit fees
+  Liability:Expenses_Payable:Audit_Fees              -5,000
+  bank1
+
+2013/Feb/16  (80005) Deepika
+  ; January Salary
+  Expenses:Salaries                                 -2,000
+  bank1
+
+2013/Feb/18  (80006) Bob Traders
+  ; For Cabinet and spike buster
+  Assets:Fixed:Computer                               -1,100
+  Expenses:Consumables                                  -400
+  bank1
+
+2013/Feb/23  (80007) Ekta
+  Expenses:Rent                                     -1,000       ; Dec 2012 rent
+  Expenses:Rent                                     -2,000       ; Jan 2013 rent
+  bank1
+
+; March 2013
+2013/Mar/4  (80008) Far Furnishing
+  ; For curtains
+  Assets:Fixed:Furniture                              -1200         ; Far Furnishing invoice #20
+  Assets:Fixed:Furniture                              -200          ; Transportation cost
+  Assets:Current:Cash
+
+2013/Mar/4  (80009) Ekta
+  ; Feb 2013 rent
+  Expenses:Rent                                       -1,500
+  bank1
+
+2013/March/4  (80010) Bob Traders
+  ; For DVD drive
+  Assets:Fixed:Computer                               -1,250
+  bank1
+
+2013/March/6  (80011) Deepika
+  ; Feb Salary
+  Expenses:Salaries                                   -1,100
+  bank1
+
+2013/March/15  (80012)
+  ; Cash Withdrawl
+  Assets:Current:Cash                                 -5,000
+  bank1
+
+2013/March/21  (80013)
+  ; Cash Withdrawl
+  Assets:Current:Cash                                 -2,000
+  bank1
+
+2013/3/23
+  ; Advance tax
+  Assets:Current:AdvanceTax                           -1,100
+  bank1
+
+2013/3/28
+  Capital:Share:Amy                                   -4,000
+  Capital:Share:Bailey
+
+include all02-invoices.ledger
+include all02-cash.ledger

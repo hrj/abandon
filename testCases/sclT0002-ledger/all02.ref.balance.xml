@@ -1,0 +1,46 @@
+<abandon>
+  <balance>
+    <accounttree>
+      <account sum="0" cumulative="-25714.10" name="Assets">
+        <account sum="0" cumulative="-13714.10" name="Assets:Current">
+          <account sum="-1100" cumulative="-1100" name="Assets:Current:AdvanceTax"> </account>
+          <account sum="0" cumulative="-4344.10" name="Assets:Current:BankAccount">
+            <account sum="-4344.10" cumulative="-4344.10" name="Assets:Current:BankAccount:Account1"> </account>
+          </account>
+          <account sum="-4770" cumulative="-4770" name="Assets:Current:Cash"> </account>
+          <account sum="0" cumulative="0" name="Assets:Current:Sundry_Debtors">
+            <account sum="0" cumulative="0" name="Assets:Current:Sundry_Debtors:Greeks"> </account>
+            <account sum="0" cumulative="0" name="Assets:Current:Sundry_Debtors:Vikings"> </account>
+          </account>
+          <account sum="-3500" cumulative="-3500" name="Assets:Current:TDS"> </account>
+        </account>
+        <account sum="0" cumulative="-12000" name="Assets:Fixed">
+          <account sum="-10600" cumulative="-10600" name="Assets:Fixed:Computer"> </account>
+          <account sum="-1400" cumulative="-1400" name="Assets:Fixed:Furniture"> </account>
+        </account>
+      </account>
+      <account sum="0" cumulative="8500" name="Capital">
+        <account sum="-1500" cumulative="-1500" name="Capital:Reserves_And_Surplus"> </account>
+        <account sum="0" cumulative="10000" name="Capital:Share">
+          <account sum="0" cumulative="0" name="Capital:Share:Amy"> </account>
+          <account sum="4000" cumulative="4000" name="Capital:Share:Bailey"> </account>
+          <account sum="6000" cumulative="6000" name="Capital:Share:Hary"> </account>
+        </account>
+      </account>
+      <account sum="-430" cumulative="-12785.90" name="Expenses">
+        <account sum="-280.90" cumulative="-280.90" name="Expenses:Bank_Charges"> </account>
+        <account sum="-4475" cumulative="-4475" name="Expenses:Consumables"> </account>
+        <account sum="-4500" cumulative="-4500" name="Expenses:Rent"> </account>
+        <account sum="-3100" cumulative="-3100" name="Expenses:Salaries"> </account>
+      </account>
+      <account sum="0" cumulative="35000" name="Income">
+        <account sum="35000" cumulative="35000" name="Income:Receipts"> </account>
+      </account>
+      <account sum="0" cumulative="-5000" name="Liability">
+        <account sum="0" cumulative="-5000" name="Liability:Expenses_Payable">
+          <account sum="-5000" cumulative="-5000" name="Liability:Expenses_Payable:Audit_Fees"> </account>
+        </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>
