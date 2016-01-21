@@ -266,9 +266,9 @@ object Reports {
           { txnGroup.groupComments.map { comment => <comment>{ comment }</comment> } }
           {
             txnGroup.children.map(txn =>
-              <posting delta={ txn.delta.toString } name={ txn.name.fullPathStr }>{
+              <post delta={ txn.delta.toString } name={ txn.name.fullPathStr }>{
                 txn.commentOpt.map { comment => <comment>{ comment }</comment> }.getOrElse(xml.Null)
-             }</posting>)
+             }</post>)
           }
         </txn>
       }

@@ -1,11 +1,37 @@
 <abandon>
   <journal>
-  <transactions>
-    <txn date="2013-04-01">
-      <posting delta="400" name="Expenses"/>
-      <posting delta="-400" name="Assets"/>
-    </txn>
-  </transactions>
+    <transactions>
+      <txn date="2013-04-01">
+        <post delta="400" name="Expenses"></post>
+        <post delta="-400" name="Assets"></post>
+      </txn>
+      <txn date="2013-04-02">
+        <annotation>123</annotation>
+        <post delta="400" name="Expenses:e"></post>
+        <post delta="-400" name="Assets"></post>
+      </txn>
+      <txn date="2013-04-02">
+        <payee>txn description</payee>
+        <annotation>123</annotation>
+        <post delta="400" name="Expenses:e:d"></post>
+        <post delta="-400" name="Assets"></post>
+      </txn>
+      <txn date="2013-04-02">
+        <payee>txn comment</payee>
+        <annotation>123</annotation>
+        <comment>txn comment</comment>
+        <post delta="400" name="Expenses:e:d"></post>
+        <post delta="-400" name="Assets"></post>
+      </txn>
+      <txn date="2013-04-02">
+        <payee>txn with everything</payee>
+        <annotation>123</annotation>
+        <comment>this is txn comment</comment>
+        <post delta="400" name="Expenses:X">
+          <comment>this is post comment</comment>
+        </post>
+        <post delta="-400" name="Assets"></post>
+      </txn>
+    </transactions>
   </journal>
 </abandon>
-
