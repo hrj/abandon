@@ -31,8 +31,8 @@ class ComplexProcessTest extends FlatSpec with Matchers with Inside {
 	  val refXMLJournal = scala.xml.XML.loadFile("testCases/refSmallJournal.xml")
 	  
 	  //val prettyPrinter = new scala.xml.PrettyPrinter(1024,2)
-	  //println(prettyPrinter.format(xmlData))
-	  //println(prettyPrinter.format(refXML))
+	  //println(prettyPrinter.format(xmlJournal))
+	  //println(prettyPrinter.format(refXMLJournal))
 	  
 	  assert(xmlBalance === refXMLBalance)
 	  assert(xmlJournal === refXMLJournal)

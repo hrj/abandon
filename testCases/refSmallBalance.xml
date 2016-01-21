@@ -1,8 +1,13 @@
 <abandon>
   <balance>
     <accounttree>
-      <account sum="-400" cumulative="-400" name="Assets"> </account>
-      <account sum="400" cumulative="400" name="Expenses"> </account>
+      <account sum="-2000" cumulative="-2000" name="Assets"> </account>
+      <account sum="400" cumulative="2000" name="Expenses">
+        <account sum="400" cumulative="400" name="Expenses:X"> </account>
+        <account sum="400" cumulative="1200" name="Expenses:e">
+          <account sum="800" cumulative="800" name="Expenses:e:d"> </account>
+        </account>
+      </account>
     </accounttree>
   </balance>
 </abandon>

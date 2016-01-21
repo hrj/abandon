@@ -2,4 +2,20 @@
   Expenses                   400
   Assets
 
+2013/4/2 (123)
+  Expenses:e                 400
+  Assets
 
+2013/4/2 (123) txn description
+  Expenses:e:d               400
+  Assets
+
+2013/4/2 (123) txn comment
+  ;txn comment
+  Expenses:e:d               400
+  Assets
+
+2013/4/2 (123) txn with everything
+  ;this is txn comment
+  Expenses:X                 400 ;this is post comment
+  Assets
