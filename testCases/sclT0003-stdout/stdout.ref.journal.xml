@@ -2,8 +2,8 @@
   <journal>
     <transactions>
       <txn date="2013-04-01">
-        <posting delta="400" name="Expenses"></posting>
-        <posting delta="-400" name="Assets"></posting>
+        <post delta="400" name="Expenses"></post>
+        <post delta="-400" name="Assets"></post>
       </txn>
     </transactions>
   </journal>
