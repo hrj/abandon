@@ -9,10 +9,10 @@
    include:
      - jdk: oraclejdk8
        scala: "2.11.7"
-       env: COMMAND="sbt clean base/clean cli/clean gui/clean coverage base/test" COMMAND2="sbt coverageAggregate"
+       env: COMMAND="sbt clean base/clean cli/clean gui/clean coverage base/test cli/test" COMMAND2="sbt coverageAggregate"
      - jdk: openjdk7
        scala: "2.11.7"
-       env: COMMAND="sbt clean base/clean cli/clean gui/clean base/coverage base/test" COMMAND2="sbt coverageAggregate"
+       env: COMMAND="sbt clean base/clean cli/clean gui/clean base/coverage base/test cli/test" COMMAND2="sbt coverageAggregate"
 
  script:
    - "$COMMAND && $COMMAND2"
