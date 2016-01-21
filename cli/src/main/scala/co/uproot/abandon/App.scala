@@ -53,7 +53,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
 
     if (writesToScreen) {
-      println(sb.toString)
+      Console.println(sb.toString)
     }
   }
 
