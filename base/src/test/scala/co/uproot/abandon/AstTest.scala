@@ -58,27 +58,32 @@ class AstTest extends FlatSpec with Matchers {
     val dates = List(
         Date(2013, 6, 1),
         Date(2014, 1, 10),
-        Date(2015, 11,12))
+        Date(2015, 11,12),
+        Date(2015, 12,31))
 
     val refCompactDates = List(
         "2013,6,1",
         "2014,1,10",
-        "2015,11,12")
+        "2015,11,12",
+        "2015,12,31")
 
     val refYYYYMMDD = List(
         "2013 / 6 / 1",
         "2014 / 1 / 10",
-        "2015 / 11 / 12")
+        "2015 / 11 / 12",
+        "2015 / 12 / 31")
 
     val refISO8601ExtDates = List(
         "2013-06-01",
         "2014-01-10",
-        "2015-11-12")
+        "2015-11-12",
+        "2015-12-31")
 
     val refCompactYYYYMMDD = List(
         "2013/6/1",
         "2014/1/10",
-        "2015/11/12")
+        "2015/11/12",
+        "2015/12/31")
 
     val months = List(
       Date(2013, 1, 1),
