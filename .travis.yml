@@ -10,9 +10,6 @@
      - jdk: oraclejdk8
        scala: "2.11.7"
        env: COMMAND="sbt clean coverage test" COMMAND2="sbt coverageAggregate"
-     - jdk: openjdk7
-       scala: "2.11.7"
-       env: COMMAND="sbt clean base/coverage base/test" COMMAND2="sbt coverageAggregate"
 
  script:
    - "$COMMAND && $COMMAND2"
