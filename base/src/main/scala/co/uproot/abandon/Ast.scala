@@ -38,6 +38,10 @@ case class Date(year: Int, month: Int, day: Int) {
     f"$year%4d / $month%d / $day%d"
   }
 
+  def formatISO8601Ext = {
+    f"$year%4d-$month%02d-$day%02d"
+  }
+
   def formatCompactYYYYMMDD = {
     f"$year%4d/$month%d/$day%d"
   }

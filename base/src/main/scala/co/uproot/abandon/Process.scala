@@ -74,7 +74,7 @@ class AccountState {
 
 }
 
-case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: Seq[AccountTreeState]) {
+case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: Seq[AccountTreeState]) extends Ordered[AccountTreeState] {
   assert(amount != null)
   assert(childStates != null)
   lazy val total: BigDecimal = amount + childStates.foldLeft(Zero)(_ + _.total)
@@ -85,6 +85,22 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
   override def toString = {
     val indent = name.depth * 2
     (" " * indent) + name.name + ": " + amount + "(" + total + ")" + (if (childStates.length > 0) "\n" else "") + childStates.mkString("\n")
+  }
+
+  def compare(that: AccountTreeState) = this.name.fullPathStr.compare(that.name.fullPathStr)
+
+  def toXML: xml.Node = {
+    if (name.fullPath.isEmpty) {
+      // This is root-node
+      <accounttree>
+        { childStates.sorted.map(_.toXML) }
+      </accounttree>
+    }
+    else {
+      <account sum={amount.toString()} cumulative={total.toString()} name={name.fullPathStr} >
+        { childStates.sorted.map(_.toXML) }
+      </account>
+    }
   }
   def maxNameLength: Int = {
     math.max(name.name.length + name.depth * 2, if (childStates.nonEmpty) childStates.map(_.maxNameLength).max else 0)

@@ -152,7 +152,7 @@ object AbandonApp extends App {
                 val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
                 exportAsLedger(reportWriter, ledgerRep)
               case xmlSettings: XmlExportSettings =>
-                val xmlData = Reports.xmlExport(appState, exportSettings)
+                val xmlData = Reports.xmlExport(appState, xmlSettings)
                 reportWriter.printXml(xmlData)
             }
             reportWriter.close

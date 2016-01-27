@@ -6,5 +6,9 @@ project/target/
 .classpath
 .settings
 /base/bin/
+/base/.cache-main
+/base/.cache-tests
 /cli/bin/
+/cli/.cache-main
 /gui/bin/
+/gui/.cache-main
