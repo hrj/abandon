@@ -1,0 +1,54 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2015-01-02">
+        <post delta="0.1" name="Expenses"></post>
+        <post delta="-0.1" name="Assets"></post>
+      </txn>
+      <txn date="2015-01-12">
+        <post delta="10000" name="Expenses:e:e:e:e"></post>
+        <post delta="-10000" name="Assets:c:c:c:c"></post>
+      </txn>
+      <txn date="2015-01-22">
+        <post delta="9" name="Expenses:z"></post>
+        <post delta="-9" name="Assets:x"></post>
+      </txn>
+      <txn date="2015-02-01">
+        <post delta="100" name="Expenses:e:e"></post>
+        <post delta="-100" name="Assets:c:c"></post>
+      </txn>
+      <txn date="2015-02-03">
+        <post delta="1000" name="Expenses:e:e:e"></post>
+        <post delta="-1000" name="Assets:c:c:c"></post>
+      </txn>
+      <txn date="2015-02-05">
+        <post delta="100" name="Expenses:e:e"></post>
+        <post delta="-100" name="Assets:c:c"></post>
+      </txn>
+      <txn date="2015-02-06">
+        <post delta="10000" name="Expenses:e:e:e:e"></post>
+        <post delta="-10000" name="Assets:c:c:c:c"></post>
+      </txn>
+      <txn date="2015-02-06">
+        <post delta="10000" name="Expenses:e:e:e:e"></post>
+        <post delta="-10000" name="Assets:c:c:c:c"></post>
+      </txn>
+      <txn date="2015-02-07">
+        <post delta="1000" name="Expenses:e:e:e"></post>
+        <post delta="-1000" name="Assets:c:c:c"></post>
+      </txn>
+      <txn date="2015-02-08">
+        <post delta="1000" name="Expenses:e:e:e"></post>
+        <post delta="-1000" name="Assets:c:c:c"></post>
+      </txn>
+      <txn date="2015-02-09">
+        <post delta="10000" name="Expenses:e:e:e:e"></post>
+        <post delta="-10000" name="Assets:c:c:c:c"></post>
+      </txn>
+      <txn date="2015-02-12">
+        <post delta="10" name="Expenses:e"></post>
+        <post delta="-10" name="Assets:c"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

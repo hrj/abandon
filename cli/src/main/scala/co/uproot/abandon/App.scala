@@ -65,7 +65,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   }
 }
 
-object AbandonApp extends App {
+object CLIMain  {
   def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
     val left = balanceReport.leftEntries.map(_.render)
     val right = balanceReport.rightEntries.map(_.render)
@@ -132,7 +132,7 @@ object AbandonApp extends App {
     reportWriter.endCodeBlock()
   }
 
-  try {
+  def runAppThrows(args: Array[String]) {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
       case Left(errorMsg) => Console.err.println("Error: " + errorMsg)
@@ -186,12 +186,17 @@ object AbandonApp extends App {
           }
         }
     }
+  }
+  def runApp(args: Array[String]) {
+  try {
+	runAppThrows(args)
   } catch {
     case a: AssertionError      => printErr("Error: " + a.getMessage)
     case i: InputError          => printErr("Input error: " + i.getMessage)
     case i: ConstraintError     => printErr("Constraint Failed: " + i.getMessage)
     case e: NotImplementedError => printErr("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
     case e: Error               => printErr("Unexpected error", e)
+  }
   }
 
   def printErr(msg: String) = {
@@ -202,4 +207,8 @@ object AbandonApp extends App {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
     err.printStackTrace(Console.out)
   }
+}
+
+object CLIApp extends App {
+   co.uproot.abandon.CLIMain.runApp(args)
 }

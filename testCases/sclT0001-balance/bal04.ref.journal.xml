@@ -1,0 +1,32 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2016-01-16">
+        <post delta="10000" name="E:e:e:e:e"></post>
+        <post delta="-10000" name="A:c:c:c:c"></post>
+        <post delta="100" name="E:e:e"></post>
+        <post delta="-100" name="A:c:c"></post>
+        <post delta="1000" name="E:e:e:e"></post>
+        <post delta="-1000" name="A:c:c:c"></post>
+        <post delta="10000" name="E:e:e:e:e"></post>
+        <post delta="-10000" name="A:c:c:c:c"></post>
+        <post delta="10000" name="E:e:e:e:e"></post>
+        <post delta="-10000" name="A:c:c:c:c"></post>
+        <post delta="10" name="E:e"></post>
+        <post delta="-10" name="A:c"></post>
+        <post delta="1000" name="E:e:e:e"></post>
+        <post delta="-1000" name="A:c:c:c"></post>
+        <post delta="9" name="E:z"></post>
+        <post delta="-9" name="A:x"></post>
+        <post delta="1000" name="E:e:e:e"></post>
+        <post delta="-1000" name="A:c:c:c"></post>
+        <post delta="10000" name="E:e:e:e:e"></post>
+        <post delta="-10000" name="A:c:c:c:c"></post>
+        <post delta="0.1" name="E"></post>
+        <post delta="-0.1" name="A"></post>
+        <post delta="100" name="E:e:e"></post>
+        <post delta="-100" name="A:c:c"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

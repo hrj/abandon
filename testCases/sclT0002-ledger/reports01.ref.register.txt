@@ -1,0 +1,16 @@
+Register
+
+2013 / Mar
+   Assets:Capital:ReservesAndSurplus                             -10000.00            -10000.00
+   Assets:Current:Bank                                           -20000.00            -20000.00
+   Assets:Current:Cash                                            -1000.00             -1000.00
+   Equity:Shares                                                  30000.00             30000.00
+   Liabilities:ProfessionalTax                                     1000.00              1000.00
+2013 / Apr
+   Assets:Current:Bank                                            -1000.00            -21000.00
+   Assets:Current:Branch                                            400.00               400.00
+   Assets:Current:Cash                                              600.00              -400.00
+   Assets:Current:Debitor:Client1                                     0.00                 0.00
+   Expenses:Clothing                                               -600.00              -600.00
+   Expenses:Food                                                   -400.00              -400.00
+   Income                                                          1000.00              1000.00

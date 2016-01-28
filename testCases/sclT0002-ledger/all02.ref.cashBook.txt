@@ -1,0 +1,257 @@
+Cash Book
+
+Account Name: Assets:Current:Cash
+
+```
+2012 / Mar
+            -7500.00             -7500.00        2012 mar 1 OpeningBalance
+                                                   Capital:Share:Hary                                 6000.00 
+                                                   Capital:Share:Amy                                  4000.00 
+                                                   Capital:Reserves_And_Surplus                      -1500.00 
+                                                   Assets:Fixed:Computer                             -1000.00 
+
+            -1000.00             -1000.00        2012 mar 1 OpeningBalance
+                                                   Capital:Share:Hary                                 6000.00 
+                                                   Capital:Share:Amy                                  4000.00 
+                                                   Capital:Reserves_And_Surplus                      -1500.00 
+                                                   Assets:Current:BankAccount:Account1               -7500.00 
+
+            -1500.00             -1500.00        2012 mar 1 OpeningBalance
+                                                   Capital:Share:Hary                                 6000.00 
+                                                   Capital:Share:Amy                                  4000.00 
+                                                   Assets:Current:BankAccount:Account1               -7500.00 
+                                                   Assets:Fixed:Computer                             -1000.00 
+
+             4000.00              4000.00        2012 mar 1 OpeningBalance
+                                                   Capital:Share:Hary                                 6000.00 
+                                                   Capital:Reserves_And_Surplus                      -1500.00 
+                                                   Assets:Current:BankAccount:Account1               -7500.00 
+                                                   Assets:Fixed:Computer                             -1000.00 
+
+             6000.00              6000.00        2012 mar 1 OpeningBalance
+                                                   Capital:Share:Amy                                  4000.00 
+                                                   Capital:Reserves_And_Surplus                      -1500.00 
+                                                   Assets:Current:BankAccount:Account1               -7500.00 
+                                                   Assets:Fixed:Computer                             -1000.00 
+
+2012 / Oct
+            -7219.10               280.90        2012 oct 5
+                                                   Expenses:Bank_Charges                              -280.90 
+
+             -280.90              -280.90        2012 oct 5
+                                                   Assets:Current:BankAccount:Account1                 280.90 
+
+2013 / Jan
+            -6734.10               485.00        2013 jan 15 (89000) Alice Enterprises
+                                                   ;  For Office Stationary
+                                                   Expenses:Consumables                               -485.00 
+
+           -29234.10            -22500.00        2013 jan 19
+                                                   ;  payment for invoice a
+                                                   Assets:Current:TDS                                -2500.00 
+                                                   Assets:Current:Sundry_Debtors:Vikings             25000.00 
+
+           -21984.10              7250.00        2013 jan 29 (89001) Bob Traders
+                                                   ;  For 22" monitor
+                                                   Assets:Fixed:Computer                             -7250.00 
+
+           -20884.10              1100.00        2013 jan 29 (89002) Bob Traders
+                                                   ;  For 50 DVD set
+                                                   Expenses:Consumables                              -1100.00 
+
+           -25000.00            -25000.00        2013 jan 4
+                                                   ;  Invoice a
+                                                   Income:Receipts                                   25000.00 
+
+                0.00             25000.00        2013 jan 19
+                                                   ;  payment for invoice a
+                                                   Assets:Current:BankAccount:Account1              -22500.00 
+                                                   Assets:Current:TDS                                -2500.00 
+
+            -2500.00             -2500.00        2013 jan 19
+                                                   ;  payment for invoice a
+                                                   Assets:Current:BankAccount:Account1              -22500.00 
+                                                   Assets:Current:Sundry_Debtors:Vikings             25000.00 
+
+            -8250.00             -7250.00        2013 jan 29 (89001) Bob Traders
+                                                   ;  For 22" monitor
+                                                   Assets:Current:BankAccount:Account1                7250.00 
+
+             -485.00              -485.00        2013 jan 15 (89000) Alice Enterprises
+                                                   ;  For Office Stationary
+                                                   Assets:Current:BankAccount:Account1                 485.00 
+
+            -1585.00             -1100.00        2013 jan 29 (89002) Bob Traders
+                                                   ;  For 50 DVD set
+                                                   Assets:Current:BankAccount:Account1                1100.00 
+
+            25000.00             25000.00        2013 jan 4
+                                                   ;  Invoice a
+                                                   Assets:Current:Sundry_Debtors:Vikings            -25000.00 
+
+2013 / Feb
+           -18794.10              2090.00        2013 feb 1 (89003) Bob Traders
+                                                   ;  For modem
+                                                   Expenses:Consumables                              -2090.00 
+
+           -27794.10             -9000.00        2013 feb 9
+                                                   ;  payment for invoice b
+                                                   Assets:Current:TDS                                -1000.00 
+                                                   Assets:Current:Sundry_Debtors:Greeks              10000.00 
+
+           -22794.10              5000.00        2013 feb 14 (89004) Cherry Auditors
+                                                   ;  Audit fees
+                                                   Liability:Expenses_Payable:Audit_Fees             -5000.00 
+
+           -20794.10              2000.00        2013 feb 16 (80005) Deepika
+                                                   ;  January Salary
+                                                   Expenses:Salaries                                 -2000.00 
+
+           -19294.10              1500.00        2013 feb 18 (80006) Bob Traders
+                                                   ;  For Cabinet and spike buster
+                                                   Assets:Fixed:Computer                             -1100.00 
+                                                   Expenses:Consumables                               -400.00 
+
+           -16294.10              3000.00        2013 feb 23 (80007) Ekta
+                                                   Expenses:Rent                                     -1000.00   ;  Dec 2012 rent
+                                                   Expenses:Rent                                     -2000.00   ;  Jan 2013 rent
+
+           -10000.00            -10000.00        2013 feb 4
+                                                   ;  Invoice b
+                                                   Income:Receipts                                   10000.00 
+
+                0.00             10000.00        2013 feb 9
+                                                   ;  payment for invoice b
+                                                   Assets:Current:BankAccount:Account1               -9000.00 
+                                                   Assets:Current:TDS                                -1000.00 
+
+            -3500.00             -1000.00        2013 feb 9
+                                                   ;  payment for invoice b
+                                                   Assets:Current:BankAccount:Account1               -9000.00 
+                                                   Assets:Current:Sundry_Debtors:Greeks              10000.00 
+
+            -9350.00             -1100.00        2013 feb 18 (80006) Bob Traders
+                                                   ;  For Cabinet and spike buster
+                                                   Expenses:Consumables                               -400.00 
+                                                   Assets:Current:BankAccount:Account1                1500.00 
+
+            -3675.00             -2090.00        2013 feb 1 (89003) Bob Traders
+                                                   ;  For modem
+                                                   Assets:Current:BankAccount:Account1                2090.00 
+
+            -4075.00              -400.00        2013 feb 18 (80006) Bob Traders
+                                                   ;  For Cabinet and spike buster
+                                                   Assets:Fixed:Computer                             -1100.00 
+                                                   Assets:Current:BankAccount:Account1                1500.00 
+
+            -1000.00             -1000.00        2013 feb 23 (80007) Ekta
+                                                   Assets:Current:BankAccount:Account1                3000.00 
+
+            -3000.00             -2000.00        2013 feb 23 (80007) Ekta
+                                                   Assets:Current:BankAccount:Account1                3000.00 
+
+            -2000.00             -2000.00        2013 feb 16 (80005) Deepika
+                                                   ;  January Salary
+                                                   Assets:Current:BankAccount:Account1                2000.00 
+
+            35000.00             10000.00        2013 feb 4
+                                                   ;  Invoice b
+                                                   Assets:Current:Sundry_Debtors:Greeks             -10000.00 
+
+            -5000.00             -5000.00        2013 feb 14 (89004) Cherry Auditors
+                                                   ;  Audit fees
+                                                   Assets:Current:BankAccount:Account1                5000.00 
+
+2013 / Mar
+            -1100.00             -1100.00        2013 mar 23
+                                                   ;  Advance tax
+                                                   Assets:Current:BankAccount:Account1                1100.00 
+
+           -14794.10              1500.00        2013 mar 4 (80009) Ekta
+                                                   ;  Feb 2013 rent
+                                                   Expenses:Rent                                     -1500.00 
+
+           -13544.10              1250.00        2013 mar 4 (80010) Bob Traders
+                                                   ;  For DVD drive
+                                                   Assets:Fixed:Computer                             -1250.00 
+
+           -12444.10              1100.00        2013 mar 6 (80011) Deepika
+                                                   ;  Feb Salary
+                                                   Expenses:Salaries                                 -1100.00 
+
+            -7444.10              5000.00        2013 mar 15 (80012)
+                                                   ;  Cash Withdrawl
+                                                   Assets:Current:Cash                               -5000.00 
+
+            -5444.10              2000.00        2013 mar 21 (80013)
+                                                   ;  Cash Withdrawl
+                                                   Assets:Current:Cash                               -2000.00 
+
+            -4344.10              1100.00        2013 mar 23
+                                                   ;  Advance tax
+                                                   Assets:Current:AdvanceTax                         -1100.00 
+
+             1400.00              1400.00        2013 mar 4 (80008) Far Furnishing
+                                                   ;  For curtains
+                                                   Assets:Fixed:Furniture                            -1200.00   ;  Far Furnishing invoice #20
+                                                   Assets:Fixed:Furniture                             -200.00   ;  Transportation cost
+
+             1650.00               250.00        2013 mar 6
+                                                   ;  For office cleaning labour
+                                                   Expenses                                           -250.00 
+
+             2050.00               400.00        2013 mar 6
+                                                   ;  For glass decorations
+                                                   Expenses:Consumables                               -400.00 
+
+             2230.00               180.00        2013 mar 6
+                                                   ;  For Snacks
+                                                   Expenses                                           -180.00 
+
+            -2770.00             -5000.00        2013 mar 15 (80012)
+                                                   ;  Cash Withdrawl
+                                                   Assets:Current:BankAccount:Account1                5000.00 
+
+            -4770.00             -2000.00        2013 mar 21 (80013)
+                                                   ;  Cash Withdrawl
+                                                   Assets:Current:BankAccount:Account1                2000.00 
+
+           -10600.00             -1250.00        2013 mar 4 (80010) Bob Traders
+                                                   ;  For DVD drive
+                                                   Assets:Current:BankAccount:Account1                1250.00 
+
+            -1200.00             -1200.00        2013 mar 4 (80008) Far Furnishing
+                                                   ;  For curtains
+                                                   Assets:Current:Cash                                1400.00 
+
+            -1400.00              -200.00        2013 mar 4 (80008) Far Furnishing
+                                                   ;  For curtains
+                                                   Assets:Current:Cash                                1400.00 
+
+                0.00             -4000.00        2013 mar 28
+                                                   Capital:Share:Bailey                               4000.00 
+
+             4000.00              4000.00        2013 mar 28
+                                                   Capital:Share:Amy                                 -4000.00 
+
+             -250.00              -250.00        2013 mar 6
+                                                   ;  For office cleaning labour
+                                                   Assets:Current:Cash                                 250.00 
+
+             -430.00              -180.00        2013 mar 6
+                                                   ;  For Snacks
+                                                   Assets:Current:Cash                                 180.00 
+
+            -4475.00              -400.00        2013 mar 6
+                                                   ;  For glass decorations
+                                                   Assets:Current:Cash                                 400.00 
+
+            -4500.00             -1500.00        2013 mar 4 (80009) Ekta
+                                                   ;  Feb 2013 rent
+                                                   Assets:Current:BankAccount:Account1                1500.00 
+
+            -3100.00             -1100.00        2013 mar 6 (80011) Deepika
+                                                   ;  Feb Salary
+                                                   Assets:Current:BankAccount:Account1                1100.00 
+
+```

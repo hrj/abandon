@@ -1,0 +1,26 @@
+<abandon>
+  <balance>
+    <accounttree>
+      <account sum="-0.1" cumulative="-43219.1" name="A">
+        <account sum="-10" cumulative="-43210" name="A:c">
+          <account sum="-200" cumulative="-43200" name="A:c:c">
+            <account sum="-3000" cumulative="-43000" name="A:c:c:c">
+              <account sum="-40000" cumulative="-40000" name="A:c:c:c:c"> </account>
+            </account>
+          </account>
+        </account>
+        <account sum="-9" cumulative="-9" name="A:x"> </account>
+      </account>
+      <account sum="0.1" cumulative="43219.1" name="E">
+        <account sum="10" cumulative="43210" name="E:e">
+          <account sum="200" cumulative="43200" name="E:e:e">
+            <account sum="3000" cumulative="43000" name="E:e:e:e">
+              <account sum="40000" cumulative="40000" name="E:e:e:e:e"> </account>
+            </account>
+          </account>
+        </account>
+        <account sum="9" cumulative="9" name="E:z"> </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>

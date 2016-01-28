@@ -1,0 +1,16 @@
+Balance Sheet
+
+Balance Sheet
+─────────────
+
+  -25714.10   Assets                         8500.00   Capital                 
+  -13714.10    ├╴Current                    -1500.00    ├╴Reserves_And_Surplus 
+   -1100.00    │  ├╴AdvanceTax              10000.00    └╴Share                
+   -4344.10    │  ├╴BankAccount:Account1     4000.00       ├╴Bailey            
+   -4770.00    │  ├╴Cash                     6000.00       └╴Hary              
+   -3500.00    │  └╴TDS                     -5000.00   Liability:Expenses_Payable:Audit_Fees
+  -12000.00    └╴Fixed                    
+  -10600.00       ├╴Computer              
+   -1400.00       └╴Furniture             
+────────────────────────────────────────────────────────────────────────────────────────────
+  -25714.10                                  3500.00 = -22214.10

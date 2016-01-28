@@ -8,7 +8,7 @@ object Main extends App {
     ensureJFXIsAvailable()
     AbandonUI.main(args.tail)
   } else {
-    AbandonApp.main(args)
+    CLIMain.runApp(args)
   }
 
   def ensureJFXIsAvailable() {

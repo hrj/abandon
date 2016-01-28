@@ -1,0 +1,23 @@
+2013/3/31
+  Assets:Current:Cash               -1000
+  Assets:Current:Bank               -20000
+  Liabilities:ProfessionalTax       1000
+  Equity:Shares                     30000
+  Assets:Capital:ReservesAndSurplus
+
+
+2013/4/1
+  Expenses:Food                   -400
+  Assets:Current:Branch
+
+2013/4/2
+  Expenses:Clothing               -600
+  Assets:Current:Cash
+
+2013/4/3
+  Assets:Current:Debitor:Client1  -1000
+  Income
+
+2013/4/4
+  Assets:Current:Bank             -1000
+  Assets:Current:Debitor:Client1

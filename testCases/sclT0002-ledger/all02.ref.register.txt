@@ -1,0 +1,40 @@
+Register
+
+2012 / Mar
+   Assets:Current:BankAccount:Account1                            -7500.00             -7500.00
+   Assets:Fixed:Computer                                          -1000.00             -1000.00
+   Capital:Reserves_And_Surplus                                   -1500.00             -1500.00
+   Capital:Share:Amy                                               4000.00              4000.00
+   Capital:Share:Hary                                              6000.00              6000.00
+2012 / Oct
+   Assets:Current:BankAccount:Account1                              280.90             -7219.10
+   Expenses:Bank_Charges                                           -280.90              -280.90
+2013 / Jan
+   Assets:Current:BankAccount:Account1                           -13665.00            -20884.10
+   Assets:Current:Sundry_Debtors:Vikings                              0.00                 0.00
+   Assets:Current:TDS                                             -2500.00             -2500.00
+   Assets:Fixed:Computer                                          -7250.00             -8250.00
+   Expenses:Consumables                                           -1585.00             -1585.00
+   Income:Receipts                                                25000.00             25000.00
+2013 / Feb
+   Assets:Current:BankAccount:Account1                             4590.00            -16294.10
+   Assets:Current:Sundry_Debtors:Greeks                               0.00                 0.00
+   Assets:Current:TDS                                             -1000.00             -3500.00
+   Assets:Fixed:Computer                                          -1100.00             -9350.00
+   Expenses:Consumables                                           -2490.00             -4075.00
+   Expenses:Rent                                                  -3000.00             -3000.00
+   Expenses:Salaries                                              -2000.00             -2000.00
+   Income:Receipts                                                10000.00             35000.00
+   Liability:Expenses_Payable:Audit_Fees                          -5000.00             -5000.00
+2013 / Mar
+   Assets:Current:AdvanceTax                                      -1100.00             -1100.00
+   Assets:Current:BankAccount:Account1                            11950.00             -4344.10
+   Assets:Current:Cash                                            -4770.00             -4770.00
+   Assets:Fixed:Computer                                          -1250.00            -10600.00
+   Assets:Fixed:Furniture                                         -1400.00             -1400.00
+   Capital:Share:Amy                                              -4000.00                 0.00
+   Capital:Share:Bailey                                            4000.00              4000.00
+   Expenses                                                        -430.00              -430.00
+   Expenses:Consumables                                            -400.00             -4475.00
+   Expenses:Rent                                                  -1500.00             -4500.00
+   Expenses:Salaries                                              -1100.00             -3100.00

@@ -1,0 +1,10 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2013-04-01">
+        <post delta="400" name="Expenses"></post>
+        <post delta="-400" name="Assets"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>
