@@ -13,7 +13,7 @@ Directory layour is following:
 	├── c
 	│   ├── c.txt
 	│   └── x.txt
-	├── layout.md
+	├── readme.md
 	├── one.txt
 	├── three.txt
 	└── two.txt

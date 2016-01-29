@@ -166,16 +166,18 @@ object Processor {
     source
   }
 
+  def mkParentDirPath(parentFile: String):String = {
+    Option(new java.io.File(parentFile).getParent()) match {
+      case Some(parentDirPath) => parentDirPath + java.io.File.separator
+      case None => ""
+    }
+  }
+
   def mkRelativeFileName(path: String, parentFile: String) = {
     if (new java.io.File(path).isAbsolute) {
       path
     } else {
-      val parentFilePath = new java.io.File(parentFile).getParent()
-      if (parentFilePath == null) {
-        path
-      } else {
-        parentFilePath + java.io.File.separator + path
-      }
+      mkParentDirPath(parentFile) + path
     }
   }
 

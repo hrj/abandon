@@ -10,6 +10,8 @@ project/target/
 /base/.cache-tests
 /cli/bin/
 /cli/.cache-main
+/cli/.cache-tests
 /gui/bin/
 /gui/.cache-main
+/gui/.cache-tests
 /testCases/*/out.*

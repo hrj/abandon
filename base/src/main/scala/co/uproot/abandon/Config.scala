@@ -53,11 +53,19 @@ object SettingsHelper {
   }
 
   def makeSettings(configFileName: String) = {
+    def handleInput(input: String, confPath: String):List[String] = {
+      val parentPath = Processor.mkParentDirPath(confPath)
+      if (input.startsWith("glob:"))
+        FileUtils.globListFiles(input, parentPath)
+      else
+        List(Processor.mkRelativeFileName(input, confPath))
+    }
+
     val file = new java.io.File(configFileName)
     if (file.exists) {
       try {
         val config = ConfigFactory.parseFile(file).resolve()
-        val inputs = config.getStringList("inputs").asScala.map(Processor.mkRelativeFileName(_, configFileName))
+        val inputs = config.getStringList("inputs").asScala.map(handleInput(_, configFileName)).flatten.toSeq.sorted
         val reports = config.getConfigList("reports").asScala.map(makeReportSettings(_))
         val reportOptions = config.optConfig("reportOptions")
         val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
