@@ -40,7 +40,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "Processor" should "not export a transaction with zero value when showZeroAmount is False" in {
+  it should "not export a transaction with zero value when showZeroAmount is False" in {
     val testInput = """
     2013/1/1
       Expense       -(200 + 40)
@@ -70,7 +70,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "Processor" should "export a transaction with zero value when showZeroAmount is True" in {
+  it should "export a transaction with zero value when showZeroAmount is True" in {
     val testInput = """
     2013/1/1
       Expense       -200
@@ -102,7 +102,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "Processor" should "export no transaction for empty input" in {
+  it should "export no transaction for empty input" in {
     val testInput = """
     """
     val parseResult = AbandonParser.abandon(scanner(testInput))
@@ -118,7 +118,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "Processor" should "export transaction with closing balance" in {
+  it should "export transaction with closing balance" in {
     val testInput = """
       2013/1/1
       Expense       4000
@@ -168,7 +168,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
   }
 
-  "Processor" should "show Exception when 'source' contains same 'accountName'" in {
+  it should "show Exception when 'source' contains same 'accountName'" in {
     val testInput = """
       2013/1/1
       Expense       4000
@@ -198,7 +198,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
   }
 
-  "Processor" should "show Exception when 'destination' is not Present" in {
+  it should "show Exception when 'destination' is not Present" in {
     val testInput = """
       2013/1/1
       Expense       14000
@@ -223,7 +223,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "Processor" should "show Exception when 'destination' is present in 'source'" in {
+  it should "show Exception when 'destination' is present in 'source'" in {
     val testInput = """
       2013/1/1
       Expense       14000
@@ -249,7 +249,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
   }
 
-  "Processor" should "process Alias name" in {
+  it should "process Alias name" in {
     val testInput = """
       2013/1/1
       MyBank       14000
