@@ -33,10 +33,42 @@ object FileUtils {
     }
   }
 
-  def globListFiles(glob: String, path: String): List[String] = {
+  def matcherListFiles(canonicalBasepath: String, matcher: java.nio.file.PathMatcher) = {
+    val files = listDirTree(canonicalBasepath)
+    files.filter { f => matcher.matches(f.toPath) }.map { f => f.toString() }.sorted
+  }
 
-    val matcher = FileSystems.getDefault.getPathMatcher(glob)
+  /**
+   * Cook glob with basepath so that it will match relative path
+   * without leading glob-pattern.
+   */
+  def basepathGlob(glob: String, basepath: String) = {
+    // globStartChar := '*' | '?' | '{' | '[' | os.pathSep | '.'
+    val pathSepRgx = if (java.io.File.separatorChar == '\\') "\\\\" else "/"
+    val regex = "^glob:((\\*)|(\\?)|(\\{)|(\\[)|(" + pathSepRgx + ")|(\\.)).*"
 
-    listDirTree(path).filter { f => matcher.matches(f.toPath) }.map { f => f.toString() }.sorted
+    if (glob.matches(regex))
+      // it start's with special character -> leave it alone
+      glob
+    else
+      "glob:" + basepath + glob.stripPrefix("glob:")
+  }
+
+  def globListFiles(glob: String, basepath: String): List[String] = {
+    assert(glob.startsWith("glob:"))
+    val canonicalBasepath = Processor.mkCanonicalDirPath(basepath)
+
+    val cookedGlob = basepathGlob(glob, canonicalBasepath)
+    val matcher = FileSystems.getDefault.getPathMatcher(cookedGlob)
+    matcherListFiles(canonicalBasepath, matcher)
+  }
+
+  def regexListFiles(regex: String, basepath: String): List[String] = {
+    assert(regex.startsWith("regex:"))
+    val canonicalBasepath = Processor.mkCanonicalDirPath(basepath)
+
+    val matcher = FileSystems.getDefault.getPathMatcher(regex)
+
+    matcherListFiles(canonicalBasepath, matcher)
   }
 }

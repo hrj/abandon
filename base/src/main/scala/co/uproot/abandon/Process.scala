@@ -166,9 +166,24 @@ object Processor {
     source
   }
 
-  def mkParentDirPath(parentFile: String):String = {
-    Option(new java.io.File(parentFile).getParent()) match {
-      case Some(parentDirPath) => parentDirPath + java.io.File.separator
+  /**
+   * dirPath must be path to directory
+   * Returns '/' or '\' terminated canonical path
+   */
+  def mkCanonicalDirPath(dirPath: String): String = {
+    val canonicalPath = (new java.io.File(dirPath)).getCanonicalPath
+    if (canonicalPath.endsWith(java.io.File.separator))
+      // this is root e.g. '/'
+      canonicalPath
+    else
+      canonicalPath + java.io.File.separator
+  }
+  /**
+   * This is '/' or '\' terminated string, or empty
+   */
+  def mkParentDirPath(parentFile: String): String = {
+    Option(new java.io.File(parentFile).getParentFile) match {
+      case Some(parentDir) => mkCanonicalDirPath(parentDir.getCanonicalPath)
       case None => ""
     }
   }
