@@ -59,6 +59,62 @@ case class Date(year: Int, month: Int, day: Int) {
   }
 }
 
+/**
+ * Trait for stackable Transaction filters
+ * These filters operate on "raw" AST level,
+ * so all filtering decisions are based on unprocessed
+ * information.
+ * 
+ * TxnFilterStack is used to glue these filters together.
+ */
+sealed trait TransactionFilter {
+  def filter(txn: Transaction): Boolean
+}
+
+/*
+ * Txn:Time filters
+ * To create filter for time span, stack "Begin" and "End" filters.
+ */
+case class EndDateTxnFilter(end: Date) extends TransactionFilter {
+  override def filter(txn: Transaction) = { txn.date.toInt <= end.toInt }
+}
+case class BeginDateTxnFilter(begin: Date) extends TransactionFilter {
+  override def filter(txn: Transaction) = { begin.toInt <= txn.date.toInt }
+}
+
+case class PayeeTxnFilter(regex: String) extends TransactionFilter {
+  val pattern = java.util.regex.Pattern.compile(regex)
+
+  override def filter(txn: Transaction) = {
+    pattern.matcher(txn.payeeOpt match {
+      case Some(payee) => payee
+      case None => ""
+    }).matches()
+  }
+}
+// TODO Txn:Annotation filter
+// TODO Txn:Post:Account filter
+
+
+/**
+ * Trait for Transaction filter stacks
+ * Filter stack defines relationship between filters
+ * (e.g. f1 && f2,  f1 || f2 or some other, specialized logic)
+ */
+sealed trait TxnFilterStack {
+  def filter(txn: Transaction): Boolean
+}
+
+/**
+ * AND- TxnFilterStack (e.g. f1 && f2 && ..)
+ */
+case class ANDTxnFilterStack(filterStack: Set[TransactionFilter]) extends TxnFilterStack {
+  override def filter(txn: Transaction): Boolean = {
+    filterStack.forall { f => f.filter(txn) }
+  }
+}
+
+
 object DateOrdering extends Ordering[Date] {
   def compare(x: Date, y: Date) = {
     x.toInt - y.toInt

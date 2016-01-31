@@ -187,11 +187,16 @@ object Processor {
     new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
-  def process(entries: Seq[ASTEntry], accountSettings: Seq[AccountSettings]) = {
+  def process(entries: Seq[ASTEntry], accountSettings: Seq[AccountSettings], txnFilters: Option[TxnFilterStack]) = {
     val definitions = filterByType[Definition[BigDecimal]](entries)
     val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
 
-    val transactions = filterByType[Transaction](entries)
+    val transactions = (filterByType[Transaction](entries)).filter { txn =>
+      txnFilters match {
+        case Some(filterStack) => filterStack.filter(txn)
+        case None => { true }
+      }
+    }
     val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
     val accState = new AccountState()
     val aliasMap = accountSettings.collect{ case AccountSettings(name, Some(alias)) => alias -> name }.toMap

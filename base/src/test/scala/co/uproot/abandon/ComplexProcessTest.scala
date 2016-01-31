@@ -21,7 +21,7 @@ class ComplexProcessTest extends FlatSpec with Matchers with Inside {
 	  val xmlTxnSettings = XmlExportSettings(JournalType, None, Seq("not-used.xml"))
 	  val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(xmlBalSettings), None)
 
-	  val appState = Processor.process(astEntries,settings.accounts)
+	  val appState = Processor.process(astEntries,settings.accounts, None)
 	  //TODO: Processor.checkConstaints(appState, settings.eodConstraints)
 
 	  val xmlBalance = Reports.xmlExport(appState, xmlBalSettings)

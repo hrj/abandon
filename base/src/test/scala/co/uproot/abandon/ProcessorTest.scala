@@ -20,7 +20,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
 
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
@@ -50,7 +50,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
@@ -80,7 +80,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
@@ -108,7 +108,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
@@ -129,7 +129,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
@@ -179,7 +179,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
         val source1 = Seq("Income", "Expense")
@@ -208,7 +208,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
@@ -233,7 +233,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(astEntries, _) =>
-        val appState = Processor.process(astEntries, Nil)
+        val appState = Processor.process(astEntries, Nil, None)
         val source = Seq("Income", "Equity")
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
@@ -266,7 +266,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
         val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None)
 
-        val appState = Processor.process(astEntries, settings.accounts)
+        val appState = Processor.process(astEntries, settings.accounts, None)
 
         val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
         inside(ledgerRep) {

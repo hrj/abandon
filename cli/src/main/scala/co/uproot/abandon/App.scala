@@ -139,7 +139,17 @@ object CLIMain  {
       case Right(settings) =>
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
-          val appState = Processor.process(astEntries,settings.accounts)
+
+          /* For example: time span + payee filter stack
+          val txnFilters = Option(
+            ANDTxnFilterStack(Set[TransactionFilter](
+              BeginDateTxnFilter(Date(2011, 1, 1)),
+              EndDateTxnFilter(Date(2017, 1, 1)),
+              PayeeTxnFilter(".*"))))
+          */
+          val txnFilters = None
+          val appState = Processor.process(astEntries,settings.accounts, txnFilters)
+
           Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
