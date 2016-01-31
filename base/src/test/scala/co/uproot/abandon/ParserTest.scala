@@ -9,7 +9,7 @@ import TestHelper._
 
 class ParserTest extends FlatSpec with Matchers with Inside {
 
-  "parser" should "parse empty file" in {
+  "Parser" should "parse empty file" in {
     val testInput = ""
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
@@ -18,7 +18,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a simple transaction" in {
+  it should "parse a simple transaction" in {
     val testInput = """
     2013/1/2
       Expense       200
@@ -45,7 +45,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a simple transaction with ISO 8601 date" in {
+  it should "parse a simple transaction with ISO 8601 date" in {
     val testInput = """
     2013-01-02
       Expense       200
@@ -72,7 +72,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse human readable dates and more than two posts in a transaction" in {
+  it should "parse human readable dates and more than two posts in a transaction" in {
     val testInput = """
     2013/March/1
       Expense       200
@@ -102,7 +102,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse short human readable dates and posts with empty value field" in {
+  it should "parse short human readable dates and posts with empty value field" in {
     val testInput = """
     2013/Mar/1
       Expense       200
@@ -151,7 +151,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a simple expression" in {
+  it should "parse a simple expression" in {
     val testInput = """
     2013/1/2
       Expense       -(200 + 40)
@@ -179,7 +179,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse posts with zero value" in {
+  it should "parse posts with zero value" in {
     val testInput = """
     2013/1/1
       Expense       200
@@ -221,7 +221,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a post with Unary plus(+) zero value" in {
+  it should "parse a post with Unary plus(+) zero value" in {
     val testInput = """
      2013/9/1
       Expense       200
@@ -252,7 +252,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a post with Unary minus(-) zero value" in {
+  it should "parse a post with Unary minus(-) zero value" in {
     val testInput = """
       2013/9/1
        Expense       200
@@ -286,7 +286,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse a simple subtraction expression" in {
+  it should "parse a simple subtraction expression" in {
     val testInput = """
     2013/1/1
       Expense       200-4
@@ -324,7 +324,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   def bd(s: String) = BigDecimal(s)
 
-  "parser" should "parse simple numeric expression" in {
+  it should "parse simple numeric expression" in {
     val tests = Map(
       "0001" -> (bd("1") -> nlit(1)),
       "000" -> (bd("0") -> nlit(0)),
@@ -348,7 +348,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse complex numeric expression" in {
+  it should "parse complex numeric expression" in {
     val tests = Map(
       "0001 + 10.00" -> (bd("11"), AddExpr(nlit(1), nlit(10.00))),
       "10.5 - (2.5 * 2)" -> (bd("5.5"), SubExpr(nlit(10.5), MulExpr(nlit(2.5), nlit(2)))),
@@ -377,7 +377,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "do something about divide by zero" in {
+  it should "do something about divide by zero" in {
     val tests = Map(
       "1 / 0" -> (bd("0"), DivExpr(nlit(1), nlit(0)))
     )
@@ -401,7 +401,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "ensure precedence of operators" in {
+  it should "ensure precedence of operators" in {
     val tests = Map(
       "1 + 2 * 3" -> (bd("7"), AddExpr(nlit(1), MulExpr(nlit(2), nlit(3)))),
       "1 * 2 + 3" -> (bd("5"), AddExpr(MulExpr(nlit(1), nlit(2)), nlit(3))),
@@ -432,7 +432,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "handle parenthesis correctly" in {
+  it should "handle parenthesis correctly" in {
     val tests = Map(
       "1 + (2 * 3)" -> (bd("7"), AddExpr(nlit(1), MulExpr(nlit(2), nlit(3)))),
       "(1 + 2) * 3" -> (bd("9"), MulExpr(AddExpr(nlit(1), nlit(2)), nlit(3))),
@@ -457,7 +457,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  "parser" should "parse month names in date" in {
+  it should "parse month names in date" in {
     val testInput = List(
       "2013/January/1",
       "2013/january/1",
@@ -477,7 +477,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   }
 
-  "parser" should "parse dates in ISO 8601" in {
+  it should "parse dates in ISO 8601" in {
     val testInput = List(
       "2013-01-02"
     )

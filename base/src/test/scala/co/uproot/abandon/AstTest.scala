@@ -11,14 +11,14 @@ class AstTest extends FlatSpec with Matchers {
     testDate.toInt should be(20160102)
   }
 
-  "Date" should "be possible to convert from int" in {  
+  it should "be possible to convert from int" in {
     val testDate = Date.fromInt(20160102)
     testDate.year should be(2016)
     testDate.month should be(1)
     testDate.day should be (2)
   }
   
-  "Dates" should "compare correctly" in {
+  it should "compare correctly" in {
     import scala.util.Sorting
 
     val dates = List(
@@ -53,7 +53,7 @@ class AstTest extends FlatSpec with Matchers {
       }) should be(true)
   }
 
-  "Dates" should "format correctly" in {
+  it should "format correctly" in {
 
     val dates = List(
         Date(2013, 6, 1),
