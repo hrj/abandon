@@ -1,8 +1,4 @@
 
-libraryDependencies += "joda-time" % "joda-time" % "2.9.1"
-
-libraryDependencies += "org.joda" % "joda-convert" % "1.8.1"
-
 libraryDependencies += "org.rogach" %% "scallop" % "0.9.5"
 
 libraryDependencies += "com.typesafe" % "config" % "1.3.0"
