@@ -2,6 +2,7 @@ package co.uproot.abandon
 
 import java.io.File
 import java.nio.file.FileSystems
+import java.util.regex.Pattern
 
 object FileUtils {
 
@@ -38,20 +39,38 @@ object FileUtils {
     files.filter { f => matcher.matches(f.toPath) }.map { f => f.toString() }.sorted
   }
 
+  private def getEscapedFileSeparatorChar() ={
+     if (java.io.File.separatorChar == '\\') """\\""" else "/"
+  }
   /**
    * Cook glob with basepath so that it will match relative path
    * without leading glob-pattern.
    */
   def basepathGlob(glob: String, basepath: String) = {
     // globStartChar := '*' | '?' | '{' | '[' | os.pathSep | '.'
-    val pathSepRgx = if (java.io.File.separatorChar == '\\') "\\\\" else "/"
+    val pathSepRgx = getEscapedFileSeparatorChar
     val regex = "^glob:((\\*)|(\\?)|(\\{)|(\\[)|(" + pathSepRgx + ")|(\\.)).*"
 
-    if (glob.matches(regex))
-      // it start's with special character -> leave it alone
+    if (glob.matches(regex)) {
+      // it begins with special character -> leave it alone
       glob
-    else
-      "glob:" + basepath + glob.stripPrefix("glob:")
+    } else {
+      "glob:" + basepath.replaceAll("""\\""", """\\\\""") + glob.stripPrefix("glob:")
+    }
+  }
+
+  def basepathRegex(pathRegex: String, basepath: String) = {
+    // regexStartChar := '\' | '[' | '.' | '^' | '$' | '(' | os.pathSep
+
+    val pathSepRgx = getEscapedFileSeparatorChar
+    val regex = "^regex:((\\\\)|(\\[)|(\\.)|(\\^)|(\\$)|(\\()|(" + pathSepRgx + ")).*"
+
+    if (pathRegex.matches(regex)) {
+      // it begins with special character -> leave it alone
+      pathRegex
+    } else {
+      "regex:" + Pattern.quote(basepath) + pathRegex.stripPrefix("regex:")
+    }
   }
 
   def globListFiles(glob: String, basepath: String): List[String] = {
@@ -67,7 +86,8 @@ object FileUtils {
     assert(regex.startsWith("regex:"))
     val canonicalBasepath = Processor.mkCanonicalDirPath(basepath)
 
-    val matcher = FileSystems.getDefault.getPathMatcher(regex)
+    val cookedRegex = basepathRegex(regex, canonicalBasepath)
+    val matcher = FileSystems.getDefault.getPathMatcher(cookedRegex)
 
     matcherListFiles(canonicalBasepath, matcher)
   }

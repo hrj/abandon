@@ -19,5 +19,5 @@
  
 #### New features
  - New report type `balance` for XML format
- - In journal configuration `input` could be specified as glob or regex pattern. See `doc/abandon.md` for further info.
+ - In journal configuration `inputs` could be specified as glob or regex pattern. See `doc/abandon.md` for further info.
 

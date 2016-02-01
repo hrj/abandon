@@ -16,7 +16,7 @@ There could be other "include" directives inside these primary inputs.
 
 Input directive supports following formats:
 
-	input += input
+	inputs += input
 
 where input could be:
  
@@ -98,8 +98,8 @@ Regex syntax supported by Adandon is based on Java's regex library.
 There is good tutorial about regex in 
 [Java Tutorial: Regex](https://docs.oracle.com/javase/tutorial/essential/regex/index.html)
 
-Regex based path matching is activated by prefixing input path with "regex:".
+Regex based path matching is activated by prefixing input path with "regex:". 
 
-There is no cooked, basepath functionality with `regex`, the pattern is always matched 
-against full path of file.
+Abandon regex system supports also basepath cooked form of regex, please see 
+documentation of glob syntax for further info how cooked mode works.
 

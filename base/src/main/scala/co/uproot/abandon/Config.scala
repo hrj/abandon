@@ -55,12 +55,13 @@ object SettingsHelper {
   def makeSettings(configFileName: String) = {
     def handleInput(input: String, confPath: String): List[String] = {
       val parentPath = Processor.mkParentDirPath(confPath)
-      if (input.startsWith("glob:"))
+      if (input.startsWith("glob:")) {
         FileUtils.globListFiles(input, parentPath)
-      else if (input.startsWith("regex:"))
+      } else if (input.startsWith("regex:")) {
         FileUtils.regexListFiles(input, parentPath)
-      else
+      } else {
         List(Processor.mkRelativeFileName(input, confPath))
+      }
     }
 
     val file = new java.io.File(configFileName)

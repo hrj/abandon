@@ -57,6 +57,66 @@ class BasepathGlobTest extends FlatSpec with Matchers with Inside {
   }
 }
 
+class BasepathRegexTest extends FlatSpec with Matchers with Inside {
+  val basepath = "/foo/bar/"
+
+  "basepathRegex" should "leave abs path alone" in {
+    val doNotTouch = "regex:/some/abs/path/.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+
+  it should "leave relative paths alone" in {
+    val doNotTouch = "regex:\\.\\./.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+
+  it should "leave backslash alone 'e.g. \\d'" in {
+    val doNotTouch = "regex:\\d+/.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+
+    it should "leave character classes alone '['" in {
+    val doNotTouch = "regex:[a-z]+/.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+
+  it should "leave match anything alone ('.*')" in {
+    val doNotTouch = "regex:.*/.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+
+  it should "leave begin of string alone ('^')" in {
+    val doNotTouch = "regex:^2015/.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+  it should "leave end of string alone ('$')" in {
+    val doNotTouch = "regex:$"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+
+  it should "leave begin of string alone ('(')" in {
+    val doNotTouch = "regex:((2015)|(2014))/.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, basepath) should equal(doNotTouch)
+  }
+
+
+  it should "prefix plain glob with absolute path" in {
+    val doNotTouch = "regex:a/.*\\.txt"
+
+    FileUtils.basepathRegex(doNotTouch, Processor.mkCanonicalDirPath(basepath)) should
+      equal("regex:" + java.util.regex.Pattern.quote(basepath)  + "a/.*\\.txt")
+  }
+}
+
+
 class WildcardInputTest extends FlatSpec with Matchers with Inside {
 
   /*
