@@ -87,7 +87,7 @@ The command line options are:
 
 The config file can specify which reports to generate and how. Some of these options are available as command line parameters too.
 
-As of now, the preferred way of running the program is by specifying a config file. Look at `examples/simple/accounts.conf` for an example config file.
+As of now, the preferred way of running the program is by specifying a config file. Look at `examples/simple/accounts.conf` for an example config file, and `doc/abandon.md` for further instructions and information about Abandon.
 
 ### Roadmap
 

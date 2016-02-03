@@ -14,9 +14,10 @@
    - Clarified meaning of "type": it could be either "journal" or "balance"
    - New configuration keyword "format": which could be "ledger" or "xml"
 
-#### fixes
- - TBD
-
-#### additions
- - TBD
+#### Fixes
+ - Fix for #72: output of xml export gets duplicated with stdout (6d5e539b)
  
+#### New features
+ - New report type `balance` for XML format
+ - In journal configuration `inputs` could be specified as glob or regex pattern. See `doc/abandon.md` for further info.
+
