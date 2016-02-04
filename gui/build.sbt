@@ -1,8 +1,9 @@
 import AssemblyKeys._ // put this at the top of the file
+import Dependencies._
 
 assemblySettings
 
-libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.40-R8"
+libraryDependencies += scalaFX
 
 unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/jfxrt.jar"))
 
