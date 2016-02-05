@@ -40,8 +40,11 @@ class CliTestRunner extends FlatSpec with Matchers with Inside {
         val ref = rf.toPath.getFileName.toString()
         val output = "out." + basename + "." + ref.stripPrefix(basename + ".ref.")
 
-        // Remove old output files - these can potentially mask test failures
-        Files.deleteIfExists(Paths.get(testDir.toString, output))
+        /*
+         * Old output files - these can potentially mask test failures
+         * Let's err on safe side and not delete files for now.
+         * TODO: Use conditionally in memory file system for output
+         */
 
         if (ref.endsWith(".xml")) {
           TestVec(testDir.toString + "/" + output,
