@@ -129,7 +129,7 @@ object AbandonUI extends JFXApp {
   def createReportTabs(firstRun: Boolean, settings: Settings) = {
     val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
     if (!parseError) {
-      val appState = Processor.process(astEntries, settings.accounts)
+      val appState = Processor.process(astEntries, settings.accounts, settings.txnFilters)
       if (firstRun) {
         settings.reports.foreach(CurrReports.addReport(appState, settings, _))
       } else {

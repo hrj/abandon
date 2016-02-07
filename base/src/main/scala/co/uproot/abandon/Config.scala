@@ -12,6 +12,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
+  val filters = propsLong[String]("filter", descr="Transaction filters", keyName=" name")
   // val trail = trailArg[String]()
 }
 
@@ -28,15 +29,45 @@ object SettingsHelper {
   }
 
   def getCompleteSettings(args: Seq[String]) = {
+    def makeDate(date: String) = {
+      val jDate = java.time.LocalDate.parse(date,
+          java.time.format.DateTimeFormatter.ISO_DATE)
+      Date(jDate.getYear, jDate.getMonthValue, jDate.getDayOfMonth)
+    }
     val cliConf = new AbandonCLIConf(args)
+
+    val txnFilters =
+      if (cliConf.filters.isEmpty) {
+        None
+      }else {
+        val txnfs: Seq[TransactionFilter] =
+          cliConf.filters.map({
+            case (key, value) if (key == "begin") => {
+              BeginDateTxnFilter(makeDate(value))
+            }
+            case (key, value) if (key == "end") => {
+              EndDateTxnFilter(makeDate(value))
+            }
+            case (key, value) if (key == "payee") => {
+              PayeeTxnFilter(value)
+            }
+            case _ => {
+              // TODO fix this
+              throw new RuntimeException("unknown filter")
+            }
+          }).toSeq
+
+        Option(ANDTxnFilterStack(txnfs))
+      }
+
     val configOpt = cliConf.config.get
     configOpt match {
       case Some(configFileName) =>
-        makeSettings(configFileName)
+        makeSettings(configFileName, txnFilters)
       case _ =>
         val inputs = cliConf.inputs.get.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
+        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, txnFilters, None))
     }
   }
 
@@ -52,7 +83,7 @@ object SettingsHelper {
     }
   }
 
-  def makeSettings(configFileName: String) = {
+  def makeSettings(configFileName: String, txnFilters: Option[TxnFilterStack]) = {
     val file = new java.io.File(configFileName)
     if (file.exists) {
       try {
@@ -66,7 +97,7 @@ object SettingsHelper {
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-        Right(Settings(inputs, eodConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file)))
+        Right(Settings(inputs, eodConstraints, accounts, reports, ReportOptions(isRight), exports, txnFilters, Some(file)))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -199,6 +230,7 @@ case class Settings(
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
+  txnFilters: Option[TxnFilterStack],
   configFileOpt: Option[java.io.File]) {
   def getConfigRelativePath(path: String) = {
     configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)

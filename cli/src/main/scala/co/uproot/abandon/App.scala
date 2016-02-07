@@ -90,7 +90,22 @@ object CLIMain  {
     }
   }
 
-  def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData]) = {
+  def getFilterWarnings(txnFilters: Option[TxnFilterStack], indent: String): List[String] = {
+    txnFilters match {
+      case Some(txnFilters) => {
+        indent + txnFilters.description() ::
+        txnFilters.filterDescriptions().map { desc =>
+          indent * 2 + desc
+        }.toList
+      }
+      case None => Nil
+    }
+  }
+
+  def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
+
+    txnFilterTxt.foreach { line => reportWriter.println("; " + line)}
+
     ledgerRep foreach { reportGroup =>
       reportWriter.println(reportGroup.date.formatCompactYYYYMMDD)
       val formatStr = "%-" + (reportGroup.maxNameLength + 4) + "s %s"
@@ -140,15 +155,8 @@ object CLIMain  {
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
 
-          /* For example: time span + payee filter stack
-          val txnFilters = Option(
-            ANDTxnFilterStack(Set[TransactionFilter](
-              BeginDateTxnFilter(Date(2011, 1, 1)),
-              EndDateTxnFilter(Date(2017, 1, 1)),
-              PayeeTxnFilter(".*"))))
-          */
           val txnFilters = None
-          val appState = Processor.process(astEntries,settings.accounts, txnFilters)
+          val appState = Processor.process(astEntries,settings.accounts, settings.txnFilters)
 
           Processor.checkConstaints(appState, settings.eodConstraints)
           settings.exports.foreach { exportSettings =>
@@ -158,11 +166,12 @@ object CLIMain  {
               println(s"Exporting to: $filePath")
             }
             exportSettings match {
+              // TODO missing warning
               case balSettings: LedgerExportSettings =>
                 val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-                exportAsLedger(reportWriter, ledgerRep)
+                exportAsLedger(reportWriter, ledgerRep, getFilterWarnings(settings.txnFilters, " "))
               case xmlSettings: XmlExportSettings =>
-                val xmlData = Reports.xmlExport(appState, xmlSettings)
+                val xmlData = Reports.xmlExport(appState, xmlSettings, settings.txnFilters)
                 reportWriter.printXml(xmlData)
             }
             reportWriter.close
@@ -179,6 +188,12 @@ object CLIMain  {
             }
 
             reportWriter.printHeading(reportSettings.title)
+
+            if (settings.txnFilters.nonEmpty) {
+              reportWriter.println("ACTIVE FILTER")
+              getFilterWarnings(settings.txnFilters, "  ").foreach { line => reportWriter.println(line)}
+              reportWriter.println("")
+            }
 
             reportSettings match {
               case balSettings: BalanceReportSettings =>

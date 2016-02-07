@@ -23,7 +23,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries, Nil, None)
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
         inside(ledgerRep) {
@@ -53,7 +53,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries, Nil, None)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
         inside(ledgerRep) {
@@ -83,7 +83,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries, Nil, None)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil)
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
         inside(ledgerRep) {
@@ -111,7 +111,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val appState = Processor.process(astEntries, Nil, None)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
         ledgerRep should be (Nil)
@@ -135,7 +135,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = Seq(ClosureExportSettings(source, destination))
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
         inside(ledgerRep) {
@@ -189,7 +189,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = closure1 ++ closure2
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
 
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val ledgerRep = intercept[InputError] {
           Reports.ledgerExport(appState, settings, balSettings)
@@ -214,7 +214,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = Seq(ClosureExportSettings(source, destination))
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val ledgerRep = intercept[MissingDestinationError] {
           Reports.ledgerExport(appState, settings, balSettings)
@@ -239,7 +239,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val closure = Seq(ClosureExportSettings(source, destination))
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
-        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None,None)
 
         val ledgerRep = intercept[SourceDestinationClashError] {
           Reports.ledgerExport(appState, settings, balSettings)
@@ -264,7 +264,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val accounts = Seq(AccountSettings(name, Some(alias)))
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
-        val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None)
+        val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None, None)
 
         val appState = Processor.process(astEntries, settings.accounts, None)
 

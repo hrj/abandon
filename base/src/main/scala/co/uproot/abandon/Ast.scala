@@ -64,11 +64,13 @@ case class Date(year: Int, month: Int, day: Int) {
  * These filters operate on "raw" AST level,
  * so all filtering decisions are based on unprocessed
  * information.
- * 
+ *
  * TxnFilterStack is used to glue these filters together.
  */
 sealed trait TransactionFilter {
   def filter(txn: Transaction): Boolean
+  def description(): String
+  def xmlDescription(): xml.Node
 }
 
 /*
@@ -77,9 +79,13 @@ sealed trait TransactionFilter {
  */
 case class EndDateTxnFilter(end: Date) extends TransactionFilter {
   override def filter(txn: Transaction) = { txn.date.toInt <= end.toInt }
+  override def description() = { "end: Transaction date is on or before: " + end.formatISO8601Ext }
+  override def xmlDescription() = { <filter type="end" date={ end.formatISO8601Ext } />}
 }
 case class BeginDateTxnFilter(begin: Date) extends TransactionFilter {
   override def filter(txn: Transaction) = { begin.toInt <= txn.date.toInt }
+  override def description() = { "begin: Transaction date is on or after: " + begin.formatISO8601Ext }
+  override def xmlDescription() = { <filter type="begin" date={ begin.formatISO8601Ext } />}
 }
 
 case class PayeeTxnFilter(regex: String) extends TransactionFilter {
@@ -91,10 +97,11 @@ case class PayeeTxnFilter(regex: String) extends TransactionFilter {
       case None => ""
     }).matches()
   }
+  override def description() = { "payee: Payee must match \"" + pattern.toString + "\""}
+  override def xmlDescription() = { <filter type="payee" pattern={ pattern.toString } /> }
 }
 // TODO Txn:Annotation filter
 // TODO Txn:Post:Account filter
-
 
 /**
  * Trait for Transaction filter stacks
@@ -103,17 +110,35 @@ case class PayeeTxnFilter(regex: String) extends TransactionFilter {
  */
 sealed trait TxnFilterStack {
   def filter(txn: Transaction): Boolean
+  def description(): String
+  def filterDescriptions(): Seq[String]
+  def xmlDescription(): xml.Node
 }
 
 /**
  * AND- TxnFilterStack (e.g. f1 && f2 && ..)
  */
-case class ANDTxnFilterStack(filterStack: Set[TransactionFilter]) extends TxnFilterStack {
+case class ANDTxnFilterStack(filterStack: Seq[TransactionFilter]) extends TxnFilterStack {
   override def filter(txn: Transaction): Boolean = {
     filterStack.forall { f => f.filter(txn) }
   }
+  override def description() = {
+    assert(!filterStack.isEmpty)
+    "All following conditions must be true:"
+  }
+  override def filterDescriptions() = {
+    assert(!filterStack.isEmpty)
+    filterStack.map({case f => f.description})
+  }
+  override def xmlDescription(): xml.Node = {
+    assert(!filterStack.isEmpty)
+    <filters type="every">
+    {
+      filterStack.map({ filt => filt.xmlDescription })
+    }
+    </filters>
+  }
 }
-
 
 object DateOrdering extends Ordering[Date] {
   def compare(x: Date, y: Date) = {
