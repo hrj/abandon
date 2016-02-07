@@ -6,7 +6,6 @@ import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.json.Lexer
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
-import org.joda.time.LocalDate
 
 class AbandonLexer extends StdLexical with ImplicitConversions {
   import scala.util.parsing.input.CharArrayReader.EofCh
@@ -229,10 +228,10 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private def isValidDate(y: Int, m: Int, d: Int): Boolean = {
     try {
-      new LocalDate(y, m, d)
+      java.time.LocalDate.of(y, m, d)
       true
     } catch {
-      case _: org.joda.time.IllegalFieldValueException => false
+      case _: java.time.DateTimeException => false
     }
   }
 }

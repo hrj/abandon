@@ -22,6 +22,20 @@ Inside a test directory, there must be:
  - reference output files, filenames MUST follow convention: 
    (e.g. bal01.ref.balance.xml and bal01.ref.journal.xml)
 
+ - Optionally use extra command line arguments for current test case.
+   These arguments are listed on "args"-file (e.g. bal01.args),
+   one argument per line, and this file MUST NOT contain
+   "-c", "conf-file" args.
+
+   For example filter-arguments:
+   ```
+   --filter
+   begin=2013-01-01
+   end=2013-12-31
+   ```
+   Each argument line is trimmed, so whitespace is removed
+   from begining and at end.
+
 Abandon configuration MUST output one file per reference file
 in following filename format:
    e.g. bal01.conf -> bal01.ref.balance.xml -> out.bal01.balance.xml

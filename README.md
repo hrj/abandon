@@ -72,7 +72,7 @@ The last line shows the total of the top level accounts, which in this case is `
 * An interactive GUI for viewing reports. 
 
 ### Installation
-* Install **Oracle Java 7** or **Java 8 from any provider**.
+* Install **Java 8 from any provider**.
   Other versions of Java will work fine for the CLI, but the GUI requires the above specific versions.
 * Download and extract the `Abandon` binaries from [here](https://github.com/hrj/abandon/releases)
 * Use the `*.sh` files to run on `*nix` and `Mac` or the `*.bat` files to run on `Windows`.
@@ -87,7 +87,7 @@ The command line options are:
 
 The config file can specify which reports to generate and how. Some of these options are available as command line parameters too.
 
-As of now, the preferred way of running the program is by specifying a config file. Look at `examples/simple/accounts.conf` for an example config file.
+As of now, the preferred way of running the program is by specifying a config file. Look at `examples/simple/accounts.conf` for an example config file, and `doc/abandon.md` for further instructions and information about Abandon.
 
 ### Roadmap
 
