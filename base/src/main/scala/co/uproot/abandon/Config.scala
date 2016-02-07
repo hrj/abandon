@@ -28,12 +28,31 @@ object SettingsHelper {
     }
   }
 
-  def getCompleteSettings(args: Seq[String]) = {
+  def createTxnFilter(key: String, value: String): TransactionFilter = {
     def makeDate(date: String) = {
       val jDate = java.time.LocalDate.parse(date,
           java.time.format.DateTimeFormatter.ISO_DATE)
       Date(jDate.getYear, jDate.getMonthValue, jDate.getDayOfMonth)
     }
+
+    (key, value) match {
+      case (key, value) if (key == "begin") => {
+        BeginDateTxnFilter(makeDate(value))
+      }
+      case (key, value) if (key == "end") => {
+        EndDateTxnFilter(makeDate(value))
+      }
+      case (key, value) if (key == "payee") => {
+        PayeeTxnFilter(value)
+      }
+      case _ => {
+        // TODO fix this
+        throw new RuntimeException("unknown filter")
+      }
+    }
+  }
+
+  def getCompleteSettings(args: Seq[String]) = {
     val cliConf = new AbandonCLIConf(args)
 
     val txnFilters =
@@ -41,22 +60,7 @@ object SettingsHelper {
         None
       }else {
         val txnfs: Seq[TransactionFilter] =
-          cliConf.filters.map({
-            case (key, value) if (key == "begin") => {
-              BeginDateTxnFilter(makeDate(value))
-            }
-            case (key, value) if (key == "end") => {
-              EndDateTxnFilter(makeDate(value))
-            }
-            case (key, value) if (key == "payee") => {
-              PayeeTxnFilter(value)
-            }
-            case _ => {
-              // TODO fix this
-              throw new RuntimeException("unknown filter")
-            }
-          }).toSeq
-
+          cliConf.filters.map({case (k,v) => createTxnFilter(k, v)}).toSeq
         Option(ANDTxnFilterStack(txnfs))
       }
 
@@ -83,7 +87,7 @@ object SettingsHelper {
     }
   }
 
-  def makeSettings(configFileName: String, txnFilters: Option[TxnFilterStack]) = {
+  def makeSettings(configFileName: String, txnFiltersCLI: Option[TxnFilterStack]) = {
     def handleInput(input: String, confPath: String): List[String] = {
       val parentPath = Processor.mkParentDirPath(confPath)
       if (input.startsWith("glob:")) {
@@ -108,6 +112,24 @@ object SettingsHelper {
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
+
+       /*
+        * filters, precedence
+        *  - conf none, cli none => None
+        *  - conf none, cli some => cli
+        *  - conf some, cli some => cli
+        */
+        val txnFilters = txnFiltersCLI match {
+          case Some(txnfs) => Option(txnfs)
+          case None =>
+            try {
+              val txnfs = config.getStringList("filters").asScala.map(s => s.split("=", 2)).
+                  map({ case Array(k, v) => createTxnFilter(k, v) })
+              Option(ANDTxnFilterStack(txnfs))
+            } catch {
+              case e: ConfigException.Missing => None
+            }
+        }
         Right(Settings(inputs, eodConstraints, accounts, reports, ReportOptions(isRight), exports, txnFilters, Some(file)))
       } catch {
         case e: ConfigException => Left(e.getMessage)

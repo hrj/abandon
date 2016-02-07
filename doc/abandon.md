@@ -5,11 +5,23 @@
  - '-g' := Start graphical GUI
  - '-c' <conf-file> := path to journal's configuration file
  - '-i' <input-file> := input file, could be specified inside conf-file
+ - '--filter' <filter-definition> := Transaction filter, please Transaction filters for further info
+
+## Transaction filters
+
+With transaction filters, you can select which transactions are used for reports and exports.
+Only those transactions which pass or match filter criteria, will be processed.
+
+Currently there are following filters available
  
+ - `begin=ISO-DATE`, include transactions starting from ISO-DATE, including that date 
+ - `end=ISO-DATE`, include transaction up to ISO-DATE, includind that date
+ - `payee=REGEX`, include all transactions which payee description match REGEX
+
 ## Configuration file
 
 
-### Input -directive
+### Inputs -directive
 
 Input directive defines primary inputs for this particular journal. 
 There could be other "include" directives inside these primary inputs.
@@ -103,3 +115,18 @@ Regex based path matching is activated by prefixing input path with "regex:".
 Abandon regex system supports also basepath cooked form of regex, please see 
 documentation of glob syntax for further info how cooked mode works.
 
+### Filters -directive
+
+Filters could be also defined in configuration file, with same way as on command line.
+
+For example:
+```
+filters += "begin=2015-01-01"
+filters += "end=2015-12-31"
+```
+
+Or same as single line:
+
+`filters = ["begin=2012-02-01", "end=2016-01-02"]`
+
+For full information about filters, please see "Transaction filters" section.
