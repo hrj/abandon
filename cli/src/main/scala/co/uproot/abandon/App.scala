@@ -104,7 +104,11 @@ object CLIMain  {
 
   def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
 
-    txnFilterTxt.foreach { line => reportWriter.println("; " + line)}
+    if (txnFilterTxt.nonEmpty) {
+      reportWriter.println("; ACTIVE FILTER")
+      txnFilterTxt.foreach { line => reportWriter.println("; " + line) }
+      reportWriter.println(";")
+    }
 
     ledgerRep foreach { reportGroup =>
       reportWriter.println(reportGroup.date.formatCompactYYYYMMDD)
