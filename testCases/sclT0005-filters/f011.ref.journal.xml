@@ -1,0 +1,41 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="payee" pattern=".*one"/>
+    </filters>
+  </info>
+  <journal>
+    <transactions>
+      <txn date="2016-01-31">
+        <payee>begin off by one</payee>
+        <post delta="2" name="Expenses:E02"></post>
+        <post delta="-2" name="Assets:A02"></post>
+      </txn>
+      <txn date="2016-02-01">
+        <payee>begin off by one</payee>
+        <post delta="3" name="Expenses:E03"></post>
+        <post delta="-3" name="Assets:A03"></post>
+      </txn>
+      <txn date="2016-02-02">
+        <payee>begin off by one</payee>
+        <post delta="5" name="Expenses:E05"></post>
+        <post delta="-5" name="Assets:A05"></post>
+      </txn>
+      <txn date="2016-02-29">
+        <payee>end off by one</payee>
+        <post delta="29" name="Expenses:E29"></post>
+        <post delta="-29" name="Assets:A29"></post>
+      </txn>
+      <txn date="2016-03-01">
+        <payee>end off by one</payee>
+        <post delta="31" name="Expenses:E31"></post>
+        <post delta="-31" name="Assets:A31"></post>
+      </txn>
+      <txn date="2016-03-02">
+        <payee>end off by one</payee>
+        <post delta="37" name="Expenses:E37"></post>
+        <post delta="-37" name="Assets:A37"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

@@ -1,0 +1,23 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="annotation" pattern="(ann)|(matchme)"/>
+    </filters>
+  </info>
+  <balance>
+    <accounttree>
+      <account sum="0" cumulative="-41" name="Assets">
+        <account sum="-7" cumulative="-7" name="Assets:A07"> </account>
+        <account sum="-11" cumulative="-11" name="Assets:A11"> </account>
+        <account sum="0" cumulative="-23" name="Assets:MatchSubAccount">
+          <account sum="-23" cumulative="-23" name="Assets:MatchSubAccount:A23"> </account>
+        </account>
+      </account>
+      <account sum="0" cumulative="41" name="Expenses">
+        <account sum="7" cumulative="7" name="Expenses:E07"> </account>
+        <account sum="11" cumulative="11" name="Expenses:E11"> </account>
+        <account sum="23" cumulative="23" name="Expenses:E23"> </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>

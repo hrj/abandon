@@ -1,0 +1,27 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="payee" pattern=".*one"/>
+    </filters>
+  </info>
+  <balance>
+    <accounttree>
+      <account sum="0" cumulative="-107" name="Assets">
+        <account sum="-2" cumulative="-2" name="Assets:A02"> </account>
+        <account sum="-3" cumulative="-3" name="Assets:A03"> </account>
+        <account sum="-5" cumulative="-5" name="Assets:A05"> </account>
+        <account sum="-29" cumulative="-29" name="Assets:A29"> </account>
+        <account sum="-31" cumulative="-31" name="Assets:A31"> </account>
+        <account sum="-37" cumulative="-37" name="Assets:A37"> </account>
+      </account>
+      <account sum="0" cumulative="107" name="Expenses">
+        <account sum="2" cumulative="2" name="Expenses:E02"> </account>
+        <account sum="3" cumulative="3" name="Expenses:E03"> </account>
+        <account sum="5" cumulative="5" name="Expenses:E05"> </account>
+        <account sum="29" cumulative="29" name="Expenses:E29"> </account>
+        <account sum="31" cumulative="31" name="Expenses:E31"> </account>
+        <account sum="37" cumulative="37" name="Expenses:E37"> </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>

@@ -1,0 +1,24 @@
+Balance Sheet
+
+Balance Sheet
+─────────────
+
+ACTIVE FILTER
+  All following conditions must be true:
+    begin: Transaction date is on or after: 2016-02-03
+    end: Transaction date is on or before: 2016-02-22
+    annotation: Annotation must match "(^$)|(ann)"
+    payee: Payee must match "(.*by.*)|(matchme)"
+    account: At least one of transaction's accounts must match "(.*:MatchSubAccount:.*)|(.*:E11)"
+
+  -47.00   Assets               
+  -11.00    ├╴A11               
+  -17.00    ├╴A17               
+  -19.00    └╴A19               
+   47.00   Expenses             
+   11.00    ├╴E11               
+   36.00    └╴MatchSubAccount   
+   17.00       ├╴E17            
+   19.00       └╴E19            
+────────────────────────────────────────────
+    0.00                         0.00 = Zero

@@ -1,0 +1,17 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="payee" pattern=".*matchme"/>
+    </filters>
+  </info>
+  <balance>
+    <accounttree>
+      <account sum="0" cumulative="-11" name="Assets">
+        <account sum="-11" cumulative="-11" name="Assets:A11"> </account>
+      </account>
+      <account sum="0" cumulative="11" name="Expenses">
+        <account sum="11" cumulative="11" name="Expenses:E11"> </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>
