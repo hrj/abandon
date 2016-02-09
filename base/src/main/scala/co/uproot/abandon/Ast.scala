@@ -95,13 +95,48 @@ case class PayeeTxnFilter(regex: String) extends TransactionFilter {
     pattern.matcher(txn.payeeOpt match {
       case Some(payee) => payee
       case None => ""
-    }).matches()
+    }).matches
   }
   override def description() = { "payee: Payee must match \"" + pattern.toString + "\""}
   override def xmlDescription() = { <filter type="payee" pattern={ pattern.toString } /> }
 }
-// TODO Txn:Annotation filter
-// TODO Txn:Post:Account filter
+
+/**
+ * Annotation Txn filter
+ *  - returns all transactions with matching annotation
+ */
+case class AnnotationTxnFilter(regex: String) extends TransactionFilter {
+  val pattern = java.util.regex.Pattern.compile(regex)
+
+  override def filter(txn: Transaction) = {
+    pattern.matcher(txn.annotationOpt match {
+      case Some(ann) => ann
+      case None => ""
+    }).matches
+  }
+  override def description() = { "annotation: Annotation must match \"" + pattern.toString + "\"" }
+  override def xmlDescription() = { <filter type="annotation" pattern={ pattern.toString }/> }
+}
+
+/**
+ * Account Txn filter
+ * Returns all transactions which have at least one matching account name
+ */
+case class AccountTxnFilter(regex: String) extends TransactionFilter {
+  val pattern = java.util.regex.Pattern.compile(regex)
+
+  override def filter(txn: Transaction) = {
+    txn.posts.exists { post =>
+      pattern.matcher(post.accName.toString).matches
+    }
+  }
+  override def description() = { "account: At least one of transaction's accounts must match \"" + pattern.toString + "\"" }
+  override def xmlDescription() = { <filter type="account" pattern={ pattern.toString }/> }
+}
+
+// TODO Txn comment filter
+// TODO Txn:Post comment filter
+
 
 /**
  * Trait for Transaction filter stacks

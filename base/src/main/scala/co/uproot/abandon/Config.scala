@@ -45,6 +45,12 @@ object SettingsHelper {
       case (key, value) if (key == "payee") => {
         PayeeTxnFilter(value)
       }
+      case (key, value) if (key == "account") => {
+        AccountTxnFilter(value)
+      }
+      case (key, value) if (key == "annotation") => {
+        AnnotationTxnFilter(value)
+      }
       case _ => {
         // TODO fix this
         throw new RuntimeException("unknown filter")
