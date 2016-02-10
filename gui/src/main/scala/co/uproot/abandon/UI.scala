@@ -59,7 +59,15 @@ object AbandonUI extends JFXApp {
     }
 
   def updateInfo(appState: AppState, settings: Settings, processedFiles: Set[String]) = {
-    infoTab.content = new Label("Processed files:\n" + processedFiles.mkString("\n"))
+    val warnings = FilterStackHelper.getFilterWarnings(settings.txnFilters, "   ")
+    val warningsTxt =
+      if (warnings.isEmpty) {
+        ""
+      } else {
+        "ACTIVE FILTER\n" + warnings.mkString("\n") + "\n\n"
+      }
+
+    infoTab.content = new Label(warningsTxt + "Processed files:\n" + processedFiles.mkString("\n"))
   }
 
   val tabPane = new TabPane {
@@ -151,7 +159,12 @@ object AbandonUI extends JFXApp {
         def updateReports(firstRun: Boolean): Unit = {
           val processedFiles = createReportTabs(firstRun, settings)
           Platform.runLater {
-            StatusBar.setText("Report generated on " + new java.util.Date)
+            val statusBarTxt = (settings.txnFilters match {
+              case Some(txnfs) =>  "ACTIVE FILTER! "
+              case None => ""
+            }) + "Report generated on " + new java.util.Date
+
+            StatusBar.setText(statusBarTxt)
           }
           inputFileWatcher.watch(processedFiles, () => {
             Platform.runLater({ updateReports(false) })

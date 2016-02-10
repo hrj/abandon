@@ -137,6 +137,19 @@ case class AccountTxnFilter(regex: String) extends TransactionFilter {
 // TODO Txn comment filter
 // TODO Txn:Post comment filter
 
+object FilterStackHelper {
+  def getFilterWarnings(txnFilters: Option[TxnFilterStack], indent: String): List[String] = {
+    txnFilters match {
+      case Some(txnFilters) => {
+        indent + txnFilters.description() ::
+        txnFilters.filterDescriptions().map { desc =>
+          indent * 2 + desc
+        }.toList
+      }
+      case None => Nil
+    }
+  }
+}
 
 /**
  * Trait for Transaction filter stacks

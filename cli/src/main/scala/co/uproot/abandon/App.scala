@@ -90,18 +90,6 @@ object CLIMain  {
     }
   }
 
-  def getFilterWarnings(txnFilters: Option[TxnFilterStack], indent: String): List[String] = {
-    txnFilters match {
-      case Some(txnFilters) => {
-        indent + txnFilters.description() ::
-        txnFilters.filterDescriptions().map { desc =>
-          indent * 2 + desc
-        }.toList
-      }
-      case None => Nil
-    }
-  }
-
   def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
 
     if (txnFilterTxt.nonEmpty) {
@@ -173,7 +161,7 @@ object CLIMain  {
               // TODO missing warning
               case balSettings: LedgerExportSettings =>
                 val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-                exportAsLedger(reportWriter, ledgerRep, getFilterWarnings(settings.txnFilters, " "))
+                exportAsLedger(reportWriter, ledgerRep, FilterStackHelper.getFilterWarnings(settings.txnFilters, " "))
               case xmlSettings: XmlExportSettings =>
                 val xmlData = Reports.xmlExport(appState, xmlSettings, settings.txnFilters)
                 reportWriter.printXml(xmlData)
@@ -195,7 +183,7 @@ object CLIMain  {
 
             if (settings.txnFilters.nonEmpty) {
               reportWriter.println("ACTIVE FILTER")
-              getFilterWarnings(settings.txnFilters, "  ").foreach { line => reportWriter.println(line)}
+              FilterStackHelper.getFilterWarnings(settings.txnFilters, "  ").foreach { line => reportWriter.println(line)}
               reportWriter.println("")
             }
 
