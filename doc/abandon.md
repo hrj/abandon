@@ -14,9 +14,18 @@ Only those transactions which pass or match filter criteria, will be processed.
 
 Currently there are following filters available
  
- - `begin=ISO-DATE`, include transactions starting from ISO-DATE, including that date 
- - `end=ISO-DATE`, include transaction up to ISO-DATE, includind that date
- - `payee=REGEX`, include all transactions which payee description match REGEX
+ - `begin=ISO-DATE`, include transactions on or after `ISO-DATE`
+ - `end=ISO-DATE`, include transactions before `ISO-DATE`
+ - `annotation=REGEX`, include all transactions which have `annotation` with matching `REGEX`
+ - `payee=REGEX`, include all transactions which have `payee` description with matching `REGEX` 
+ - `account=REGEX`, include all transactions which have an `account` with matching `REGEX`
+
+For example to query all transactions for Feb 2016 (which is leap year), you could use following filter:
+ `--filter begin=2016-02-01 end=2016-03-01`. Notice that date 2016-03-01 is excluded from result set. 
+
+There are many functional tests for filters, those tests could be also used as an example.
+Please see [readme.md](testCases/sclT0005-filters/readme.md) for filter tests, which provides more 
+information about various use cases.
 
 ## Configuration file
 

@@ -78,8 +78,8 @@ sealed trait TransactionFilter {
  * To create filter for time span, stack "Begin" and "End" filters.
  */
 case class EndDateTxnFilter(end: Date) extends TransactionFilter {
-  override def filter(txn: Transaction) = { txn.date.toInt <= end.toInt }
-  override def description() = { "end: Transaction date is on or before: " + end.formatISO8601Ext }
+  override def filter(txn: Transaction) = { txn.date.toInt < end.toInt }
+  override def description() = { "end: Transaction date is before: " + end.formatISO8601Ext }
   override def xmlDescription() = { <filter type="end" date={ end.formatISO8601Ext } />}
 }
 case class BeginDateTxnFilter(begin: Date) extends TransactionFilter {
@@ -119,10 +119,10 @@ case class AnnotationTxnFilter(regex: String) extends TransactionFilter {
 }
 
 /**
- * Account Txn filter
+ * Account Name Txn filter
  * Returns all transactions which have at least one matching account name
  */
-case class AccountTxnFilter(regex: String) extends TransactionFilter {
+case class AccountNameTxnFilter(regex: String) extends TransactionFilter {
   val pattern = java.util.regex.Pattern.compile(regex)
 
   override def filter(txn: Transaction) = {

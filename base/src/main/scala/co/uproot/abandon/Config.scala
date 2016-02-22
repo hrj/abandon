@@ -46,7 +46,7 @@ object SettingsHelper {
         PayeeTxnFilter(value)
       }
       case (key, value) if (key == "account") => {
-        AccountTxnFilter(value)
+        AccountNameTxnFilter(value)
       }
       case (key, value) if (key == "annotation") => {
         AnnotationTxnFilter(value)

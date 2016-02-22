@@ -3,7 +3,7 @@
     <filters type="every">
       <filter type="annotation" pattern="(^$)|(ann)"/>
       <filter type="begin" date="2016-01-31"/>
-      <filter type="end" date="2016-02-29"/>
+      <filter type="end" date="2016-03-01"/>
     </filters>
   </info>
   <balance>
