@@ -100,15 +100,19 @@ object Reports {
     BalanceReport(leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
   }
 
-  private def formatMonth(monthYear: Int) = {
-    val year = monthYear / 100
-    val month = monthYear % 100
-    s"$year / ${Helper.monthLabels(month - 1)}"
+  private def formatGroupingDate(groupingDate: Int) = {
+    val date = Date.fromInt(groupingDate)
+    if (date.hasDayResolution) {
+      date.formatISO8601Ext
+    }
+    else {
+      s"${date.year} / ${Helper.monthLabels(date.month - 1)}"
+    }
   }
 
   def registerReport(state: AppState, reportSettings: RegisterReportSettings): Seq[RegisterReportGroup] = {
     val postGroups = state.accState.postGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
-    val monthlyGroups = postGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+    val monthlyGroups = postGroups.groupBy(d => d.date.toIntYYYYMM).toSeq.sortBy(_._1)
 
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
@@ -132,14 +136,14 @@ object Reports {
         val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
 
         reportGroups :+= RegisterReportGroup(
-          formatMonth(month),
+          formatGroupingDate(month),
           sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) })
     }
     reportGroups
   }
 
   def bookReport(state: AppState, reportSettings: BookReportSettings): Seq[RegisterReportGroup] = {
-    val monthlyGroups = state.accState.postGroups.groupBy(d => d.date.month + d.date.year * 100).toSeq.sortBy(_._1)
+    val monthlyGroups = state.accState.postGroups.groupBy(d => d.date.toIntYYYYMM).toSeq.sortBy(_._1)
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
 
@@ -162,7 +166,7 @@ object Reports {
         val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
 
         reportGroups :+= RegisterReportGroup(
-          formatMonth(month),
+          formatGroupingDate(month),
           sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) })
     }
     reportGroups

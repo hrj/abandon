@@ -54,8 +54,16 @@ case class Date(year: Int, month: Int, day: Int) {
     year * Date.yearMultiplier + month * Date.monthMultiplier + day
   }
 
+  def toIntYYYYMM = {
+    year * Date.yearMultiplier + month * Date.monthMultiplier
+  }
+
   def formatCompact = {
     s"$year,$month,$day"
+  }
+
+  def hasDayResolution = {
+    day != 0
   }
 }
 
