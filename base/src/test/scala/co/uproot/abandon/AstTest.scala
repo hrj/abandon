@@ -11,11 +11,25 @@ class AstTest extends FlatSpec with Matchers {
     testDate.toInt should be(20160102)
   }
 
+  "Date" should "convert to int with month resolution" in {
+    val testDate = Date(2016, 1, 2)
+    testDate.toIntYYYYMM should be(20160100)
+  }
+
   it should "be possible to convert from int" in {
     val testDate = Date.fromInt(20160102)
     testDate.year should be(2016)
     testDate.month should be(1)
     testDate.day should be (2)
+    testDate.hasDayResolution should be (true)
+  }
+
+  it should "be possible to convert from int with month resolution" in {
+    val testDate = Date.fromInt(20160100)
+    testDate.year should be(2016)
+    testDate.month should be(1)
+    testDate.day should be (0)
+    testDate.hasDayResolution should be (false)
   }
   
   it should "compare correctly" in {
