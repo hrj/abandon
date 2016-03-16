@@ -16,11 +16,17 @@ class AstTest extends FlatSpec with Matchers {
     testDate.toIntYYYYMM should be(20160100)
   }
 
+  "Date" should "convert to int with year resolution" in {
+    val testDate = Date(2016, 1, 2)
+    testDate.toIntYYYY should be(20160000)
+  }
+
   it should "be possible to convert from int" in {
     val testDate = Date.fromInt(20160102)
     testDate.year should be(2016)
     testDate.month should be(1)
     testDate.day should be (2)
+    testDate.hasMonthResolution should be (true)
     testDate.hasDayResolution should be (true)
   }
 
@@ -29,9 +35,19 @@ class AstTest extends FlatSpec with Matchers {
     testDate.year should be(2016)
     testDate.month should be(1)
     testDate.day should be (0)
+    testDate.hasMonthResolution should be (true)
     testDate.hasDayResolution should be (false)
   }
-  
+
+  it should "be possible to convert from int with year resolution" in {
+    val testDate = Date.fromInt(20160000)
+    testDate.year should be(2016)
+    testDate.month should be(0)
+    testDate.day should be (0)
+    testDate.hasDayResolution should be (false)
+    testDate.hasMonthResolution should be (false)
+  }
+
   it should "compare correctly" in {
     import scala.util.Sorting
 
@@ -148,4 +164,25 @@ class AstTest extends FlatSpec with Matchers {
         case (date, refDate) => date.formatYYYYMMMDD == refDate
       }) should be(true)
   }
+
+  it should "format ISO 8601 weeks correctly" in {
+    val dates = List(
+      (Date(2005, 1, 2),   "2004-W53", "2004-W53-7"),
+      (Date(2005, 12, 31), "2005-W52", "2005-W52-6"),
+      (Date(2007, 1, 1),   "2007-W01", "2007-W01-1"),
+      (Date(2008, 1, 1),   "2008-W01", "2008-W01-2"),
+      (Date(2008, 12, 29), "2009-W01", "2009-W01-1"),
+      (Date(2008, 12, 31), "2009-W01", "2009-W01-3"),
+      (Date(2010, 1, 1),   "2009-W53", "2009-W53-5"),
+      (Date(2010, 1, 3),   "2009-W53", "2009-W53-7"),
+      (Date(2010, 1, 4),   "2010-W01", "2010-W01-1"))
+
+    dates.forall({
+      case (date, refWeek, refWeekDay) => {
+        date.formatISO8601Week == refWeek &&
+        date.formatISO8601WeekDay == refWeekDay
+      }
+    }) should be(true)
+  }
+
 }
