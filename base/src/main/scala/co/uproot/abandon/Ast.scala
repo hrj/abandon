@@ -38,8 +38,31 @@ case class Date(year: Int, month: Int, day: Int) {
     f"$year%4d / $month%d / $day%d"
   }
 
+  /**
+    * @return ISO 8601 extended day (YYYY-MM-DD)
+    */
   def formatISO8601Ext = {
     f"$year%4d-$month%02d-$day%02d"
+  }
+
+  /**
+    * @return ISO-8601 week without day (2010-01-01 => 2009-W53)
+    */
+  def formatISO8601Week = {
+    val frmtISOWeek = java.time.format.DateTimeFormatter.ISO_WEEK_DATE
+    val jDate = java.time.LocalDate.of(year, month, day)
+
+    jDate.format(frmtISOWeek).substring(0,8)
+  }
+
+  /**
+    * @return ISO-8601 week with week day (2010-01-01 => 2009-W53-5)
+    */
+  def formatISO8601WeekDay = {
+    val frmtISOWeek = java.time.format.DateTimeFormatter.ISO_WEEK_DATE
+    val jDate = java.time.LocalDate.of(year, month, day)
+
+    jDate.format(frmtISOWeek)
   }
 
   def formatCompactYYYYMMDD = {
@@ -50,12 +73,37 @@ case class Date(year: Int, month: Int, day: Int) {
     f"$year%4d ${Helper.getShortMonth(month)} $day%d"
   }
 
+  /**
+    * @return date as int with day resolution
+    */
   def toInt = {
     year * Date.yearMultiplier + month * Date.monthMultiplier + day
   }
 
+  /**
+    * @return date as int with month resolution
+    */
+  def toIntYYYYMM = {
+    year * Date.yearMultiplier + month * Date.monthMultiplier
+  }
+
+  /**
+    * @return date as int with year resolution
+    */
+  def toIntYYYY = {
+    year * Date.yearMultiplier
+  }
+
   def formatCompact = {
     s"$year,$month,$day"
+  }
+
+  def hasDayResolution = {
+    day != 0
+  }
+
+  def hasMonthResolution = {
+    month != 0
   }
 }
 
