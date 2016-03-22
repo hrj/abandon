@@ -29,6 +29,7 @@ object SettingsHelper {
 
   def getCompleteSettings(args: Seq[String]) = {
     val cliConf = new AbandonCLIConf(args)
+    cliConf.verify()
     val configOpt = cliConf.config.get
     configOpt match {
       case Some(configFileName) =>
