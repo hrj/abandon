@@ -61,7 +61,7 @@ class CliTestRunner extends FlatSpec with Matchers with Inside {
       try {
         co.uproot.abandon.CLIMain.runAppThrows(Array("-c", tc.conf) ++ tc.args)
       } catch {
-        case _: Throwable => assert(false)
+        case x: Exception => assert(false, x)
       }
       for (testfiles <- tc.testVec) {
         println("reference: " + testfiles.reference)

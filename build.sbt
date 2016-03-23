@@ -18,7 +18,7 @@ lazy val commonSettings = Seq(
   // circular dependencies with sub-projects
 
   version := "0.3.0-dev",
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.11.8",
   scalacOptions := List("-deprecation")
   )
 

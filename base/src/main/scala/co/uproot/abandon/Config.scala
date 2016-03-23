@@ -60,6 +60,7 @@ object SettingsHelper {
 
   def getCompleteSettings(args: Seq[String]) = {
     val cliConf = new AbandonCLIConf(args)
+    cliConf.verify()
 
     val txnFilters =
       if (cliConf.filters.isEmpty) {
