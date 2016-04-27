@@ -37,7 +37,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
 
     if (writesToScreen) {
-      s.foreach { print }
+      s.foreach { print(_) }
       Console.println()
     }
   }
@@ -74,7 +74,10 @@ object CLIMain  {
     val maxLeftLength = maxElseZero(left.map(_.length))
 
     def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
-    val balRender = lines.map { case (left, right) => renderBoth(left, right) }
+    val balRender = lines map {
+      case (left, right) => renderBoth(left, right)
+      case _ => ???
+    }
     reportWriter.println(balRender.mkString("\n"))
     val totalLine = renderBoth(balanceReport.totalLeft, balanceReport.totalRight)
     reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
@@ -107,25 +110,33 @@ object CLIMain  {
 
     reportWriter.println("Account Name: " + bookReportSettings.account + "\n")
 
-    val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))))
+    val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt.fold {
+      ??? // What do we do in the event we have no parent?
+    } { parent =>
+      parent.children.map(_.name.fullPathStr.length)
+    }))))
     reportWriter.startCodeBlock()
 
     bookReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
         e.txns foreach { txn =>
-          val parent = txn.parentOpt.get
-          reportWriter.println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
-          // println(txnIndent + parent.dateLineStr)
-          val otherTxns = parent.children.filterNot(_.name equals txn.name)
-          parent.groupComments.foreach { groupComment =>
-            reportWriter.println(txnIndent + "  ; " + groupComment)
+          val maybeParent = txn.parentOpt
+          maybeParent.fold {
+            ??? // What do we do in the event we have no parent?
+          } { parent =>
+            reportWriter.println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
+            // println(txnIndent + parent.dateLineStr)
+            val otherTxns = parent.children.filterNot(_.name equals txn.name)
+            parent.groupComments.foreach { groupComment =>
+              reportWriter.println(txnIndent + "  ; " + groupComment)
+            }
+            otherTxns.foreach { otherTxn =>
+              val commentStr = otherTxn.commentOpt.map("  ; " + _).getOrElse("")
+              reportWriter.println((txnIndent + "  %-" + maxNameLength + "s %20.2f %s") format (otherTxn.name, otherTxn.delta, commentStr))
+            }
+            reportWriter.println()
           }
-          otherTxns.foreach { otherTxn =>
-            val commentStr = otherTxn.commentOpt.map("  ; " + _).getOrElse("")
-            reportWriter.println((txnIndent + "  %-" + maxNameLength + "s %20.2f %s") format (otherTxn.name, otherTxn.delta, commentStr))
-          }
-          reportWriter.println()
         }
       }
     }
@@ -154,6 +165,7 @@ object CLIMain  {
               case xmlSettings: XmlExportSettings =>
                 val xmlData = Reports.xmlExport(appState, xmlSettings)
                 reportWriter.printXml(xmlData)
+              case _ => ???
             }
             reportWriter.close
           }
@@ -180,11 +192,13 @@ object CLIMain  {
               case bookSettings: BookReportSettings =>
                 val bookReport = Reports.bookReport(appState, bookSettings)
                 printBookReport(reportWriter, bookSettings, bookReport)
+              case _ => ???
             }
 
             reportWriter.close
           }
         }
+      case _ => ???
     }
   }
   def runApp(args: Array[String]) {

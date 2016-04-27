@@ -15,3 +15,4 @@ project/target/
 /gui/.cache-main
 /gui/.cache-tests
 /testCases/*/out.*
+*.idea/

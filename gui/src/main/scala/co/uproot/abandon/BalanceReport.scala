@@ -23,7 +23,7 @@ object BalanceUIReport extends UIReport {
         // if (e.code equals jfxKeyCode.ENTER) {
         if (e.character equals "\r") {
           val selectedItems = selectionModel().getSelectedItems()
-          val selectedAccountNames = selectedItems.flatMap(_.accName)
+          val selectedAccountNames = selectedItems.flatMap(_.accName.toIterable)
           val selectedAccountPatterns = selectedAccountNames.map("^" + _.fullPathStr + ".*")
           val regSettings =
             RegisterReportSettings(
