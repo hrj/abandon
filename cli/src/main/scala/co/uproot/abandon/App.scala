@@ -37,7 +37,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
 
     if (writesToScreen) {
-      s.foreach { print(_) }
+      s.foreach(print(_))
       Console.println()
     }
   }
@@ -110,10 +110,9 @@ object CLIMain  {
 
     reportWriter.println("Account Name: " + bookReportSettings.account + "\n")
 
-    val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt.fold {
-      ??? // What do we do in the event we have no parent?
-    } { parent =>
-      parent.children.map(_.name.fullPathStr.length)
+    val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt match {
+      case Some(parent) => parent.children.map(_.name.fullPathStr.length)
+      case _ => ???
     }))))
     reportWriter.startCodeBlock()
 
