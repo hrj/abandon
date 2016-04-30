@@ -121,20 +121,21 @@ object CLIMain  {
       reportGroup.entries foreach { e =>
         e.txns foreach { txn =>
           val maybeParent = txn.parentOpt
-          maybeParent.fold {
-            ??? // What do we do in the event we have no parent?
-          } { parent =>
-            reportWriter.println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
-            // println(txnIndent + parent.dateLineStr)
-            val otherTxns = parent.children.filterNot(_.name equals txn.name)
-            parent.groupComments.foreach { groupComment =>
-              reportWriter.println(txnIndent + "  ; " + groupComment)
+          maybeParent match {
+            case Some(parent) => {
+              reportWriter.println(("%20.2f %20.2f        %s") format(txn.resultAmount, txn.delta, parent.dateLineStr))
+              // println(txnIndent + parent.dateLineStr)
+              val otherTxns = parent.children.filterNot(_.name equals txn.name)
+              parent.groupComments.foreach { groupComment =>
+                reportWriter.println(txnIndent + "  ; " + groupComment)
+              }
+              otherTxns.foreach { otherTxn =>
+                val commentStr = otherTxn.commentOpt.map("  ; " + _).getOrElse("")
+                reportWriter.println((txnIndent + "  %-" + maxNameLength + "s %20.2f %s") format(otherTxn.name, otherTxn.delta, commentStr))
+              }
+              reportWriter.println()
             }
-            otherTxns.foreach { otherTxn =>
-              val commentStr = otherTxn.commentOpt.map("  ; " + _).getOrElse("")
-              reportWriter.println((txnIndent + "  %-" + maxNameLength + "s %20.2f %s") format (otherTxn.name, otherTxn.delta, commentStr))
-            }
-            reportWriter.println()
+            case None => ??? // What do we do in the event we have no parent?
           }
         }
       }
