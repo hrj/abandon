@@ -11,9 +11,9 @@ object Main extends App {
     CLIMain.runApp(args)
   }
 
-  def ensureJFXIsAvailable() {
+  def ensureJFXIsAvailable(): Unit = {
     try {
-      Class.forName("javafx.event.EventTarget")
+      Class.forName{"javafx.event.EventTarget"}
     } catch {
       case e:java.lang.ClassNotFoundException =>
         val javaHome = System.getProperty("java.home")

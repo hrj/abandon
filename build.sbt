@@ -19,7 +19,8 @@ lazy val commonSettings = Seq(
 
   version := "0.3.0-dev",
   scalaVersion := "2.11.8",
-  scalacOptions := List("-deprecation")
+  scalacOptions := List("-deprecation"),
+  wartremoverWarnings ++= Warts.all
   )
 
 lazy val abandon = (project in file(".")).

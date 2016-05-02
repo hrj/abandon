@@ -1,16 +1,8 @@
 package co.uproot.abandon
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.Matcher
-import org.scalatest.Matchers
-import org.scalatest.Inside
-import java.lang.Exception
-import org.scalatest.StreamlinedXmlEquality._
-import TestComparator._
+import java.nio.file.{Files, Paths}
 
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
+import org.scalatest.{FlatSpec, Inside, Matchers}
 
 class CliTestRunner extends FlatSpec with Matchers with Inside {
 
