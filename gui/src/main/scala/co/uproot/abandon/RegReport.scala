@@ -41,7 +41,7 @@ object RegUIReport extends UIReport {
                 }
                 stylesheets += "default_theme.css"
               }
-              initModality(Modality.APPLICATION_MODAL)
+              initModality(Modality.ApplicationModal)
               title = "Transactions"
             }
             txStage.show
