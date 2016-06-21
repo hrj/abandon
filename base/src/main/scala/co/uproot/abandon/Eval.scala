@@ -45,7 +45,8 @@ class EvaluationContext[T](globalDefinitions: Seq[Definition[T]], localDefinitio
   def getValue(name: String, params: Seq[T]) = {
     val d = defined(name)
     assert(d.params.length == params.length)
-    val result = d.rhs.evaluate(mkContext(d.params.zip(params).map(pairs => Definition(pairs._1, Nil, literalFactory(pairs._2)))))
+    val newLocalDefs = d.params.zip(params).map(pairs => Definition(pairs._1, Nil, literalFactory(pairs._2)))
+    val result = d.rhs.evaluate(mkContext(newLocalDefs))
     // println("evaluated", name, params, result)
     result
   }
