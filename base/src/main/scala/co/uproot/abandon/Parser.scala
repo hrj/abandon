@@ -189,12 +189,14 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
     (term ~ termFrag) ^^ {
       case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
     }
+
   private lazy val term: PackratParser[NumericExpr] =
     factor ~ factorFrag ^^ {
       case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
     }
+
   private lazy val termFrag: PackratParser[Seq[String ~ NumericExpr]] = (("+" | "-") ~ term)*
-  private lazy val factor: PackratParser[NumericExpr] = numericLiteralExpr | parenthesizedExpr | unaryPosExpr | unaryNegExpr
+  private lazy val factor: PackratParser[NumericExpr] = numericFunctionExpr | numericLiteralExpr | parenthesizedExpr | unaryPosExpr | unaryNegExpr
   private lazy val factorFrag: PackratParser[Seq[String ~ NumericExpr]] = (("*" | "/") ~ factor)*
 
   private lazy val booleanExpression: PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
@@ -204,8 +206,11 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
       val annotationStrOpt = annotationOpt.map(_.mkString(""))
       Transaction(date, posts, annotationStrOpt, optPayee, optComment.flatten)
   }
+
   private lazy val annotation = (("(" ~> (ident | numericLit)+) <~ ")")
+
   private lazy val payee = ((allButEOL)+) ^^ { case x => x.mkString(" ") }
+
   private lazy val post: PackratParser[Post] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
     case name ~ amount ~ commentOpt => Post(name, amount, commentOpt)
   }
