@@ -5,9 +5,9 @@ import com.sun.org.apache.xalan.internal.xsltc.compiler.LiteralExpr
 case class Ref(name: String, argCount: Int)
 
 object EvaluationContext {
-  private def ensureUnique[T](defs: Seq[Definition[T]]) = {
-    val duplicate = defs.map(_.name).combinations(2).find(e => e.head equals e.tail.head)
-    if (duplicate.isDefined) {
+  private def ensureUnique[T](defs: Seq[Definition[T]]):Unit = {
+    if (defs.toSet.size != defs.size) {
+      val duplicate = defs.map(_.name).combinations(2).find(e => e.head equals e.tail.head)
       throw new InputError("Attempt to redefine value having name: " + duplicate.get.head)
     }
   }
