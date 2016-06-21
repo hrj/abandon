@@ -20,7 +20,7 @@ lazy val commonSettings = Seq(
   version := "0.3.0-dev",
   scalaVersion := "2.11.8",
   scalacOptions := List("-deprecation"),
-  wartremoverWarnings ++= Warts.all
+  wartremoverWarnings ++= Warts.allBut(Wart.ToString, Wart.Throw)
   )
 
 lazy val abandon = (project in file(".")).
