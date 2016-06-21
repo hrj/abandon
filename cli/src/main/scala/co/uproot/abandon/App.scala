@@ -197,6 +197,8 @@ object CLIMain  {
 
             reportWriter.close
           }
+        } else {
+          throw new InputError("Couldn't parse input")
         }
       case _ => ???
     }
