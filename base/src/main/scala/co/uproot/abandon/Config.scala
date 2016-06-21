@@ -27,7 +27,7 @@ object SettingsHelper {
     }
   }
 
-  def getCompleteSettings(args: Seq[String]) = {
+  def getCompleteSettings(args: Seq[String]): Either[String, Settings] = {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
     val configOpt = cliConf.config.get
