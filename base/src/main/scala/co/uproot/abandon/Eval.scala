@@ -42,9 +42,12 @@ class EvaluationContext[T](globalDefinitions: Seq[Definition[T]], localDefinitio
   }
 
   def isImmediatelyEvaluable(name: String) = true
+
   def getValue(name: String, params: Seq[T]) = {
     val d = defined(name)
-    assert(d.params.length == params.length)
+    if (d.params.length != params.length) {
+      throw new InputError("Parameter lengths don't match for " + name)
+    }
     val newLocalDefs = d.params.zip(params).map(pairs => Definition(pairs._1, Nil, literalFactory(pairs._2)))
     val result = d.rhs.evaluate(mkContext(newLocalDefs))
     // println("evaluated", name, params, result)
