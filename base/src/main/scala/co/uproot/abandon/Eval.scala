@@ -8,7 +8,7 @@ object EvaluationContext {
   private def ensureUnique[T](defs: Seq[Definition[T]]):Unit = {
     if (defs.toSet.size != defs.size) {
       val duplicate = defs.map(_.name).combinations(2).find(e => e.head equals e.tail.head)
-      throw new InputError("Attempt to redefine value having name: " + duplicate.get.head)
+      throw new InputError("Attempt to redefine symbol: " + duplicate.get.head)
     }
   }
 }
