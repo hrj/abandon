@@ -59,7 +59,7 @@ class CliTestRunner extends FlatSpec with Matchers with Inside {
         println("reference: " + testfiles.reference)
         println("output:    " + testfiles.output)
 
-        assert(testfiles.comparator(testfiles.output, testfiles.reference))
+        assert(testfiles.comparator(testfiles.output, testfiles.reference), "Failed comparison for " + testfiles)
       }
     }
   }
