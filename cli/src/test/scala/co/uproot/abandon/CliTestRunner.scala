@@ -10,7 +10,7 @@ class CliTestRunner extends FlatSpec with Matchers with Inside {
 
     val testConfs =
       for (d <- FileUtils.listDirs("testCases", ".*/sclT[0-9]+(-.*)$")) yield {
-        for (f <- FileUtils.listFiles(d.getAbsolutePath, ".*\\.conf$")) yield { f }
+        for (f <- FileUtils.listFilesRecursive(d.getAbsolutePath, ".*\\.conf$")) yield { f }
       }
 
     val testCases = for (f <- testConfs.flatten) yield {
