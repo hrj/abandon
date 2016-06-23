@@ -5,7 +5,7 @@ import com.sun.org.apache.xalan.internal.xsltc.compiler.LiteralExpr
 case class Ref(name: String, argCount: Int)
 
 object EvaluationContext {
-  private def ensureUnique[T](defs: Seq[Definition[T]]):Unit = {
+  private def ensureUnique(defs: Seq[Definition]):Unit = {
     if (defs.toSet.size != defs.size) {
       val duplicate = defs.map(_.name).combinations(2).find(e => e.head equals e.tail.head)
       throw new InputError("Attempt to redefine symbol: " + duplicate.get.head)
@@ -13,7 +13,7 @@ object EvaluationContext {
   }
 }
 
-class EvaluationContext[T](globalDefinitions: Seq[Definition[T]], localDefinitions: Seq[Definition[T]], literalFactory: (T) => Expr[T]) {
+class EvaluationContext(globalDefinitions: Seq[Definition], localDefinitions: Seq[Definition]) {
   EvaluationContext.ensureUnique(globalDefinitions)
   EvaluationContext.ensureUnique(localDefinitions)
 
@@ -36,21 +36,62 @@ class EvaluationContext[T](globalDefinitions: Seq[Definition[T]], localDefinitio
     }
   }
 
-  private def mkContext(newLocalDefs: Seq[Definition[T]]) = {
+  private def mkContext(newLocalDefs: Seq[Definition]) = {
     // println("Making new context with", newLocalDefs.map(_.prettyPrint))
-    new EvaluationContext[T](globalDefinitions, newLocalDefs, literalFactory)
+    new EvaluationContext(globalDefinitions, newLocalDefs)
   }
 
   def isImmediatelyEvaluable(name: String) = true
 
-  def getValue(name: String, params: Seq[T]) = {
+  private def makeLiteral(e: Any) = {
+    e match {
+      case b: BigDecimal => new NumericLiteralExpr(b)
+      case b: Boolean => new BooleanLiteralExpr(b)
+    }
+  }
+
+  def getValue(name: String, params: Seq[Any]) = {
     val d = defined(name)
     if (d.params.length != params.length) {
       throw new InputError("Parameter lengths don't match for " + name)
     }
-    val newLocalDefs = d.params.zip(params).map(pairs => Definition(pairs._1, Nil, literalFactory(pairs._2)))
-    val result = d.rhs.evaluate(mkContext(newLocalDefs))
+    val newLocalDefs = d.params.zip(params).map(pairs => Definition(pairs._1, Nil, makeLiteral(pairs._2)))
+    val result = mkContext(newLocalDefs).evaluateInternal(d.rhs)
     // println("evaluated", name, params, result)
     result
+  }
+
+  def evaluate[T](e: Expr)(implicit m: Manifest[T]):T = {
+    evaluateInternal(e) match {
+      case t:T => t
+      case _ => throw new InputError("Expected type: " + m + " but expression evaluated to: " + evaluateInternal(e).getClass)
+    }
+  }
+
+  def evaluateBD(e:Expr):BigDecimal = { evaluate[BigDecimal](e) }
+
+  private def evaluateInternal(e:Expr):Any = {
+    e match {
+      case AddExpr(e1, e2) => evaluateBD(e1) + evaluateBD(e2)
+      case SubExpr(e1, e2) => evaluateBD(e1) - evaluateBD(e2)
+      case MulExpr(e1, e2) => evaluateBD(e1) * evaluateBD(e2)
+      case DivExpr(e1, e2) => evaluateBD(e1) / evaluateBD(e2)
+      case UnaryNegExpr(e1) => -evaluateBD(e1)
+      case le:LiteralValue[_] => le.value
+      case IdentifierExpr(name) => getValue(name, Nil)
+      case FunctionExpr(name, arguments) => getValue(name, arguments.map(evaluateInternal(_)))
+      case IfExpr(cond, e1, e2) => evaluateInternal(if(evaluate[Boolean](cond)) e1 else e2)
+      case ConditionExpr(e1, op, e2) => {
+        val r1 = evaluateBD(e1)
+        val r2 = evaluateBD(e2)
+        op match {
+          case ">" => r1 > r2
+          case ">=" => r1 >= r2
+          case "<" => r1 < r2
+          case "<=" => r1 <= r2
+          case "==" => r1 == r2
+        }
+      }
+    }
   }
 }

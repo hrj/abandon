@@ -205,8 +205,9 @@ object Processor {
   }
 
   def process(entries: Seq[ASTEntry], accountSettings: Seq[AccountSettings]) = {
-    val definitions = filterByType[Definition[BigDecimal]](entries)
-    val evaluationContext = new EvaluationContext[BigDecimal](definitions, Nil, new NumericLiteralExpr(_))
+    val definitions = filterByType[Definition](entries)
+    val evaluationContext = new EvaluationContext(definitions, Nil)
+
 
     val transactions = filterByType[Transaction](entries)
     val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
@@ -223,7 +224,7 @@ object Processor {
       var txTotal = Zero
       var detailedPosts = Seq[DetailedPost]()
       postsWithAmount foreach { p =>
-        val delta = p.amount.get.evaluate(evaluationContext)
+        val delta = evaluationContext.evaluateBD(p.amount.get)
         txTotal += delta
         detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }

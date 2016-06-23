@@ -320,8 +320,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  import ASTHelper.NumericExpr
-
   def bd(s: String) = BigDecimal(s)
 
   it should "parse simple numeric expression" in {
@@ -331,7 +329,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "0" -> (bd("0") -> nlit(0)),
       "-20" -> (bd("-20") -> UnaryNegExpr(nlit(20)))
     )
-    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
 
     tests foreach {
       case (testInput, expectedOutput) =>
@@ -340,8 +338,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(parseResult) {
           case AbandonParser.Success(result, _) =>
             inside(result) {
-              case ne: NumericExpr =>
-                ne.evaluate(context) should be (expectedOutput._1)
+              case ne: Expr =>
+                context.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }
@@ -360,7 +358,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "-20 + 30*-5.0" -> (bd("-170"), AddExpr(UnaryNegExpr(nlit(20)), MulExpr(nlit(30), UnaryNegExpr(nlit(5)))))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
 
     tests foreach {
       case (testInput, expectedOutput) =>
@@ -369,8 +367,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(parseResult) {
           case AbandonParser.Success(result, _) =>
             inside(result) {
-              case ne: NumericExpr =>
-                ne.evaluate(context) should be (expectedOutput._1)
+              case ne: Expr =>
+                context.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }
@@ -382,7 +380,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "1 / 0" -> (bd("0"), DivExpr(nlit(1), nlit(0)))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
 
     tests foreach {
       case (testInput, expectedOutput) =>
@@ -391,10 +389,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(parseResult) {
           case AbandonParser.Success(result, _) =>
             inside(result) {
-              case ne: NumericExpr =>
+              case ne: Expr =>
                 ne should be(expectedOutput._2)
                 intercept[java.lang.ArithmeticException] {
-                    ne.evaluate(context)
+                    context.evaluateBD(ne)
                 }
             }
         }
@@ -415,7 +413,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "1 / 2 * 3" -> (bd("1.5"), MulExpr(DivExpr(nlit(1), nlit(2)), nlit(3)))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
 
     tests foreach {
       case (testInput, expectedOutput) =>
@@ -424,8 +422,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(parseResult) {
           case AbandonParser.Success(result, _) =>
             inside(result) {
-              case ne: NumericExpr =>
-                ne.evaluate(context) should be (expectedOutput._1)
+              case ne: Expr =>
+                context.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }
@@ -440,7 +438,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "1 * (2 + 3) * 4 - 2" -> (bd("18"), SubExpr(MulExpr(MulExpr(nlit(1), AddExpr(nlit(2), nlit(3))), nlit(4)), nlit(2)))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext[BigDecimal](Nil, Nil, null)
+    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
 
     tests foreach {
       case (testInput, expectedOutput) =>
@@ -449,8 +447,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(parseResult) {
           case AbandonParser.Success(result, _) =>
             inside(result) {
-              case ne: NumericExpr =>
-                ne.evaluate(context) should be (expectedOutput._1)
+              case ne: Expr =>
+                context.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }

@@ -1,7 +1,6 @@
 package co.uproot.abandon
 
 object ASTHelper {
-  type NumericExpr = Expr[BigDecimal]
 
   def parseAccountName(name:String):AccountName = {
     AbandonParser.accountName(ParserHelper.scanner(name)) match {
@@ -18,8 +17,6 @@ class InputFileNotFoundError(fileName:String) extends InputError("File not found
 
 class ConstraintError(msg: String) extends RuntimeException(msg)
 
-import ASTHelper._
-
 object Date {
   val yearMultiplier = 10000
   val monthMultiplier = 100
@@ -33,6 +30,8 @@ object Date {
     Date(year, month, day)
   }
 }
+
+
 case class Date(year: Int, month: Int, day: Int) {
   def formatYYYYMMDD = {
     f"$year%4d / $month%d / $day%d"
@@ -107,11 +106,13 @@ case class Date(year: Int, month: Int, day: Int) {
   }
 }
 
+
 object DateOrdering extends Ordering[Date] {
   def compare(x: Date, y: Date) = {
     x.toInt - y.toInt
   }
 }
+
 
 case class AccountName(fullPath: Seq[String]) {
   val name = fullPath.lastOption.getOrElse("")
@@ -120,7 +121,7 @@ case class AccountName(fullPath: Seq[String]) {
   val depth = fullPath.length
 }
 
-case class Post(accName: AccountName, amount: Option[NumericExpr], commentOpt: Option[String])
+case class Post(accName: AccountName, amount: Option[Expr], commentOpt: Option[String])
 
 sealed class ASTEntry
 
@@ -131,16 +132,15 @@ sealed class ASTTangibleEntry extends ASTEntry
 
 case class Transaction(date: Date, posts: Seq[Post], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
 
-case class Definition[T](name: String, params: List[String], rhs: Expr[T]) extends ASTTangibleEntry {
+case class Definition(name: String, params: List[String], rhs: Expr) extends ASTTangibleEntry {
   def prettyPrint = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)
 }
 
-case class AccountDeclaration(name: AccountName, details: Map[String, Expr[_]]) extends ASTTangibleEntry
+case class AccountDeclaration(name: AccountName, details: Map[String, Expr]) extends ASTTangibleEntry
 
 case class IncludeDirective(fileName: String) extends ASTEntry
 
-sealed abstract class Expr[T] {
-  def evaluate(context: EvaluationContext[T]): T
+sealed abstract class Expr {
   def prettyPrint = toString
   def getRefs: Seq[Ref]
 }
@@ -148,48 +148,47 @@ sealed abstract class Expr[T] {
 trait LiteralValue[T] {
   val value: T
   def getRefs = Nil
-  def evaluate(context: EvaluationContext[T]): T = value
 }
 
-abstract class BooleanExpr extends Expr[Boolean] {
-  def evaluate(context: EvaluationContext[Boolean]): Boolean
+case class BooleanLiteralExpr(val value: Boolean) extends Expr with LiteralValue[Boolean] {
 }
 
-case class BooleanLiteralExpr(val value: Boolean) extends BooleanExpr with LiteralValue[Boolean] {
-}
-
-case class NumericLiteralExpr(val value: BigDecimal) extends NumericExpr with LiteralValue[BigDecimal] {
+case class NumericLiteralExpr(val value: BigDecimal) extends Expr with LiteralValue[BigDecimal] {
   override def prettyPrint = value.toString
 }
 
-case class FunctionExpr[T](val name: String, val arguments: Seq[Expr[T]]) extends Expr[T] {
-  def evaluate(context: EvaluationContext[T]): T = context.getValue(name, arguments.map(_.evaluate(context)))
+case class FunctionExpr(val name: String, val arguments: Seq[Expr]) extends Expr {
   override def prettyPrint = "%s(%s)" format (name, arguments.map(_.prettyPrint).mkString(", "))
   def getRefs = Ref(name, arguments.length) +: arguments.flatMap(_.getRefs)
 }
 
-case class IdentifierExpr[T](val name: String) extends Expr[T] {
-  def evaluate(context: EvaluationContext[T]): T = context.getValue(name, Nil)
+case class IdentifierExpr(val name: String) extends Expr {
   override def prettyPrint = name
   def getRefs = Seq(Ref(name, 0))
 }
 
-abstract class BinaryNumericExpr(op1: NumericExpr, op2: NumericExpr, opChar: String, operation: (BigDecimal, BigDecimal) => BigDecimal) extends NumericExpr {
-  def evaluate(context: EvaluationContext[BigDecimal]): BigDecimal = operation(op1.evaluate(context), op2.evaluate(context))
+sealed abstract class BinaryExpr(op1: Expr, op2: Expr, opChar: String, operation: (BigDecimal, BigDecimal) => BigDecimal) extends Expr {
   override def prettyPrint = op1.prettyPrint + " " + opChar + " " + op2.prettyPrint
   def getRefs = op1.getRefs ++ op2.getRefs
 }
 
-case class AddExpr(val op1: NumericExpr, val op2: NumericExpr) extends BinaryNumericExpr(op1, op2, "+", _ + _)
+case class AddExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "+", _ + _)
 
-case class SubExpr(val op1: NumericExpr, val op2: NumericExpr) extends BinaryNumericExpr(op1, op2, "-", _ - _)
+case class SubExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "-", _ - _)
 
-case class MulExpr(val op1: NumericExpr, val op2: NumericExpr) extends BinaryNumericExpr(op1, op2, "*", _ * _)
+case class MulExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "*", _ * _)
 
-case class DivExpr(val op1: NumericExpr, val op2: NumericExpr) extends BinaryNumericExpr(op1, op2, "/", _ / _)
+case class DivExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "/", _ / _)
 
-case class UnaryNegExpr(val op: NumericExpr) extends NumericExpr {
-  def evaluate(context: EvaluationContext[BigDecimal]): BigDecimal = -op.evaluate(context)
+case class UnaryNegExpr(val op: Expr) extends Expr {
   override def prettyPrint = " -(" + op.prettyPrint + ")"
   def getRefs = op.getRefs
+}
+
+case class ConditionExpr(val e1: Expr, val op: String, val e2: Expr) extends Expr {
+  def getRefs = e1.getRefs ++ e2.getRefs
+}
+
+case class IfExpr(val cond: Expr, val op1: Expr, val op2: Expr) extends Expr {
+  def getRefs = cond.getRefs ++ op1.getRefs ++ op2.getRefs
 }
