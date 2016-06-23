@@ -234,7 +234,7 @@ object Processor {
         detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }
       accState.updateAmounts(new PostGroup(detailedPosts, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
-      assert(txTotal equals Zero, s"Transactions do not balance. Unbalance amount: $txTotal")
+      assert(txTotal equals Zero, s"Transactions do not balance. Unbalanced amount: $txTotal")
     }
     val accountDeclarations = filterByType[AccountDeclaration](entries)
     AppState(accState, accountDeclarations)
