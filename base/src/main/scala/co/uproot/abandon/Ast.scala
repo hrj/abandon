@@ -150,8 +150,8 @@ trait LiteralValue[T] {
   def getRefs = Nil
 }
 
-case class BooleanLiteralExpr(val value: Boolean) extends Expr with LiteralValue[Boolean] {
-}
+case class BooleanLiteralExpr(val value: Boolean) extends Expr with LiteralValue[Boolean]
+case class StringLiteralExpr(val value: String) extends Expr with LiteralValue[String]
 
 case class NumericLiteralExpr(val value: BigDecimal) extends Expr with LiteralValue[BigDecimal] {
   override def prettyPrint = value.toString

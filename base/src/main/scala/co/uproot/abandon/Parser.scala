@@ -156,7 +156,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
     case name ~ arg ~ expr => Definition(name, arg.getOrElse(Nil), expr)
   }
   private lazy val arguments = ("(" ~> rep1sep(ident, ",")) <~ ")"
-  private lazy val expression: PackratParser[Expr] = (numericExpr ||| booleanExpr)
+  private lazy val expression: PackratParser[Expr] = (numericExpr ||| booleanExpr ||| stringExpr)
 
   private def mkFunctionExpr(exprParser: Parser[Expr]) = {
     val zeroArgFunctionExpr = (ident ^^ { case x => IdentifierExpr(x) })
@@ -199,6 +199,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val factor: PackratParser[Expr] = ternaryIfExpr | functionExpr | numericLiteralExpr | parenthesizedExpr | unaryPosExpr | unaryNegExpr
   private lazy val factorFrag: PackratParser[Seq[String ~ Expr]] = (("*" | "/") ~ factor)*
 
+  private lazy val stringExpr: PackratParser[Expr] =  (stringLit ^^ StringLiteralExpr) | functionExpr
   private lazy val booleanExpr: PackratParser[Expr] =  conditionExpr | booleanLiteralExpr | functionExpr
   private lazy val booleanLiteralExpr = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
   private lazy val conditionExpr = (numericExpr ~ comparisonExpr ~ numericExpr) ^^ { case (e1 ~ op ~ e2) => ConditionExpr(e1, op, e2)}

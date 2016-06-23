@@ -233,6 +233,18 @@ object Processor {
         txTotal += delta
         detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }
+      if (!(txTotal equals Zero)) {
+        definitions.find { d => d.name equals "defaultAccount" } match {
+          case Some(defaultAccountDef) => {
+            val defaultAccount = evaluationContext.evaluate[String](FunctionExpr("defaultAccount", Nil))
+            val fullDefaultAccount = transformAlias(AccountName(defaultAccount.split(":")))
+            val delta = -txTotal
+            txTotal += delta
+            detailedPosts :+= DetailedPost(fullDefaultAccount, delta, Some("post by default"))
+          }
+          case None =>
+        }
+      }
       accState.updateAmounts(new PostGroup(detailedPosts, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalanced amount: $txTotal")
     }
