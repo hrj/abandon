@@ -483,4 +483,51 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
 
   }
+
+  it should "parse compact transactions" in {
+    val testInput = """
+    |def defaultAccount = bank
+    |def tax = 0.1
+    |. 2016/May/1 Expense        100 * tax            ; simple
+    |  .   2016/May/2 Cash           800 + tax        ; with a space
+    |2016/May/2
+    |  Cash                      900 + tax
+    """.stripMargin
+
+    val parseResult = AbandonParser.abandon(scanner(testInput))
+
+    inside(parseResult) {
+      case AbandonParser.Success(result, _) =>
+        inside(result.entries) {
+          case List(_, _, txnGroup1, txnGroup2, txnGroup3) =>
+            inside(txnGroup1) {
+              case Transaction(date, posts, None, None, Nil) =>
+                date should be(Date(2016, 5, 1))
+                inside(posts) {
+                  case List(Post(acc1, expr1, _)) =>
+                    acc1 should be (expenseAccount)
+                    expr1 should be (Some(MulExpr(nlit(100), IdentifierExpr("tax"))))
+                }
+            }
+            inside(txnGroup2) {
+              case Transaction(date, posts, None, None, Nil) =>
+                date should be(Date(2016, 5, 2))
+                inside(posts) {
+                  case List(Post(acc1, expr1, _)) =>
+                    acc1 should be (cashAccount)
+                    expr1 should be (Some(AddExpr(nlit(800), IdentifierExpr("tax"))))
+                }
+            }
+            inside(txnGroup3) {
+              case Transaction(date, posts, None, None, Nil) =>
+                date should be(Date(2016, 5, 2))
+                inside(posts) {
+                  case List(Post(acc1, expr1, _)) =>
+                    acc1 should be (cashAccount)
+                    expr1 should be (Some(AddExpr(nlit(900), IdentifierExpr("tax"))))
+                }
+            }
+        }
+    }
+  }
 }

@@ -142,7 +142,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val frags = (fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators
 
-  private lazy val fragment: Parser[ASTEntry] = (scopeBlock | txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
+  private lazy val fragment: Parser[ASTEntry] = (scopeBlock | compactTxFrag | txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
   private lazy val includeFrag = (includeKeyword ~> fileName) ^^ { case name => IncludeDirective(name) }
   private lazy val payeeDefFrag = (payeeKeyword ~> stringOrAllUntilEOL) ^^ { case payee => PayeeDef(payee.mkString("")) }
   private lazy val tagDefFrag = (tagKeyword ~> stringOrAllUntilEOL) ^^ { case tag => TagDef(tag.mkString("")) }
@@ -210,6 +210,11 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val booleanLiteralExpr = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
   private lazy val conditionExpr = (numericExpr ~ comparisonExpr ~ numericExpr) ^^ { case (e1 ~ op ~ e2) => ConditionExpr(e1, op, e2)}
   private lazy val comparisonExpr: PackratParser[String] = ((">" | "<" | "=") ~ "=" ^^ {case (o1 ~ o2) => o1 + o2}) | ">" | "<" 
+
+  private lazy val compactTxFrag = (("." ~> (dateFrag | isoDateFrag) ~ accountName ~ numericExpr ~ eolComment) ^^ {
+    case date ~ accountName ~ amount ~ optComment =>
+      Transaction(date, List(Post(accountName, Option(amount), optComment)), None, None, Nil)
+  })
 
   private lazy val txFrag = (((dateFrag | isoDateFrag) ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+) ^^ {
     case date ~ annotationOpt ~ optPayee ~ optComment ~ posts =>
