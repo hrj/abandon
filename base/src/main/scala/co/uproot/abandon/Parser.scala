@@ -130,7 +130,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val fragSeparators = anyEol*
   private def line[T](p: Parser[T]): Parser[T] = p <~ (((comment?) ~ eol)*)
 
-  // End of line commment
+  // End of line comment
   private def eolComment = (comment?) <~ eol
 
   lazy val abandon: Parser[Seq[ASTEntry]] = phrase((fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators)
