@@ -7,4 +7,4 @@ fi
 
 BASEDIR=`dirname $0`
 
-$JAVA_CMD -jar ${BASEDIR}/start.jar $*
+$JAVA_CMD -jar ${BASEDIR}/lib/abandon.jar $*
