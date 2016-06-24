@@ -1,3 +1,7 @@
+include "def.ledger"
+
+def topX = 2000
+
 2016/May/1
   expenses        x * 2
   bank

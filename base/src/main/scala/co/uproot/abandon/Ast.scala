@@ -192,3 +192,31 @@ case class ConditionExpr(val e1: Expr, val op: String, val e2: Expr) extends Exp
 case class IfExpr(val cond: Expr, val op1: Expr, val op2: Expr) extends Expr {
   def getRefs = cond.getRefs ++ op1.getRefs ++ op2.getRefs
 }
+
+case class ScopedTxn(txn: Transaction, scope: Scope)
+
+/* Note: This is a mutable class */
+case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEntry {
+  private var includedScopes: List[Scope] = Nil
+
+  def addIncludedScope(i: Scope) {
+    includedScopes :+= i
+  }
+
+  private val localDefinitions = Helper.filterByType[Definition](entries)
+  private def allLocalDefinitions: Seq[Definition] = localDefinitions ++ includedScopes.flatMap(_.allLocalDefinitions)
+
+  def definitions:Seq[Definition] = {
+    val parentDefinitions = parentOpt.map(_.definitions).getOrElse(Nil)
+    val allLocalDefs = allLocalDefinitions
+    val allLocalNames = allLocalDefs.map(_.name)
+    parentDefinitions.filter(d => !allLocalNames.contains(d.name)) ++ allLocalDefs
+  }
+
+  private val localTransactions = Helper.filterByType[Transaction](entries)
+  private def allLocalTransactions:Seq[ScopedTxn] = localTransactions.map(ScopedTxn(_, this)) ++ includedScopes.flatMap(_.allTransactions)
+
+  def childScopes = Helper.filterByType[Scope](entries)
+
+  def allTransactions:Seq[ScopedTxn] = allLocalTransactions ++ childScopes.flatMap(_.allTransactions)
+}

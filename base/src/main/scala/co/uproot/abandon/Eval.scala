@@ -13,14 +13,12 @@ object EvaluationContext {
   }
 }
 
-class EvaluationContext(globalDefinitions: Seq[Definition], localDefinitions: Seq[Definition]) {
-  EvaluationContext.ensureUnique(globalDefinitions)
-  EvaluationContext.ensureUnique(localDefinitions)
+class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
 
-  private val localNames = localDefinitions.map(_.name)
-  private val definitions = globalDefinitions.filter(d => !localNames.contains(d.name)) ++ localDefinitions
   // println("Context created\n" + definitions.map(_.prettyPrint).mkString("\n"))
 
+  private val localNames = localDefs.map(_.name)
+  private val definitions = scope.definitions.filter(d => !localNames.contains(d.name)) ++ localDefs
   private val defined = definitions.map(d => d.name -> d).toMap
   definitions.foreach { d =>
     d.rhs.getRefs foreach { ref =>
@@ -38,7 +36,7 @@ class EvaluationContext(globalDefinitions: Seq[Definition], localDefinitions: Se
 
   private def mkContext(newLocalDefs: Seq[Definition]) = {
     // println("Making new context with", newLocalDefs.map(_.prettyPrint))
-    new EvaluationContext(globalDefinitions, newLocalDefs)
+    new EvaluationContext(scope, newLocalDefs)
   }
 
   def isImmediatelyEvaluable(name: String) = true

@@ -5,7 +5,7 @@ import scala.util.parsing.input.PagedSeqReader
 import scala.collection.immutable.PagedSeq
 import java.io.FileNotFoundException
 
-case class AppState(accState: AccountState, accDeclarations: Seq[AccountDeclaration])
+case class AppState(accState: AccountState)
 
 class PostGroup(
   _children: Seq[DetailedPost],
@@ -111,35 +111,33 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
 }
 
 object Processor {
+  case class Input(path: String, parentScope: Scope)
+  
   def parseAll(inputFiles: Seq[String]) = {
-    var astEntries = List[ASTEntry]()
-    var inputQueue = inputFiles
+    // var astEntries = List[ASTEntry]()
+    val rootScope = Scope(Nil, None)
+    var inputQueue = inputFiles.map(Input(_, rootScope))
     var processedFiles = List[String]()
     var parseError = false
     while (inputQueue.nonEmpty && !parseError) {
-      val input = mkAbsolutePath(inputQueue.head)
+      val input = inputQueue.head
+      val inputPath = mkAbsolutePath(input.path)
       inputQueue = inputQueue.tail
-      if (!processedFiles.contains(input)) {
-        processedFiles :+= input
-        println("Processing:" + input)
-        val sourceOpt = getSource(input)
+      if (!processedFiles.contains(inputPath)) {
+        processedFiles :+= inputPath
+        println("Processing:" + inputPath)
+        val sourceOpt = getSource(inputPath)
         sourceOpt match {
           case Some(source) =>
 
-            /*
-            val scanner = new AbandonParser.lexical.Scanner(StreamReader(source.reader))
-            println(Stream.iterate(scanner)(_.rest).takeWhile(!_.atEnd).map(_.first).toList)
-            exit
-          */
-
-            val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(readerForFile(input)))
+            val parseResult = AbandonParser.abandon(Option(input.parentScope))(new AbandonParser.lexical.Scanner(readerForFile(inputPath)))
             parseResult match {
-              case AbandonParser.Success(result, _) =>
-                val includes = filterByType[IncludeDirective](result)
-                inputQueue ++= includes.map(id => mkRelativeFileName(id.fileName, input))
-                astEntries ++= result
+              case AbandonParser.Success(scope, _) =>
+                val includes = filterByType[IncludeDirective](scope.entries)
+                inputQueue ++= includes.map(id => Input(mkRelativeFileName(id.fileName, inputPath), scope))
+                input.parentScope.addIncludedScope(scope)
               case n: AbandonParser.NoSuccess =>
-                println("Error while parsing %s:\n%s" format (bold(input), n))
+                println("Error while parsing %s:\n%s" format (bold(inputPath), n))
                 parseError = true
             }
             source.close
@@ -148,7 +146,7 @@ object Processor {
         }
       }
     }
-    (parseError, astEntries, processedFiles.toSet)
+    (parseError, rootScope, processedFiles.toSet)
   }
 
   def getSource(fileName: String): Option[io.Source] = {
@@ -204,13 +202,9 @@ object Processor {
     new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
-  def process(entries: Seq[ASTEntry], accountSettings: Seq[AccountSettings]) = {
-    val definitions = filterByType[Definition](entries)
-    val evaluationContext = new EvaluationContext(definitions, Nil)
-
-
-    val transactions = filterByType[Transaction](entries)
-    val sortedTxns = transactions.sortBy(_.date)(DateOrdering)
+  def process(scope: Scope, accountSettings: Seq[AccountSettings]) = {
+    val transactions = scope.allTransactions
+    val sortedTxns = transactions.sortBy(_.txn.date)(DateOrdering)
     val accState = new AccountState()
     val aliasMap = accountSettings.collect{ case AccountSettings(name, Some(alias)) => alias -> name }.toMap
 
@@ -218,7 +212,10 @@ object Processor {
       aliasMap.get(accName.fullPathStr).getOrElse(accName)
     }
 
-    sortedTxns foreach { tx =>
+    sortedTxns foreach { case ScopedTxn(tx, txScope) =>
+      val entries = txScope.entries
+      val evaluationContext = new EvaluationContext(txScope, Nil)
+
       val (postsWithAmount, postsNoAmount) = tx.posts.partition(p => p.amount.isDefined)
       assert(postsNoAmount.length <= 1, "More than one account with unspecified amount: " + postsNoAmount)
       var txTotal = Zero
@@ -234,7 +231,7 @@ object Processor {
         detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }
       if (!(txTotal equals Zero)) {
-        definitions.find { d => d.name equals "defaultAccount" } match {
+        scope.definitions.find { d => d.name equals "defaultAccount" } match {
           case Some(defaultAccountDef) => {
             val defaultAccount = evaluationContext.evaluate[String](FunctionExpr("defaultAccount", Nil))
             val fullDefaultAccount = transformAlias(AccountName(defaultAccount.split(":")))
@@ -248,8 +245,8 @@ object Processor {
       accState.updateAmounts(new PostGroup(detailedPosts, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       assert(txTotal equals Zero, s"Transactions do not balance. Unbalanced amount: $txTotal")
     }
-    val accountDeclarations = filterByType[AccountDeclaration](entries)
-    AppState(accState, accountDeclarations)
+    // val accountDeclarations = filterByType[AccountDeclaration](entries)
+    AppState(accState)
   }
 
   def checkConstaints(appState: AppState, constraints: Seq[Constraint]) = {

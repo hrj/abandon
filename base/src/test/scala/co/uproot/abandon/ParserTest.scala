@@ -14,7 +14,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     val parseResult = AbandonParser.abandon(scanner(testInput))
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        result should be('empty)
+        result.entries should be('empty)
     }
   }
 
@@ -28,7 +28,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -55,7 +55,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -83,7 +83,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -118,7 +118,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup1, txnGroup2) =>
             inside(txnGroup1) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -162,7 +162,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -195,7 +195,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -233,7 +233,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -265,7 +265,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -299,7 +299,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     inside(parseResult) {
       case AbandonParser.Success(result, _) =>
-        inside(result) {
+        inside(result.entries) {
           case List(txnGroup1) =>
             inside(txnGroup1) {
               case Transaction(date, posts, None, None, Nil) =>
@@ -320,7 +320,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  def bd(s: String) = BigDecimal(s)
+  private def bd(s: String) = BigDecimal(s)
+  private val emptyScope = Scope(Nil, None)
+  private val emptyContext = new co.uproot.abandon.EvaluationContext(emptyScope, Nil)
 
   it should "parse simple numeric expression" in {
     val tests = Map(
@@ -329,7 +331,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "0" -> (bd("0") -> nlit(0)),
       "-20" -> (bd("-20") -> UnaryNegExpr(nlit(20)))
     )
-    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
 
     tests foreach {
       case (testInput, expectedOutput) =>
@@ -339,7 +340,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case AbandonParser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
-                context.evaluateBD(ne) should be (expectedOutput._1)
+                emptyContext.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }
@@ -358,8 +359,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "-20 + 30*-5.0" -> (bd("-170"), AddExpr(UnaryNegExpr(nlit(20)), MulExpr(nlit(30), UnaryNegExpr(nlit(5)))))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
-
     tests foreach {
       case (testInput, expectedOutput) =>
         val parseResult = AbandonParser.numericParser(scanner(testInput))
@@ -368,7 +367,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case AbandonParser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
-                context.evaluateBD(ne) should be (expectedOutput._1)
+                emptyContext.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }
@@ -380,8 +379,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "1 / 0" -> (bd("0"), DivExpr(nlit(1), nlit(0)))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
-
     tests foreach {
       case (testInput, expectedOutput) =>
         val parseResult = AbandonParser.numericParser(scanner(testInput))
@@ -392,7 +389,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
               case ne: Expr =>
                 ne should be(expectedOutput._2)
                 intercept[java.lang.ArithmeticException] {
-                    context.evaluateBD(ne)
+                    emptyContext.evaluateBD(ne)
                 }
             }
         }
@@ -413,8 +410,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "1 / 2 * 3" -> (bd("1.5"), MulExpr(DivExpr(nlit(1), nlit(2)), nlit(3)))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
-
     tests foreach {
       case (testInput, expectedOutput) =>
         val parseResult = AbandonParser.numericParser(scanner(testInput))
@@ -423,7 +418,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case AbandonParser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
-                context.evaluateBD(ne) should be (expectedOutput._1)
+                emptyContext.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }
@@ -438,8 +433,6 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       "1 * (2 + 3) * 4 - 2" -> (bd("18"), SubExpr(MulExpr(MulExpr(nlit(1), AddExpr(nlit(2), nlit(3))), nlit(4)), nlit(2)))
     )
 
-    val context = new co.uproot.abandon.EvaluationContext(Nil, Nil)
-
     tests foreach {
       case (testInput, expectedOutput) =>
         val parseResult = AbandonParser.numericParser(scanner(testInput))
@@ -448,7 +441,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case AbandonParser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
-                context.evaluateBD(ne) should be (expectedOutput._1)
+                emptyContext.evaluateBD(ne) should be (expectedOutput._1)
                 ne should be(expectedOutput._2)
             }
         }

@@ -1,4 +1,6 @@
 2016/5/3
-   bank         -1800
-   expenses     1800
+   bank           -1800
+   expenses       1800
+   inBank         -2000
+   inExpenses     2000
 
