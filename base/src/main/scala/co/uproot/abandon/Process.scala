@@ -231,7 +231,7 @@ object Processor {
         detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }
       if (!(txTotal equals Zero)) {
-        scope.definitions.find { d => d.name equals "defaultAccount" } match {
+        txScope.definitions.find { d => d.name equals "defaultAccount" } match {
           case Some(defaultAccountDef) => {
             val defaultAccount = evaluationContext.evaluate[String](FunctionExpr("defaultAccount", Nil))
             val fullDefaultAccount = transformAlias(AccountName(defaultAccount.split(":")))

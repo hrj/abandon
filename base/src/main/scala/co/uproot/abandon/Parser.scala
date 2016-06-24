@@ -112,7 +112,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   lexical.reserved += falseKeyword
   lexical.reserved += payeeKeyword
   lexical.reserved += tagKeyword
-  lexical.delimiters ++= List("+", "-", "*", "/", "=", "(", ")", ":", ",", "&", ".", "?", ">", "<")
+  lexical.delimiters ++= List("+", "-", "*", "/", "=", "(", ")", ":", ",", "&", ".", "?", ">", "<", "{", "}")
 
   val nameSeparator = ":"
 
@@ -134,13 +134,15 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private def eolComment = (comment?) <~ eol
 
   lazy val abandon: Parser[Scope] = abandon(None)
-  def abandon(parentScope: Option[Scope]): Parser[Scope] = phrase(frags) ^^ { case entries => Scope(entries, parentScope) }
+  def abandon(parentScopeOpt: Option[Scope]): Parser[Scope] = phrase(frags) ^^ { case entries => ParserHelper.fixupScopeParents(Scope(entries, None), parentScopeOpt) }
+
+  private lazy val scopeBlock: Parser[Scope] = ("{" ~> frags) <~ "}"  ^^ { case entries => Scope(entries, None) }
 
   lazy val accountName: Parser[AccountName] = rep1sep(ident, nameSeparator) ^^ { case path => AccountName(path) }
 
   private lazy val frags = (fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators
 
-  private lazy val fragment: Parser[ASTEntry] = (txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
+  private lazy val fragment: Parser[ASTEntry] = (scopeBlock | txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
   private lazy val includeFrag = (includeKeyword ~> fileName) ^^ { case name => IncludeDirective(name) }
   private lazy val payeeDefFrag = (payeeKeyword ~> stringOrAllUntilEOL) ^^ { case payee => PayeeDef(payee.mkString("")) }
   private lazy val tagDefFrag = (tagKeyword ~> stringOrAllUntilEOL) ^^ { case tag => TagDef(tag.mkString("")) }
@@ -256,4 +258,11 @@ object ParserHelper {
   def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
   def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
   def scanner(s: String) = mkScanner(reader(s))
+
+  def fixupScopeParents(s:Scope, parentOpt: Option[Scope]): Scope = {
+    Scope(s.entries.map( {
+      case c:Scope => fixupScopeParents(c, Option(s))
+      case x => x
+    }), parentOpt)
+  }
 }
