@@ -72,8 +72,8 @@ The last line shows the total of the top level accounts, which in this case is `
 * An interactive GUI for viewing reports. 
 
 ### Installation
-* Install **Java 8 from any provider**.
-  Other versions of Java will work fine for the CLI, but the GUI requires the above specific versions.
+* If you only need the CLI version, install **Java 8** from any provider. OpenJDK works fine.
+  The GUI version requires JavaFX, which is bundled by the Oracle 8 JRE and available as a separate package in other JREs.
 * Download and extract the `Abandon` binaries from [here](https://github.com/hrj/abandon/releases)
 * Use the `*.sh` files to run on `*nix` and `Mac` or the `*.bat` files to run on `Windows`.
 
@@ -90,14 +90,12 @@ The config file can specify which reports to generate and how. Some of these opt
 As of now, the preferred way of running the program is by specifying a config file. Look at `examples/simple/accounts.conf` for an example config file, and `doc/abandon.md` for further instructions and information about Abandon.
 
 ### Roadmap
+Abandon works fine for single-currency accounting. In the future, we plan to add support for:
 
-Many features are still missing. Until version 0.5 the focus will be on adding basic features such as:
+* Multiple currencies (or units or commodities).
+* Reporting options (sorting, grouping, time limits, etc).
 
-* Support for currencies
-* Reporting options (sorting, grouping, time limits, etc)
-
-Look at the issue list for a complete road map.
-
+The issue list provides a glimpse into the immediate road map.
 
 ### License
 Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
@@ -106,7 +104,7 @@ Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 ### Contact
 Join us in the chat room here: [![Gitter chat room](https://badges.gitter.im/hrj/abandon.png)](https://gitter.im/hrj/abandon).
 
-Or simply raise an issue in GitHub.
+Or raise an issue in GitHub.
 
 ### Build & Coverage status
 [![Build Status](https://travis-ci.org/hrj/abandon.svg?branch=master)](https://travis-ci.org/hrj/abandon)
