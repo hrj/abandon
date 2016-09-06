@@ -146,7 +146,7 @@ object CLIMain  {
   def runAppThrows(args: Array[String]) {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
-      case Left(errorMsg) => Console.err.println("Error: " + errorMsg)
+      case Left(errorMsg) => printErrAndExit(errorMsg)
       case Right(settings) =>
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
@@ -208,21 +208,20 @@ object CLIMain  {
     try {
       runAppThrows(args)
     } catch {
-      case a: AssertionError      => printErr("Error: " + a.getMessage)
-      case i: InputError          => printErr("Input error: " + i.getMessage)
-      case i: ConstraintError     => printErr("Constraint Failed: " + i.getMessage)
-      case e: NotImplementedError => printErr("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
-      case e: Error               => printErr("Unexpected error", e)
+      case a: AssertionError      => printErrAndExit("Error: " + a.getMessage)
+      case i: InputError          => printErrAndExit("Input error: " + i.getMessage)
+      case i: ConstraintError     => printErrAndExit("Constraint Failed: " + i.getMessage)
+      case e: NotImplementedError => printErrAndExit("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
+      case e: Error               => printErrAndExit("Unexpected error", e)
     }
   }
 
-  def printErr(msg: String) = {
+  def printErrAndExit(msg: String, err:Error = null) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
-  }
-
-  def printErr(msg: String, err:Error) = {
-    println(Console.RED + Console.BOLD + msg + Console.RESET)
-    err.printStackTrace(Console.out)
+    if (err != null) {
+      err.printStackTrace(Console.out)
+    }
+    System.exit(1)
   }
 }
 
