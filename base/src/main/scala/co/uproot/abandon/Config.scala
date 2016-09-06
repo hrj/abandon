@@ -1,12 +1,16 @@
 package co.uproot.abandon
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+
 import collection.JavaConverters._
-import com.typesafe.config.ConfigObject
 import org.rogach.scallop.ScallopConf
 import SettingsHelper._
 import com.typesafe.config.ConfigException
+import scala.util.Try
 
 class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
@@ -69,16 +73,17 @@ object SettingsHelper {
     if (file.exists) {
       try {
         val config = ConfigFactory.parseFile(file).resolve()
-        val inputs = config.getStringList("inputs").asScala.map(handleInput(_, configFileName)).flatten.toSeq.sorted
+        val inputs = config.getStringList("inputs").asScala.flatMap(handleInput(_, configFileName)).toSeq.sorted
         val reports = config.getConfigList("reports").asScala.map(makeReportSettings(_))
         val reportOptions = config.optConfig("reportOptions")
-        val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
+        val isRight = reportOptions.flatMap(_.optStringList("isRight")).getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
         val exports = exportConfigs.map(makeExportSettings)
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-        Right(Settings(inputs, eodConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file)))
+        val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateConstraints(_))
+        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -94,6 +99,13 @@ object SettingsHelper {
       case "positive" => PositiveConstraint(accName)
       case "negative" => NegativeConstraint(accName)
     }
+  }
+
+  def makeDateConstraints(config: Config): DateConstraint = {
+    val from = AbandonParser.dateExpr(ParserHelper.scanner(config.getString("from"))).map(Some(_)).getOrElse(None)
+    val to   = AbandonParser.dateExpr(ParserHelper.scanner(config.getString("to"))).map(Some(_)).getOrElse(None)
+
+    DateConstraint(from, to)
   }
 
   def makeReportSettings(config: Config) = {
@@ -204,9 +216,27 @@ case class NegativeConstraint(val accName: String) extends Constraint with SignC
   val signStr = "negative"
 }
 
+case class DateConstraint(dateFrom: Option[Date], dateTo: Option[Date]) extends Constraint {
+  override def check(appState: AppState): Boolean = {
+    appState.accState.posts.find(post => {
+      val date = post.date
+
+      dateFrom.map(DateOrdering.compare(_, date) > 0).getOrElse(false) || dateTo.map(DateOrdering.compare(_, date) < 0).getOrElse(false)
+    }).foreach(post => {
+      throw new ConstraintError(
+        s"${post.name} is not in date range of " +
+        s"[${dateFrom.getOrElse("None")}, ${dateTo.getOrElse("None")}]. " +
+        s"Date is ${post.date.formatISO8601Ext}"
+      )
+    })
+
+    true
+  }
+}
+
 case class Settings(
   inputs: Seq[String],
-  eodConstraints: Seq[Constraint],
+  constraints: Seq[Constraint],
   accounts: Seq[AccountSettings],
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,

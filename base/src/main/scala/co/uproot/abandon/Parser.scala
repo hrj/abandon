@@ -211,12 +211,12 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val conditionExpr = (numericExpr ~ comparisonExpr ~ numericExpr) ^^ { case (e1 ~ op ~ e2) => ConditionExpr(e1, op, e2)}
   private lazy val comparisonExpr: PackratParser[String] = ((">" | "<" | "=") ~ "=" ^^ {case (o1 ~ o2) => o1 + o2}) | ">" | "<" 
 
-  private lazy val compactTxFrag = (("." ~> (dateFrag | isoDateFrag) ~ accountName ~ numericExpr ~ eolComment) ^^ {
+  private lazy val compactTxFrag = (("." ~> dateExpr ~ accountName ~ numericExpr ~ eolComment) ^^ {
     case date ~ accountName ~ amount ~ optComment =>
       Transaction(date, List(Post(accountName, Option(amount), optComment)), None, None, Nil)
   })
 
-  private lazy val txFrag = (((dateFrag | isoDateFrag) ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+) ^^ {
+  private lazy val txFrag = ((dateExpr ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+) ^^ {
     case date ~ annotationOpt ~ optPayee ~ optComment ~ posts =>
       val annotationStrOpt = annotationOpt.map(_.mkString(""))
       Transaction(date, posts, annotationStrOpt, optPayee, optComment.flatten)
@@ -229,6 +229,8 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val post: PackratParser[Post] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
     case name ~ amount ~ commentOpt => Post(name, amount, commentOpt)
   }
+
+  lazy val dateExpr = dateFrag | isoDateFrag
 
   lazy val isoDateFrag = ((((integer <~ "-") ~ integer) <~ "-") ~ integer) ^? ({
     case y ~ m ~ d if (isValidDate(y, m, d)) =>
