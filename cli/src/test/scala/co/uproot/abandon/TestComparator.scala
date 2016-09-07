@@ -13,7 +13,7 @@ object TestComparator extends FlatSpec  {
         val srcSecond = scala.io.Source.fromFile(second)
         val txtSecond = try srcSecond.getLines mkString "\n" finally srcSecond.close()
 
-        txtFirst == txtSecond
+        txtFirst === txtSecond
   }
 
   def xmlComparator(first: String, second: String) :Boolean = {
