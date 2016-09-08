@@ -151,7 +151,7 @@ object CLIMain  {
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
         if (!parseError) {
           val appState = Processor.process(astEntries,settings.accounts)
-          Processor.checkConstaints(appState, settings.eodConstraints)
+          Processor.checkConstaints(appState, settings.constraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
             println()
