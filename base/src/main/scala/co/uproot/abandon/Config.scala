@@ -82,7 +82,7 @@ object SettingsHelper {
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-        val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateConstraints(_))
+        val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateConstraint(_))
         Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
         case e: ConfigException => Left(e.getMessage)
@@ -101,11 +101,23 @@ object SettingsHelper {
     }
   }
 
-  def makeDateConstraints(config: Config): DateConstraint = {
-    val from = AbandonParser.dateExpr(ParserHelper.scanner(config.getString("from"))).map(Some(_)).getOrElse(None)
-    val to   = AbandonParser.dateExpr(ParserHelper.scanner(config.getString("to"))).map(Some(_)).getOrElse(None)
+  private def getDate(name: String, config: Config) : Option[Date] = {
+    import AbandonParser.{Success, NoSuccess}
 
-    DateConstraint(from, to)
+    config.optional(name) { _.getString(_) } match {
+      case Some(valueStr) =>
+        val parseResult = AbandonParser.dateExpr(ParserHelper.scanner(valueStr))
+        parseResult match {
+          case Success(date, _) => Option(date)
+          case NoSuccess(_, _) =>
+            throw new ConfigException.BadValue(config.origin, name, "expected date expression")
+        }
+      case None => None
+    }
+  }
+
+  private def makeDateConstraint(config: Config): DateConstraint = {
+    DateConstraint(getDate("from", config), getDate("to", config))
   }
 
   def makeReportSettings(config: Config) = {
