@@ -237,7 +237,7 @@ object Processor {
             val fullDefaultAccount = transformAlias(AccountName(defaultAccount.split(":")))
             val delta = -txTotal
             txTotal += delta
-            detailedPosts :+= DetailedPost(fullDefaultAccount, delta, Some("post by default"))
+            detailedPosts :+= DetailedPost(fullDefaultAccount, delta, None)
           }
           case None =>
         }
