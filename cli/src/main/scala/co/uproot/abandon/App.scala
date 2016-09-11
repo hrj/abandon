@@ -208,7 +208,7 @@ object CLIMain  {
     try {
       runAppThrows(args)
     } catch {
-      case a: AssertionError      => printErrAndExit("Error: " + a.getMessage)
+      case a: AssertionError      => printErrAndExit("Internal Assertion Error (please report a bug):" + a.getMessage)
       case i: InputError          => printErrAndExit("Input error: " + i.getMessage)
       case i: ConstraintError     => printErrAndExit("Constraint Failed: " + i.getMessage)
       case e: NotImplementedError => printErrAndExit("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
