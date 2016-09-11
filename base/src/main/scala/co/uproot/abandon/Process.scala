@@ -203,6 +203,7 @@ object Processor {
   }
 
   def process(scope: Scope, accountSettings: Seq[AccountSettings]) = {
+    scope.checkDupes()
     val transactions = scope.allTransactions
     val sortedTxns = transactions.sortBy(_.txn.date)(DateOrdering)
     val accState = new AccountState()

@@ -14,6 +14,7 @@ class InputError(msg: String) extends RuntimeException(msg)
 class MissingDestinationError(msg: String) extends InputError(msg)
 class SourceDestinationClashError(msg: String) extends InputError(msg)
 class InputFileNotFoundError(fileName:String) extends InputError("File not found: " + fileName)
+class DupSymbolInScopeError(symbol: String) extends InputError("A symbol was defined multiple times within the same scope: " + symbol)
 
 class ConstraintError(msg: String) extends RuntimeException(msg)
 
@@ -219,4 +220,13 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
   def childScopes = Helper.filterByType[Scope](entries)
 
   def allTransactions:Seq[ScopedTxn] = allLocalTransactions ++ childScopes.flatMap(_.allTransactions)
+
+  def checkDupes() {
+    Helper.allUnique(localDefinitions.map(_.name)) match {
+      case Some(nonUnique) =>
+        throw new DupSymbolInScopeError(nonUnique)
+      case None =>
+        includedScopes.foreach(_.checkDupes())
+    }
+  }
 }
