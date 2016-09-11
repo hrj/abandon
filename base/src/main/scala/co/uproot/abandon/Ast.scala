@@ -195,7 +195,7 @@ case class IfExpr(val cond: Expr, val op1: Expr, val op2: Expr) extends Expr {
 
 case class ScopedTxn(txn: Transaction, scope: Scope)
 
-/* Note: This is a mutable class */
+/* Note: This is class has mutable state */
 case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEntry {
   private var includedScopes: List[Scope] = Nil
 
