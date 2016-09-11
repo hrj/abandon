@@ -82,7 +82,7 @@ object SettingsHelper {
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-        val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateConstraint(_))
+        val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateRangeConstraint(_))
         Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file)))
       } catch {
         case e: ConfigException => Left(e.getMessage)
@@ -101,23 +101,23 @@ object SettingsHelper {
     }
   }
 
-  private def getDate(name: String, config: Config) : Option[Date] = {
+  private def getDateBound(name: String, config: Config) : Option[DateBound] = {
     import AbandonParser.{Success, NoSuccess}
 
     config.optional(name) { _.getString(_) } match {
       case Some(valueStr) =>
-        val parseResult = AbandonParser.dateExpr(ParserHelper.scanner(valueStr))
+        val parseResult = AbandonParser.dateBoundExpr(ParserHelper.scanner(valueStr))
         parseResult match {
-          case Success(date, _) => Option(date)
+          case Success(dateBound, _) => Option(dateBound)
           case NoSuccess(_, _) =>
-            throw new ConfigException.BadValue(config.origin, name, "expected date expression")
+            throw new ConfigException.BadValue(config.origin, name, "expected a date bound of the form: <date> <inclusive|exclusive>")
         }
       case None => None
     }
   }
 
-  private def makeDateConstraint(config: Config): DateConstraint = {
-    DateConstraint(getDate("from", config), getDate("to", config))
+  private def makeDateRangeConstraint(config: Config): DateRangeConstraint = {
+    DateRangeConstraint(getDateBound("from", config), getDateBound("to", config))
   }
 
   def makeReportSettings(config: Config) = {
@@ -228,16 +228,37 @@ case class NegativeConstraint(val accName: String) extends Constraint with SignC
   val signStr = "negative"
 }
 
-case class DateConstraint(dateFrom: Option[Date], dateTo: Option[Date]) extends Constraint {
+case class DateBound(date: Date, inclusive: Boolean) {
+  def isNotEarlierThan(that: Date) = {
+    if (inclusive) {
+      DateOrdering.compare(this.date, that) > 0
+    } else {
+      DateOrdering.compare(this.date, that) >= 0
+    }
+  }
+
+  def isNotLaterThan(that: Date) = {
+    if (inclusive) {
+      DateOrdering.compare(this.date, that) < 0
+    } else {
+      DateOrdering.compare(this.date, that) <= 0
+    }
+  }
+}
+
+case class DateRangeConstraint(dateFromOpt: Option[DateBound], dateToOpt: Option[DateBound]) extends Constraint {
   override def check(appState: AppState): Boolean = {
     appState.accState.posts.find(post => {
       val date = post.date
 
-      dateFrom.map(DateOrdering.compare(_, date) > 0).getOrElse(false) || dateTo.map(DateOrdering.compare(_, date) < 0).getOrElse(false)
+      val fromFails = dateFromOpt.map(_.isNotEarlierThan(date)).getOrElse(false)
+      val toFails = dateToOpt.map(_.isNotLaterThan(date)).getOrElse(false)
+
+      fromFails || toFails
     }).foreach(post => {
       throw new ConstraintError(
         s"${post.name} is not in date range of " +
-        s"[${dateFrom.getOrElse("None")}, ${dateTo.getOrElse("None")}]. " +
+        s"[${dateFromOpt.getOrElse("...")}, ${dateToOpt.getOrElse("...")}]. " +
         s"Date is ${post.date.formatISO8601Ext}"
       )
     })

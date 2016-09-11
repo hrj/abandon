@@ -16,38 +16,71 @@ class DateConstraintTest extends FlatSpec with Matchers with BeforeAndAfterEach 
   }
 
   it should "return true on valid posts" in {
-    val constraint = new DateConstraint(
-      Some(Date(2013, 1, 1)),
-      Some(Date(2013, 12, 31))
+    val constraint = new DateRangeConstraint(
+      Some(DateBound(Date(2013, 1, 1), inclusive = true)),
+      Some(DateBound(Date(2013, 12, 31), inclusive = false))
     )
 
     constraint.check(appState) should be(true)
   }
 
   it should "throw exception on end date violation" in {
-    val constraint = new DateConstraint(
-      Some(Date(2013, 1, 1)),
-      Some(Date(2013, 11, 1))
+    val constraint = new DateRangeConstraint(
+      Some(DateBound(Date(2013, 1, 1), inclusive = false)),
+      Some(DateBound(Date(2013, 11, 1), inclusive = false))
     )
     an [ConstraintError] should be thrownBy constraint.check(appState)
 
-    val constraintWithoutFrom = new DateConstraint(None, Some(Date(2013, 11, 1)))
+    val constraintWithoutFrom = new DateRangeConstraint(None, Some(DateBound(Date(2013, 11, 1), inclusive = true)))
+    an [ConstraintError] should be thrownBy constraintWithoutFrom.check(appState)
+  }
+
+  it should "throw exception on inclusive end date violation" in {
+    val constraint = new DateRangeConstraint(
+      Some(DateBound(Date(2013, 1, 1), inclusive = true)),
+      Some(DateBound(Date(2013, 11, 30), inclusive = true))
+    )
+    an [ConstraintError] should be thrownBy constraint.check(appState)
+
+    val constraintWithoutFrom = new DateRangeConstraint(None, Some(DateBound(Date(2013, 11, 30), inclusive = true)))
+    an [ConstraintError] should be thrownBy constraintWithoutFrom.check(appState)
+  }
+
+  it should "throw exception on exclusive from-date violation" in {
+    val constraint = new DateRangeConstraint(
+      Some(DateBound(Date(2013, 1, 1), inclusive = false)),
+      Some(DateBound(Date(2013, 12, 2), inclusive = false))
+    )
+    an [ConstraintError] should be thrownBy constraint.check(appState)
+
+    val constraintWithoutFrom = new DateRangeConstraint(Some(DateBound(Date(2013, 1, 1), inclusive = false)), None)
+    an [ConstraintError] should be thrownBy constraintWithoutFrom.check(appState)
+  }
+
+  it should "throw exception on exclusive to-date violation" in {
+    val constraint = new DateRangeConstraint(
+      Some(DateBound(Date(2013, 1, 1), inclusive = true)),
+      Some(DateBound(Date(2013, 12, 1), inclusive = false))
+    )
+    an [ConstraintError] should be thrownBy constraint.check(appState)
+
+    val constraintWithoutFrom = new DateRangeConstraint(None, Some(DateBound(Date(2013, 12, 1), inclusive = false)))
     an [ConstraintError] should be thrownBy constraintWithoutFrom.check(appState)
   }
 
   it should "throw exception on start date violation" in {
-    val constraint = new DateConstraint(
-      Some(Date(2013, 6, 1)),
-      Some(Date(2013, 11, 1))
+    val constraint = new DateRangeConstraint(
+      Some(DateBound(Date(2013, 6, 1), inclusive = false)),
+      Some(DateBound(Date(2013, 12, 1), inclusive = false))
     )
     an [ConstraintError] should be thrownBy constraint.check(appState)
 
-    val constraintWithoutTo = new DateConstraint(Some(Date(2013, 11, 1)), None)
+    val constraintWithoutTo = new DateRangeConstraint(Some(DateBound(Date(2013, 11, 1), inclusive = false)), None)
     an [ConstraintError] should be thrownBy constraintWithoutTo.check(appState)
   }
 
   it should "return true on empty dates" in {
-    val constraintWithoutTo = new DateConstraint(None, None)
+    val constraintWithoutTo = new DateRangeConstraint(None, None)
     constraintWithoutTo.check(appState) should be(true)
   }
 
