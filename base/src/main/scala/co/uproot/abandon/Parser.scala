@@ -232,10 +232,12 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   lazy val dateExpr = dateFrag | isoDateFrag
 
-  lazy val dateBoundExpr = dateExpr ~ ("inclusive" | "exclusive") ^? {
-    case date ~ lusive =>
-      DateBound(date, lusive == "inclusive")
+  lazy val inclusive = ident ^? {
+    case "inclusive" => true
+    case "exclusive" => false
   }
+
+  lazy val dateBoundExpr = (dateExpr ~ inclusive) ^^ { case date ~ inclusive => DateBound(date, inclusive) }
 
   lazy val isoDateFrag = ((((integer <~ "-") ~ integer) <~ "-") ~ integer) ^? ({
     case y ~ m ~ d if (isValidDate(y, m, d)) =>
