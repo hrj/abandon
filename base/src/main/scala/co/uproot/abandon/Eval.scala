@@ -2,7 +2,7 @@ package co.uproot.abandon
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.LiteralExpr
 
-case class Ref(name: String, argCount: Int)
+case class Ref(name: String, argCount: Int, pos: Option[InputPosition])
 
 object EvaluationContext {
   private def ensureUnique(defs: Seq[Definition]):Unit = {
@@ -25,7 +25,7 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
     d.rhs.getRefs foreach { ref =>
       if (!defined.isDefinedAt(ref.name)) {
         if (!d.params.contains(ref.name)) {
-          throw new InputPosError("Definition not found: " + ref.name, d.pos)
+          throw mkInputError("Couldn't resolve reference: " + ref.name, ref.pos)
         }
       } else {
         if (defined(ref.name).params.length != ref.argCount) {
@@ -42,7 +42,16 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
 
   def isImmediatelyEvaluable(name: String) = true
 
-  def getValue(name: String, params: Seq[Expr]) = {
+  private def mkInputError(msg: String, posOpt: Option[InputPosition]):RuntimeException = {
+    posOpt match {
+      case Some(pos) =>
+        new InputPosError(msg, pos)
+      case None =>
+        new InputError(msg)
+    }
+  }
+
+  def getValue(name: String, params: Seq[Expr], e: Expr) = {
     defined.get(name) match {
       case Some(d) =>
         val d = defined(name)
@@ -54,8 +63,7 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
         // println("evaluated", name, params, result)
         result
       case None =>
-        // TODO: show input position
-        throw new InputError("Definition not found: " + name)
+        throw mkInputError("Couldn't resolve reference: " + name, e.pos)
     }
   }
 
@@ -63,7 +71,8 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
     // TODO: Expression can also have a position, and we can throw InputPosError
     evaluateInternal(e) match {
       case t:T => t
-      case x => throw new InputError("Expected type: " + m + " but expression evaluated to: " + x.getClass)
+      case x =>
+        throw mkInputError("Expected type: " + m + " but expression evaluated to: " + x.getClass, e.pos)
     }
   }
 
@@ -73,24 +82,24 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
 
   private def evaluateInternal(e:Expr):Expr = {
     e match {
-      case AddExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) + evaluateBD(e2))
-      case SubExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) - evaluateBD(e2))
-      case MulExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) * evaluateBD(e2))
-      case DivExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) / evaluateBD(e2))
-      case UnaryNegExpr(e1) => NumericLiteralExpr(-evaluateBD(e1))
+      case AddExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) + evaluateBD(e2))(None)
+      case SubExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) - evaluateBD(e2))(None)
+      case MulExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) * evaluateBD(e2))(None)
+      case DivExpr(e1, e2) => NumericLiteralExpr(evaluateBD(e1) / evaluateBD(e2))(None)
+      case UnaryNegExpr(e1) => NumericLiteralExpr(-evaluateBD(e1))(None)
       case le:LiteralValue[_] => le
-      case IdentifierExpr(name) => getValue(name, Nil)
-      case FunctionExpr(name, arguments) => getValue(name, arguments.map(evaluateInternal(_)))
+      case IdentifierExpr(name) => getValue(name, Nil, e)
+      case FunctionExpr(name, arguments, _) => getValue(name, arguments.map(evaluateInternal(_)), e)
       case IfExpr(cond, e1, e2) => evaluateInternal(if(evaluateBoolean(cond)) e1 else e2)
       case ConditionExpr(e1, op, e2) => {
         val r1 = evaluateBD(e1)
         val r2 = evaluateBD(e2)
         op match {
-          case ">" => BooleanLiteralExpr(r1 > r2)
-          case ">=" => BooleanLiteralExpr(r1 >= r2)
-          case "<" => BooleanLiteralExpr(r1 < r2)
-          case "<=" => BooleanLiteralExpr(r1 <= r2)
-          case "==" => BooleanLiteralExpr(r1 == r2)
+          case ">" => BooleanLiteralExpr(r1 > r2)(None)
+          case ">=" => BooleanLiteralExpr(r1 >= r2)(None)
+          case "<" => BooleanLiteralExpr(r1 < r2)(None)
+          case "<=" => BooleanLiteralExpr(r1 <= r2)(None)
+          case "==" => BooleanLiteralExpr(r1 == r2)(None)
         }
       }
     }

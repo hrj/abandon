@@ -153,6 +153,7 @@ case class AccountDeclaration(name: AccountName, details: Map[String, Expr]) ext
 case class IncludeDirective(fileName: String) extends ASTEntry
 
 sealed abstract class Expr {
+  val pos: Option[InputPosition]
   def prettyPrint = toString
   def getRefs: Seq[Ref]
 }
@@ -162,21 +163,21 @@ trait LiteralValue[T] {
   def getRefs = Nil
 }
 
-case class BooleanLiteralExpr(val value: Boolean) extends Expr with LiteralValue[Boolean]
-case class StringLiteralExpr(val value: String) extends Expr with LiteralValue[String]
+case class BooleanLiteralExpr(val value: Boolean)(val pos: Option[InputPosition]) extends Expr with LiteralValue[Boolean]
+case class StringLiteralExpr(val value: String)(val pos: Option[InputPosition]) extends Expr with LiteralValue[String]
 
-case class NumericLiteralExpr(val value: BigDecimal) extends Expr with LiteralValue[BigDecimal] {
+case class NumericLiteralExpr(val value: BigDecimal)(val pos: Option[InputPosition]) extends Expr with LiteralValue[BigDecimal] {
   override def prettyPrint = value.toString
 }
 
-case class FunctionExpr(val name: String, val arguments: Seq[Expr]) extends Expr {
+case class FunctionExpr(val name: String, val arguments: Seq[Expr], val pos: Option[InputPosition]) extends Expr {
   override def prettyPrint = "%s(%s)" format (name, arguments.map(_.prettyPrint).mkString(", "))
-  def getRefs = Ref(name, arguments.length) +: arguments.flatMap(_.getRefs)
+  def getRefs = Ref(name, arguments.length, pos) +: arguments.flatMap(_.getRefs)
 }
 
-case class IdentifierExpr(val name: String) extends Expr {
+case class IdentifierExpr(val name: String)(val pos: Option[InputPosition]) extends Expr {
   override def prettyPrint = name
-  def getRefs = Seq(Ref(name, 0))
+  def getRefs = Seq(Ref(name, 0, pos))
 }
 
 sealed abstract class BinaryExpr(op1: Expr, op2: Expr, opChar: String, operation: (BigDecimal, BigDecimal) => BigDecimal) extends Expr {
@@ -184,24 +185,24 @@ sealed abstract class BinaryExpr(op1: Expr, op2: Expr, opChar: String, operation
   def getRefs = op1.getRefs ++ op2.getRefs
 }
 
-case class AddExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "+", _ + _)
+case class AddExpr(val op1: Expr, val op2: Expr)(val pos: Option[InputPosition]) extends BinaryExpr(op1, op2, "+", _ + _)
 
-case class SubExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "-", _ - _)
+case class SubExpr(val op1: Expr, val op2: Expr)(val pos: Option[InputPosition]) extends BinaryExpr(op1, op2, "-", _ - _)
 
-case class MulExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "*", _ * _)
+case class MulExpr(val op1: Expr, val op2: Expr)(val pos: Option[InputPosition]) extends BinaryExpr(op1, op2, "*", _ * _)
 
-case class DivExpr(val op1: Expr, val op2: Expr) extends BinaryExpr(op1, op2, "/", _ / _)
+case class DivExpr(val op1: Expr, val op2: Expr)(val pos: Option[InputPosition]) extends BinaryExpr(op1, op2, "/", _ / _)
 
-case class UnaryNegExpr(val op: Expr) extends Expr {
+case class UnaryNegExpr(val op: Expr)(val pos: Option[InputPosition]) extends Expr {
   override def prettyPrint = " -(" + op.prettyPrint + ")"
   def getRefs = op.getRefs
 }
 
-case class ConditionExpr(val e1: Expr, val op: String, val e2: Expr) extends Expr {
+case class ConditionExpr(val e1: Expr, val op: String, val e2: Expr)(val pos: Option[InputPosition]) extends Expr {
   def getRefs = e1.getRefs ++ e2.getRefs
 }
 
-case class IfExpr(val cond: Expr, val op1: Expr, val op2: Expr) extends Expr {
+case class IfExpr(val cond: Expr, val op1: Expr, val op2: Expr)(val pos: Option[InputPosition]) extends Expr {
   def getRefs = cond.getRefs ++ op1.getRefs ++ op2.getRefs
 }
 

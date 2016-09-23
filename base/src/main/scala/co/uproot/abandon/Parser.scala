@@ -157,7 +157,7 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
     case name ~ details => AccountDeclaration(name, details)
   }
   private lazy val accountDefDetails = keyValuePairs
-  private lazy val keyValuePairSingleton = (ident) ^^ { case k => (k, BooleanLiteralExpr(true)) }
+  private lazy val keyValuePairSingleton = (currentPosition ~ ident) ^^ { case pos ~ k => (k, BooleanLiteralExpr(true)(Some(pos))) }
   private lazy val keyValuePairBoolean = ((ident <~ ":") ~ booleanExpr) ^^ { case k ~ v => (k, v) }
   private lazy val keyValuePair = keyValuePairSingleton | keyValuePairBoolean
   private lazy val keyValuePairs = ((keyValuePair <~ anyEol)*) ^^ { case s => s.toMap }
@@ -176,8 +176,10 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
   private lazy val expression: PackratParser[Expr] = (numericExpr ||| booleanExpr ||| stringExpr)
 
   private def mkFunctionExpr(exprParser: Parser[Expr]) = {
-    val zeroArgFunctionExpr = (ident ^^ { case x => IdentifierExpr(x) })
-    val multiArgFunctionExpr = (((ident <~ "(") ~ rep1sep(exprParser, ",")) <~ ")") ^^ { case x ~ es => FunctionExpr(x, es) }
+    val zeroArgFunctionExpr = (currentPosition ~ ident ^^ { case pos ~ x => IdentifierExpr(x)(Some(pos)) })
+    val multiArgFunctionExpr = currentPosition ~ (((ident <~ "(") ~ rep1sep(exprParser, ",")) <~ ")") ^^ {
+      case pos ~ (x ~ es) => FunctionExpr(x, es, Some(pos))
+      }
     multiArgFunctionExpr ||| zeroArgFunctionExpr
   }
 
@@ -185,41 +187,50 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
 
   lazy val numericParser: Parser[Expr] = phrase(numericExpr)
 
-  private lazy val numericLiteralExpr: PackratParser[Expr] = (number ^^ { case n => NumericLiteralExpr(n) })
+  private lazy val numericLiteralExpr: PackratParser[Expr] = (currentPosition ~ number ^^ { case pos ~ n => NumericLiteralExpr(n)(Some(pos)) })
   private lazy val numericLiteralFirstExpr: PackratParser[Expr] = (numericLiteralExpr | numericExpr)
   private lazy val unaryPosExpr: PackratParser[Expr] = ("+" ~> numericLiteralFirstExpr)
-  private lazy val unaryNegExpr: PackratParser[UnaryNegExpr] = ("-" ~> numericLiteralFirstExpr) ^^ { case expr => UnaryNegExpr(expr) }
+  private lazy val unaryNegExpr: PackratParser[UnaryNegExpr] = currentPosition ~ ("-" ~> numericLiteralFirstExpr) ^^ {
+    case pos ~ expr => UnaryNegExpr(expr)(Some(pos))
+  }
   private lazy val parenthesizedExpr: PackratParser[Expr] = (("(" ~> numericExpr) <~ ")") ^^ { case expr => expr }
 
-  private lazy val ternaryIfExpr: PackratParser[Expr] = (booleanExpr <~ "?") ~ (expression <~ ":") ~ expression ^^ { case be ~ e1 ~ e2 => IfExpr(be, e1, e2) }
+  private lazy val ternaryIfExpr: PackratParser[Expr] = currentPosition ~ (booleanExpr <~ "?") ~ (expression <~ ":") ~ expression ^^ {
+    case pos ~ be ~ e1 ~ e2 => IfExpr(be, e1, e2)(Some(pos))
+  }
 
-  private def mkExpr(op: String, e1: Expr, e2: Expr) = {
+  private def mkExpr(op: String, e1: Expr, e2: Expr, pos: InputPosition) = {
     op match {
-      case "+" => AddExpr(e1, e2)
-      case "-" => SubExpr(e1, e2)
-      case "*" => MulExpr(e1, e2)
-      case "/" => DivExpr(e1, e2)
+      case "+" => AddExpr(e1, e2)(Some(pos))
+      case "-" => SubExpr(e1, e2)(Some(pos))
+      case "*" => MulExpr(e1, e2)(Some(pos))
+      case "/" => DivExpr(e1, e2)(Some(pos))
     }
   }
 
   private lazy val numericExpr: PackratParser[Expr] =
-    (term ~ termFrag) ^^ {
-      case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
+    currentPosition ~ (term ~ termFrag) ^^ {
+      case pos ~ (t1 ~ ts) => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2, pos) }
     }
 
   private lazy val term: PackratParser[Expr] =
-    factor ~ factorFrag ^^ {
-      case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
+    currentPosition ~ factor ~ factorFrag ^^ {
+      case pos ~ t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2, pos) }
     }
 
   private lazy val termFrag: PackratParser[Seq[String ~ Expr]] = (("+" | "-") ~ term)*
   private lazy val factor: PackratParser[Expr] = ternaryIfExpr | functionExpr | numericLiteralExpr | parenthesizedExpr | unaryPosExpr | unaryNegExpr
   private lazy val factorFrag: PackratParser[Seq[String ~ Expr]] = (("*" | "/") ~ factor)*
 
-  private lazy val stringExpr: PackratParser[Expr] =  (stringLit ^^ StringLiteralExpr) | functionExpr
+  private lazy val stringLitExpr = (currentPosition ~ stringLit) ^^ {case pos ~ lit => StringLiteralExpr(lit)(Some(pos))}
+  private lazy val stringExpr: PackratParser[Expr] =  stringLitExpr | functionExpr
   private lazy val booleanExpr: PackratParser[Expr] =  conditionExpr | booleanLiteralExpr | functionExpr
-  private lazy val booleanLiteralExpr = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
-  private lazy val conditionExpr = (numericExpr ~ comparisonExpr ~ numericExpr) ^^ { case (e1 ~ op ~ e2) => ConditionExpr(e1, op, e2)}
+  private lazy val trueExpr = currentPosition ~ trueKeyword ^^ { case pos ~ lit => BooleanLiteralExpr(true)(Some(pos))}
+  private lazy val falseExpr = currentPosition ~ falseKeyword ^^ { case pos ~ lit => BooleanLiteralExpr(false)(Some(pos))}
+  private lazy val booleanLiteralExpr = trueExpr | falseExpr
+  private lazy val conditionExpr = currentPosition ~ (numericExpr ~ comparisonExpr ~ numericExpr) ^^ {
+    case pos ~ (e1 ~ op ~ e2) => ConditionExpr(e1, op, e2)(Some(pos))
+  }
   private lazy val comparisonExpr: PackratParser[String] = ((">" | "<" | "=") ~ "=" ^^ {case (o1 ~ o2) => o1 + o2}) | ">" | "<" 
 
   private lazy val compactTxFrag = (currentPosition ~ ("." ~> dateExpr ~ accountName ~ numericExpr ~ eolComment) ^^ {
