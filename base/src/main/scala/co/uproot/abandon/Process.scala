@@ -244,7 +244,9 @@ object Processor {
         }
       }
       accState.updateAmounts(new PostGroup(detailedPosts, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
-      assert(txTotal equals Zero, s"Transactions do not balance. Unbalanced amount: $txTotal")
+      if (!(txTotal equals Zero)) {
+        throw new ConstraintError(s"Transactions do not balance. Unbalanced amount: $txTotal")
+      }
     }
     // val accountDeclarations = filterByType[AccountDeclaration](entries)
     AppState(accState)
