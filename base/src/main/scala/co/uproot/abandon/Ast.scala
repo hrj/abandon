@@ -1,20 +1,28 @@
 package co.uproot.abandon
 
+import scala.util.parsing.input.Position
+
 object ASTHelper {
 
   def parseAccountName(name:String):AccountName = {
     AbandonParser.accountName(ParserHelper.scanner(name)) match {
       case AbandonParser.Success(result, _) => result
-      case _ => throw new InputError("Couldn't parse accountName: " + name)
+      case AbandonParser.Failure(msg, next) => throw new InputError("Couldn't parse accountName: " + name)
+      case AbandonParser.Error(msg, next) => throw new InputError("Couldn't parse accountName: " + name)
     }
   }
 }
+
+case class InputPosition(path: String, pos: Position)
 
 class InputError(msg: String) extends RuntimeException(msg)
 class MissingDestinationError(msg: String) extends InputError(msg)
 class SourceDestinationClashError(msg: String) extends InputError(msg)
 class InputFileNotFoundError(fileName:String) extends InputError("File not found: " + fileName)
-class DupSymbolInScopeError(symbol: String) extends InputError("A symbol was defined multiple times within the same scope: " + symbol)
+
+class InputPosError(msg: String, pos: InputPosition) extends InputError(msg + " at position: " + pos)
+
+class DupSymbolInScopeError(symbol: String, pos: InputPosition) extends InputPosError("A symbol was defined multiple times within the same scope: " + symbol, pos)
 
 class ConstraintError(msg: String) extends RuntimeException(msg)
 
@@ -133,7 +141,7 @@ sealed class ASTTangibleEntry extends ASTEntry
 
 case class Transaction(date: Date, posts: Seq[Post], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
 
-case class Definition(name: String, params: List[String], rhs: Expr) extends ASTTangibleEntry {
+case class Definition(pos: InputPosition, name: String, params: List[String], rhs: Expr) extends ASTTangibleEntry {
   def prettyPrint = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)
 }
 
@@ -224,7 +232,7 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
   def checkDupes() {
     Helper.allUnique(localDefinitions.map(_.name)) match {
       case Some(nonUnique) =>
-        throw new DupSymbolInScopeError(nonUnique)
+        throw new DupSymbolInScopeError(nonUnique, localDefinitions.find { _.name == nonUnique }.get.pos)
       case None =>
         includedScopes.foreach(_.checkDupes())
     }

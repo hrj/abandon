@@ -8,7 +8,8 @@ object EvaluationContext {
   private def ensureUnique(defs: Seq[Definition]):Unit = {
     if (defs.toSet.size != defs.size) {
       val duplicate = defs.map(_.name).combinations(2).find(e => e.head equals e.tail.head)
-      throw new InputError("Attempt to redefine symbol: " + duplicate.get.head)
+      val dupName = duplicate.get.head
+      throw new InputPosError("Attempt to redefine symbol: " + dupName, defs.find(_.name == dupName).get.pos)
     }
   }
 }
@@ -24,11 +25,11 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
     d.rhs.getRefs foreach { ref =>
       if (!defined.isDefinedAt(ref.name)) {
         if (!d.params.contains(ref.name)) {
-          throw new InputError("Definition not found: " + ref.name)
+          throw new InputPosError("Definition not found: " + ref.name, d.pos)
         }
       } else {
         if (defined(ref.name).params.length != ref.argCount) {
-          throw new InputError("Reference and Definition parameters don't match: " + ref.name)
+          throw new InputPosError("Reference and Definition parameters don't match: " + ref.name, d.pos)
         }
       }
     }
@@ -44,15 +45,16 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
   def getValue(name: String, params: Seq[Expr]) = {
     val d = defined(name)
     if (d.params.length != params.length) {
-      throw new InputError("Parameter lengths don't match for " + name)
+      throw new InputPosError("Parameter lengths don't match for " + name, d.pos)
     }
-    val newLocalDefs = d.params.zip(params).map(pairs => Definition(pairs._1, Nil, pairs._2))
+    val newLocalDefs = d.params.zip(params).map(pairs => Definition(d.pos, pairs._1, Nil, pairs._2))
     val result = mkContext(newLocalDefs).evaluateInternal(d.rhs)
     // println("evaluated", name, params, result)
     result
   }
 
   def evaluate[T](e: Expr)(implicit m: Manifest[T]):T = {
+    // TODO: Expression can also have a position, and we can throw InputPosError
     evaluateInternal(e) match {
       case t:T => t
       case x => throw new InputError("Expected type: " + m + " but expression evaluated to: " + x.getClass)

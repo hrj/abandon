@@ -6,6 +6,7 @@ import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.json.Lexer
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
+import scala.util.parsing.input.Position
 
 class AbandonLexer extends StdLexical with ImplicitConversions {
   import scala.util.parsing.input.CharArrayReader.EofCh
@@ -158,9 +159,17 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val keyValuePair = keyValuePairSingleton | keyValuePairBoolean
   private lazy val keyValuePairs = ((keyValuePair <~ anyEol)*) ^^ { case s => s.toMap }
 
-  private lazy val defFrag = (((defKeyword ~> ident) ~ (arguments?)) <~ "=") ~ expression ^^ {
-    case name ~ arg ~ expr => Definition(name, arg.getOrElse(Nil), expr)
+  private lazy val currentPosition = new Parser[InputPosition] {
+    def apply(in:Input) = {
+      // TODO: path
+      Success(InputPosition(null, in.pos), in)
+    }
   }
+
+  private lazy val defFrag = currentPosition ~ ((((defKeyword ~> ident) ~ (arguments?)) <~ "=") ~ expression) ^^ {
+    case pos ~ (name ~ arg ~ expr) => Definition(pos, name, arg.getOrElse(Nil), expr)
+  }
+
   private lazy val arguments = ("(" ~> rep1sep(ident, ",")) <~ ")"
   private lazy val expression: PackratParser[Expr] = (numericExpr ||| booleanExpr ||| stringExpr)
 
