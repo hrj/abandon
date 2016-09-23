@@ -220,15 +220,15 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val conditionExpr = (numericExpr ~ comparisonExpr ~ numericExpr) ^^ { case (e1 ~ op ~ e2) => ConditionExpr(e1, op, e2)}
   private lazy val comparisonExpr: PackratParser[String] = ((">" | "<" | "=") ~ "=" ^^ {case (o1 ~ o2) => o1 + o2}) | ">" | "<" 
 
-  private lazy val compactTxFrag = (("." ~> dateExpr ~ accountName ~ numericExpr ~ eolComment) ^^ {
-    case date ~ accountName ~ amount ~ optComment =>
-      Transaction(date, List(Post(accountName, Option(amount), optComment)), None, None, Nil)
+  private lazy val compactTxFrag = (currentPosition ~ ("." ~> dateExpr ~ accountName ~ numericExpr ~ eolComment) ^^ {
+    case pos ~ (date ~ accountName ~ amount ~ optComment) =>
+      Transaction(pos, date, List(Post(accountName, Option(amount), optComment)), None, None, Nil)
   })
 
-  private lazy val txFrag = ((dateExpr ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+) ^^ {
-    case date ~ annotationOpt ~ optPayee ~ optComment ~ posts =>
+  private lazy val txFrag = currentPosition ~ (((dateExpr ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+)) ^^ {
+    case pos ~ (date ~ annotationOpt ~ optPayee ~ optComment ~ posts) =>
       val annotationStrOpt = annotationOpt.map(_.mkString(""))
-      Transaction(date, posts, annotationStrOpt, optPayee, optComment.flatten)
+      Transaction(pos, date, posts, annotationStrOpt, optPayee, optComment.flatten)
   }
 
   private lazy val annotation = (("(" ~> (ident | numericLit)+) <~ ")")

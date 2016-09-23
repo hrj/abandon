@@ -27,6 +27,7 @@ class InputPosError(msg: String, pos: InputPosition) extends InputError(msg + " 
 class DupSymbolInScopeError(symbol: String, pos: InputPosition) extends InputPosError("A symbol was defined multiple times within the same scope: " + symbol, pos)
 
 class ConstraintError(msg: String) extends RuntimeException(msg)
+class ConstraintPosError(msg: String, pos: InputPosition) extends ConstraintError(msg + " in " + pos)
 
 object Date {
   val yearMultiplier = 10000
@@ -141,7 +142,7 @@ case class TagDef(name: String) extends ASTEntry
 
 sealed class ASTTangibleEntry extends ASTEntry
 
-case class Transaction(date: Date, posts: Seq[Post], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
+case class Transaction(pos: InputPosition, date: Date, posts: Seq[Post], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
 
 case class Definition(pos: InputPosition, name: String, params: List[String], rhs: Expr) extends ASTTangibleEntry {
   def prettyPrint = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)

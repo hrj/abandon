@@ -31,7 +31,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 2))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
@@ -58,7 +58,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 2))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
@@ -86,7 +86,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, None), Post(acc2, expr2, None), Post(acc3, expr3, None)) =>
@@ -121,7 +121,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup1, txnGroup2) =>
             inside(txnGroup1) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 3, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _)) =>
@@ -134,7 +134,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                 }
             }
             inside(txnGroup2) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 6, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, None), Post(acc2, expr2, Some(comment)), Post(acc3, expr3, None)) =>
@@ -165,7 +165,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 2))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
@@ -198,7 +198,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _), Post(acc5, expr5, _), Post(acc6, expr6, _), Post(acc7, expr7, _)) =>
@@ -236,7 +236,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 9, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _)) =>
@@ -268,7 +268,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 9, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _)) =>
@@ -302,7 +302,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(txnGroup1) =>
             inside(txnGroup1) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2013, 1, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _), Post(acc3, expr3, _), Post(acc4, expr4, _)) =>
@@ -501,7 +501,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         inside(result.entries) {
           case List(_, _, txnGroup1, txnGroup2, txnGroup3) =>
             inside(txnGroup1) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2016, 5, 1))
                 inside(posts) {
                   case List(Post(acc1, expr1, _)) =>
@@ -510,7 +510,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                 }
             }
             inside(txnGroup2) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2016, 5, 2))
                 inside(posts) {
                   case List(Post(acc1, expr1, _)) =>
@@ -519,7 +519,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                 }
             }
             inside(txnGroup3) {
-              case Transaction(date, posts, None, None, Nil) =>
+              case Transaction(_, date, posts, None, None, Nil) =>
                 date should be(Date(2016, 5, 2))
                 inside(posts) {
                   case List(Post(acc1, expr1, _)) =>
