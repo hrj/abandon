@@ -24,22 +24,24 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   implicit object ExprEquality extends Equality[Option[Expr]] {
     def areEqual(a: Option[Expr], b: Any) = {
-      println("Comparing " + a + " with " + b)
       a match {
         case Some(ae) =>
-        b match {
-          case Some(be:Expr) =>
-            val posMatch = (ae.pos, be.pos) match {
-              case (Some(ap), Some(bp)) =>
-                ap.pos.column == bp.pos.column && ap.pos.line == bp.pos.line
-              case (None, None) =>
-                true
-              case _ => false
-            }
-            (ae equals be) && posMatch
-          case _ =>
-            false
-        }
+          b match {
+            case Some(be: Expr) =>
+              val posMatch = (ae.pos, be.pos) match {
+                case (Some(ap), Some(bp)) =>
+                  ap.pos.column == bp.pos.column && ap.pos.line == bp.pos.line
+                case (None, None) =>
+                  true
+                case _ => false
+              }
+              if (!posMatch) {
+                println("Failed to match positions: " + ae.pos + " and " + be.pos)
+              }
+              (ae equals be) && posMatch
+            case _ =>
+              false
+          }
         case None =>
           b match {
             case None => true
@@ -50,7 +52,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
   }
   
   it should "parse a simple transaction" in {
-    val testInput = """
+    implicit val testInput = """
     2013/1/2
       Expense       200
       Cash          -200
@@ -68,8 +70,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
-                    expr1 shouldEqual Some(nlit(200, testInput, 34))
-                    expr2 shouldEqual Some(UnaryNegExpr(nlit(200, testInput, 44))(mkPos(testInput, 58)))
+                    expr1 shouldEqual Some(nlit(200, 34))
+                    expr2 shouldEqual Some(UnaryNegExpr(nlit(200, 44))(mkPos(58)))
                 }
             }
         }
@@ -95,8 +97,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                   case List(Post(acc1, expr1, _), Post(acc2, expr2, _)) =>
                     acc1 should be (expenseAccount)
                     acc2 should be (cashAccount)
-                    expr1 should be (Some(nlit(200)))
-                    expr2 should be (Some(UnaryNegExpr(nlit(200))(mkPos(1))))
+                    expr1 shouldEqual Some(nlit(200, 36))
+                    expr2 shouldEqual Some(UnaryNegExpr(nlit(200))(mkPos(60)))
                 }
             }
         }

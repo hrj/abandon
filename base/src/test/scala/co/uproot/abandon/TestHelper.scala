@@ -13,7 +13,7 @@ object TestHelper {
   }
 
   def nlit(n: BigDecimal) = NumericLiteralExpr(n)(None)
-  def nlit(n: BigDecimal, testInput: String, count: Int) = NumericLiteralExpr(n)(mkPos(testInput, count))
+  def nlit(n: BigDecimal, count: Int)(implicit testInput: String) = NumericLiteralExpr(n)(mkPos(testInput, count))
 
   val expenseAccount = AccountName(Seq("Expense"))
   val cashAccount = AccountName(Seq("Cash"))
