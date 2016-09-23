@@ -246,18 +246,18 @@ case class DateBound(date: Date, inclusive: Boolean) {
 
 case class DateRangeConstraint(dateFromOpt: Option[DateBound], dateToOpt: Option[DateBound]) extends Constraint {
   override def check(appState: AppState): Boolean = {
-    appState.accState.posts.find(post => {
-      val date = post.date
+    appState.accState.postGroups.find(postGroup => {
+      val date = postGroup.txn.date
 
       val fromFails = dateFromOpt.map(_.isNotEarlierThan(date)).getOrElse(false)
       val toFails = dateToOpt.map(_.isNotLaterThan(date)).getOrElse(false)
 
       fromFails || toFails
-    }).foreach(post => {
-      throw new ConstraintError(
-        s"${post.name} is not in date range of " +
-        s"[${dateFromOpt.getOrElse("...")}, ${dateToOpt.getOrElse("...")}]. " +
-        s"Date is ${post.date.formatISO8601Ext}"
+    }).foreach(postGroup => {
+      throw new ConstraintPosError(
+        s"Transaction dated ${postGroup.txn.date.formatISO8601Ext} is not in the range of " +
+        s"[${dateFromOpt.getOrElse("...")}, ${dateToOpt.getOrElse("...")}]. ",
+        postGroup.txn.pos
       )
     })
 

@@ -89,12 +89,14 @@ class DateConstraintTest extends FlatSpec with Matchers with BeforeAndAfterEach 
     val accState = stub[AccountState]
     appState = new AppState(accState)
 
-    val posts: Seq[DetailedPost] = (1 to 12).map(month => {
-      val post = stub[MockableDetailedPost]
-      (post.date _).when().returns(new Date(2013, month, 1))
-      post
+    val postGroups: Seq[PostGroup] = (1 to 12).map(month => {
+      val date = new Date(2013, month, 1)
+      val txn = Transaction(null, date, Nil, None, None, Nil)
+      val postGroup = new PostGroup(Nil, txn, null, None, None, Nil)
+
+      postGroup
     })
 
-    (accState.posts _).when().returns(posts)
+    (accState.postGroups _).when().returns(postGroups)
   }
 }

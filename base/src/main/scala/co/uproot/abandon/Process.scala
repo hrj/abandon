@@ -9,6 +9,7 @@ case class AppState(accState: AccountState)
 
 class PostGroup(
   _children: Seq[DetailedPost],
+  val txn: Transaction,
   val date: Date,
   val annotationOpt: Option[String],
   val payeeOpt: Option[String],
@@ -21,6 +22,7 @@ class PostGroup(
     s"${date.formatYYYYMMMDD}$annotationStr$payeeStr"
   }
 }
+
 case class DetailedPost(name: AccountName, delta: BigDecimal, commentOpt: Option[String], parentOpt: Option[PostGroup] = None) {
   def date = parentOpt.get.date
   var resultAmount = Zero
@@ -240,7 +242,7 @@ object Processor {
           case None =>
         }
       }
-      accState.updateAmounts(new PostGroup(detailedPosts, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
+      accState.updateAmounts(new PostGroup(detailedPosts, tx, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       if (!(txTotal equals Zero)) {
         throw new ConstraintPosError(s"Transaction does not balance. Unbalanced amount: $txTotal", tx.pos)
       }
