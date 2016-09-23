@@ -50,6 +50,30 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       }
     }
   }
+
+  def identifierExpr(s: String, pos: Option[InputPosition] = None) = {
+    IdentifierExpr(s)(pos)
+  }
+
+  def addExpr(e1: Expr, e2: Expr, pos: Option[InputPosition] = None) = {
+    AddExpr(e1, e2)(pos)
+  }
+
+  def subExpr(e1: Expr, e2: Expr, pos: Option[InputPosition] = None) = {
+    SubExpr(e1, e2)(pos)
+  }
+
+  def mulExpr(e1: Expr, e2: Expr, pos: Option[InputPosition] = None) = {
+    MulExpr(e1, e2)(pos)
+  }
+
+  def divExpr(e1: Expr, e2: Expr, pos: Option[InputPosition] = None) = {
+    DivExpr(e1, e2)(pos)
+  }
+
+  def unaryNegExpr(e1: Expr, pos: Option[InputPosition] = None) = {
+    UnaryNegExpr(e1)(pos)
+  }
   
   it should "parse a simple transaction" in {
     implicit val testInput = """
@@ -212,9 +236,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     }
   }
 
-  /*
   it should "parse posts with zero value" in {
-    val testInput = """
+    implicit val testInput = """
     2013/1/1
       Expense       200
       Cash          000
@@ -247,8 +270,8 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     expr3 should be (Some(nlit(0)))
                     expr4 should be (Some(nlit(0)))
                     expr5 should be (Some(nlit(0)))
-                    expr6 should be (Some(AddExpr(nlit(0), nlit(200))))
-                    expr7 should be (Some(MulExpr(AddExpr(nlit(200), nlit(10)), nlit(0))))
+                    expr6 should be (Some(AddExpr(nlit(0), nlit(200))(mkPos(0))))
+                    expr7 should be (Some(MulExpr(AddExpr(nlit(200), nlit(10))(mkPos(0)), nlit(0))(mkPos(0))))
                 }
             }
         }
@@ -256,7 +279,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
   }
 
   it should "parse a post with Unary plus(+) zero value" in {
-    val testInput = """
+    implicit val testInput = """
      2013/9/1
       Expense       200
       Cash          +00
@@ -279,7 +302,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc3 should be (cashAccount)
                     expr1 should be (Some(nlit(200)))
                     expr2 should be (Some(nlit(0)))
-                    expr3 should be (Some(AddExpr(nlit(0), nlit(10))))
+                    expr3 should be (Some(AddExpr(nlit(0), nlit(10))(mkPos(0))))
                 }
             }
         }
@@ -287,7 +310,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
   }
 
   it should "parse a post with Unary minus(-) zero value" in {
-    val testInput = """
+    implicit val testInput = """
       2013/9/1
        Expense       200
        Cash          -00
@@ -311,9 +334,9 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc3 should be(cashAccount)
                     acc4 should be(cashAccount)
                     expr1 should be(Some(nlit(200)))
-                    expr2 should be(Some(UnaryNegExpr((nlit(0)))))
-                    expr3 should be(Some(UnaryNegExpr((nlit(0)))))
-                    expr4 should be(Some(AddExpr(UnaryNegExpr(nlit(0)), MulExpr(nlit(10), nlit(3)))))
+                    expr2 should be(Some(UnaryNegExpr(nlit(0))(mkPos(0))))
+                    expr3 should be(Some(UnaryNegExpr(nlit(0))(mkPos(0))))
+                    expr4 should be(Some(AddExpr(UnaryNegExpr(nlit(0))(mkPos(0)), MulExpr(nlit(10), nlit(3))(mkPos(0)))(mkPos(0))))
                 }
             }
         }
@@ -321,7 +344,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
   }
 
   it should "parse a simple subtraction expression" in {
-    val testInput = """
+    implicit val testInput = """
     2013/1/1
       Expense       200-4
       Cash        10-(5-6)
@@ -344,10 +367,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                     acc2 should be (cashAccount)
                     acc3 should be (cashAccount)
                     acc4 should be (cashAccount)
-                    expr1 should be (Some(SubExpr(nlit(200), nlit(4))))
-                    expr2 should be (Some(SubExpr(nlit(10), (SubExpr(nlit(5), nlit(6))))))
-                    expr3 should be (Some(AddExpr(UnaryNegExpr(nlit(20)), MulExpr(nlit(3), UnaryNegExpr(nlit(4))))))
-                    expr4 should be (Some(SubExpr(nlit(0), MulExpr(nlit(3), nlit(4)))))
+                    expr1 should be (Some(SubExpr(nlit(200), nlit(4))(mkPos(0))))
+                    expr2 should be (Some(SubExpr(nlit(10), (SubExpr(nlit(5), nlit(6))(mkPos(0))))(mkPos(0))))
+                    expr3 should be (Some(AddExpr(UnaryNegExpr(nlit(20))(mkPos(0)), MulExpr(nlit(3), UnaryNegExpr(nlit(4))(mkPos(0)))(mkPos(0)))(mkPos(0))))
+                    expr4 should be (Some(SubExpr(nlit(0), MulExpr(nlit(3), nlit(4))(mkPos(0)))(mkPos(0))))
                 }
             }
         }
@@ -360,10 +383,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   it should "parse simple numeric expression" in {
     val tests = Map(
-      "0001" -> (bd("1") -> nlit(1)),
-      "000" -> (bd("0") -> nlit(0)),
-      "0" -> (bd("0") -> nlit(0)),
-      "-20" -> (bd("-20") -> UnaryNegExpr(nlit(20)))
+      "0001" -> (bd("1") -> nlit(1, 0)("0001")),
+      "000" -> (bd("0") -> nlit(0, 0)("000")),
+      "0" -> (bd("0") -> nlit(0, 0)("0")),
+      "-20" -> (bd("-20") -> unaryNegExpr(nlit(20)))
     )
 
     tests foreach {
@@ -383,14 +406,14 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   it should "parse complex numeric expression" in {
     val tests = Map(
-      "0001 + 10.00" -> (bd("11"), AddExpr(nlit(1), nlit(10.00))),
-      "10.5 - (2.5 * 2)" -> (bd("5.5"), SubExpr(nlit(10.5), MulExpr(nlit(2.5), nlit(2)))),
-      "10.5 - (2.5 * -2)" -> (bd("15.5"), SubExpr(nlit(10.5), MulExpr(nlit(2.5), UnaryNegExpr(nlit(2))))),
-      "10.5 + -(2.5 * 2)" -> (bd("5.5"), AddExpr(nlit(10.5), UnaryNegExpr(MulExpr(nlit(2.5), nlit(2))))),
-      "10.5 - (10.0 / 2)" -> (bd("5.5"), SubExpr(nlit(10.5), DivExpr(nlit(10.0), nlit(2)))),
-      "10.5 + (10.0 / -2)" -> (bd("5.5"), AddExpr(nlit(10.5), DivExpr(nlit(10.0), UnaryNegExpr(nlit(2))))),
-      "-20 + 30" -> (bd("10"), AddExpr(UnaryNegExpr(nlit(20)), nlit(30))),
-      "-20 + 30*-5.0" -> (bd("-170"), AddExpr(UnaryNegExpr(nlit(20)), MulExpr(nlit(30), UnaryNegExpr(nlit(5)))))
+      "0001 + 10.00" -> (bd("11"), addExpr(nlit(1), nlit(10.00))),
+      "10.5 - (2.5 * 2)" -> (bd("5.5"), subExpr(nlit(10.5), mulExpr(nlit(2.5), nlit(2)))),
+      "10.5 - (2.5 * -2)" -> (bd("15.5"), subExpr(nlit(10.5), mulExpr(nlit(2.5), unaryNegExpr(nlit(2))))),
+      "10.5 + -(2.5 * 2)" -> (bd("5.5"), addExpr(nlit(10.5), unaryNegExpr(mulExpr(nlit(2.5), nlit(2))))),
+      "10.5 - (10.0 / 2)" -> (bd("5.5"), subExpr(nlit(10.5), divExpr(nlit(10.0), nlit(2)))),
+      "10.5 + (10.0 / -2)" -> (bd("5.5"), addExpr(nlit(10.5), divExpr(nlit(10.0), unaryNegExpr(nlit(2))))),
+      "-20 + 30" -> (bd("10"), addExpr(unaryNegExpr(nlit(20)), nlit(30))),
+      "-20 + 30*-5.0" -> (bd("-170"), addExpr(unaryNegExpr(nlit(20)), mulExpr(nlit(30), unaryNegExpr(nlit(5)))))
     )
 
     tests foreach {
@@ -410,7 +433,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   it should "do something about divide by zero" in {
     val tests = Map(
-      "1 / 0" -> (bd("0"), DivExpr(nlit(1), nlit(0)))
+      "1 / 0" -> (bd("0"), divExpr(nlit(1), nlit(0)))
     )
 
     tests foreach {
@@ -432,16 +455,16 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   it should "ensure precedence of operators" in {
     val tests = Map(
-      "1 + 2 * 3" -> (bd("7"), AddExpr(nlit(1), MulExpr(nlit(2), nlit(3)))),
-      "1 * 2 + 3" -> (bd("5"), AddExpr(MulExpr(nlit(1), nlit(2)), nlit(3))),
-      "2 + 1 / 4" -> (bd("2.25"), AddExpr(nlit(2), DivExpr(nlit(1), nlit(4)))),
-      "1 / 2 + 3" -> (bd("3.5"), AddExpr(DivExpr(nlit(1), nlit(2)), nlit(3))),
-      "1 * 2 + 3 * 4 - 2" -> (bd("12"), SubExpr(AddExpr(MulExpr(nlit(1), nlit(2)), MulExpr(nlit(3), nlit(4))), nlit(2))),
-      "1 + 2 * 3 * 4 - 2" -> (bd("23"), SubExpr(AddExpr(nlit(1), MulExpr(MulExpr(nlit(2), nlit(3)), nlit(4))), nlit(2))),
-      "1 / 2 + 3 / 4 - 2" -> (bd("-0.75"), SubExpr(AddExpr(DivExpr(nlit(1), nlit(2)), DivExpr(nlit(3), nlit(4))), nlit(2))),
-      "1 + 2 / 5 / 4 - 2" -> (bd("-0.9"), SubExpr(AddExpr(nlit(1), DivExpr(DivExpr(nlit(2), nlit(5)), nlit(4))), nlit(2))),
-      "1 + 2 * -3 * 4 - 2" -> (bd("-25"), SubExpr(AddExpr(nlit(1), MulExpr(MulExpr(nlit(2), UnaryNegExpr(nlit(3))), nlit(4))), nlit(2))),
-      "1 / 2 * 3" -> (bd("1.5"), MulExpr(DivExpr(nlit(1), nlit(2)), nlit(3)))
+      "1 + 2 * 3" -> (bd("7"), addExpr(nlit(1), mulExpr(nlit(2), nlit(3)))),
+      "1 * 2 + 3" -> (bd("5"), addExpr(mulExpr(nlit(1), nlit(2)), nlit(3))),
+      "2 + 1 / 4" -> (bd("2.25"), addExpr(nlit(2), divExpr(nlit(1), nlit(4)))),
+      "1 / 2 + 3" -> (bd("3.5"), addExpr(divExpr(nlit(1), nlit(2)), nlit(3))),
+      "1 * 2 + 3 * 4 - 2" -> (bd("12"), subExpr(addExpr(mulExpr(nlit(1), nlit(2)), mulExpr(nlit(3), nlit(4))), nlit(2))),
+      "1 + 2 * 3 * 4 - 2" -> (bd("23"), subExpr(addExpr(nlit(1), mulExpr(mulExpr(nlit(2), nlit(3)), nlit(4))), nlit(2))),
+      "1 / 2 + 3 / 4 - 2" -> (bd("-0.75"), subExpr(addExpr(divExpr(nlit(1), nlit(2)), divExpr(nlit(3), nlit(4))), nlit(2))),
+      "1 + 2 / 5 / 4 - 2" -> (bd("-0.9"), subExpr(addExpr(nlit(1), divExpr(divExpr(nlit(2), nlit(5)), nlit(4))), nlit(2))),
+      "1 + 2 * -3 * 4 - 2" -> (bd("-25"), subExpr(addExpr(nlit(1), mulExpr(mulExpr(nlit(2), unaryNegExpr(nlit(3))), nlit(4))), nlit(2))),
+      "1 / 2 * 3" -> (bd("1.5"), mulExpr(divExpr(nlit(1), nlit(2)), nlit(3)))
     )
 
     tests foreach {
@@ -461,10 +484,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
   it should "handle parenthesis correctly" in {
     val tests = Map(
-      "1 + (2 * 3)" -> (bd("7"), AddExpr(nlit(1), MulExpr(nlit(2), nlit(3)))),
-      "(1 + 2) * 3" -> (bd("9"), MulExpr(AddExpr(nlit(1), nlit(2)), nlit(3))),
-      "1 * (2 + 3)" -> (bd("5"), MulExpr(nlit(1), AddExpr(nlit(2), nlit(3)))),
-      "1 * (2 + 3) * 4 - 2" -> (bd("18"), SubExpr(MulExpr(MulExpr(nlit(1), AddExpr(nlit(2), nlit(3))), nlit(4)), nlit(2)))
+      "1 + (2 * 3)" -> (bd("7"), addExpr(nlit(1), mulExpr(nlit(2), nlit(3)))),
+      "(1 + 2) * 3" -> (bd("9"), mulExpr(addExpr(nlit(1), nlit(2)), nlit(3))),
+      "1 * (2 + 3)" -> (bd("5"), mulExpr(nlit(1), addExpr(nlit(2), nlit(3)))),
+      "1 * (2 + 3) * 4 - 2" -> (bd("18"), subExpr(mulExpr(mulExpr(nlit(1), addExpr(nlit(2), nlit(3))), nlit(4)), nlit(2)))
     )
 
     tests foreach {
@@ -540,7 +563,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                 inside(posts) {
                   case List(Post(acc1, expr1, _)) =>
                     acc1 should be (expenseAccount)
-                    expr1 should be (Some(MulExpr(nlit(100), IdentifierExpr("tax"))))
+                    expr1 should be (Some(mulExpr(nlit(100), identifierExpr("tax"))))
                 }
             }
             inside(txnGroup2) {
@@ -549,7 +572,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                 inside(posts) {
                   case List(Post(acc1, expr1, _)) =>
                     acc1 should be (cashAccount)
-                    expr1 should be (Some(AddExpr(nlit(800), IdentifierExpr("tax"))))
+                    expr1 should be (Some(addExpr(nlit(800), identifierExpr("tax"))))
                 }
             }
             inside(txnGroup3) {
@@ -558,11 +581,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                 inside(posts) {
                   case List(Post(acc1, expr1, _)) =>
                     acc1 should be (cashAccount)
-                    expr1 should be (Some(AddExpr(nlit(900), IdentifierExpr("tax"))))
+                    expr1 should be (Some(addExpr(nlit(900), identifierExpr("tax"))))
                 }
             }
         }
     }
   }
-  * */
 }
