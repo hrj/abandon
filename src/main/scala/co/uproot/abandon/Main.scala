@@ -5,13 +5,13 @@ import java.net.{URL, URLClassLoader}
 object Main extends App {
 
   if(args.headOption.getOrElse("") equals "-g") {
-    ensureJFXIsAvailable()
+    // ensureJFXIsAvailable()
     AbandonUI.main(args.tail)
   } else {
     CLIMain.runApp(args)
   }
 
-  def ensureJFXIsAvailable(): Unit = {
+  private def ensureJFXIsAvailable(): Unit = {
     try {
       Class.forName{"javafx.event.EventTarget"}
     } catch {
