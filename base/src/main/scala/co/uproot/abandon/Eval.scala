@@ -43,14 +43,20 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
   def isImmediatelyEvaluable(name: String) = true
 
   def getValue(name: String, params: Seq[Expr]) = {
-    val d = defined(name)
-    if (d.params.length != params.length) {
-      throw new InputPosError("Parameter lengths don't match for " + name, d.pos)
+    defined.get(name) match {
+      case Some(d) =>
+        val d = defined(name)
+        if (d.params.length != params.length) {
+          throw new InputPosError("Parameter lengths don't match for " + name, d.pos)
+        }
+        val newLocalDefs = d.params.zip(params).map(pairs => Definition(d.pos, pairs._1, Nil, pairs._2))
+        val result = mkContext(newLocalDefs).evaluateInternal(d.rhs)
+        // println("evaluated", name, params, result)
+        result
+      case None =>
+        // TODO: show input position
+        throw new InputError("Definition not found: " + name)
     }
-    val newLocalDefs = d.params.zip(params).map(pairs => Definition(d.pos, pairs._1, Nil, pairs._2))
-    val result = mkContext(newLocalDefs).evaluateInternal(d.rhs)
-    // println("evaluated", name, params, result)
-    result
   }
 
   def evaluate[T](e: Expr)(implicit m: Manifest[T]):T = {
