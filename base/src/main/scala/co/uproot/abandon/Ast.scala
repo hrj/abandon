@@ -13,14 +13,16 @@ object ASTHelper {
   }
 }
 
-case class InputPosition(path: String, pos: Position)
+case class InputPosition(path: String, pos: Position) {
+  override def toString = path + " line: " + pos.line + " col: " + pos.column
+}
 
 class InputError(msg: String) extends RuntimeException(msg)
 class MissingDestinationError(msg: String) extends InputError(msg)
 class SourceDestinationClashError(msg: String) extends InputError(msg)
 class InputFileNotFoundError(fileName:String) extends InputError("File not found: " + fileName)
 
-class InputPosError(msg: String, pos: InputPosition) extends InputError(msg + " at position: " + pos)
+class InputPosError(msg: String, pos: InputPosition) extends InputError(msg + " in " + pos)
 
 class DupSymbolInScopeError(symbol: String, pos: InputPosition) extends InputPosError("A symbol was defined multiple times within the same scope: " + symbol, pos)
 
