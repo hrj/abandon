@@ -8,12 +8,13 @@ import ParserHelper._
 import TestHelper._
 
 class ParserTest extends FlatSpec with Matchers with Inside {
+  val parser = new AbandonParser(None)
 
   "Parser" should "parse empty file" in {
     val testInput = ""
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         result.entries should be('empty)
     }
   }
@@ -24,10 +25,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Expense       200
       Cash          -200
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
@@ -51,10 +52,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Expense       200
       Cash          -200
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
@@ -79,10 +80,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash          -100
       Bank:Current  -100
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
@@ -114,10 +115,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash              ; Comment
       Bank:Current
     """
-    val parseResult = AbandonParser.abandon(new AbandonParser.lexical.Scanner(reader(testInput)))
+    val parseResult = parser.abandon(parser.scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup1, txnGroup2) =>
             inside(txnGroup1) {
@@ -158,10 +159,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash
     """
 
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
@@ -191,10 +192,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash 			(200+10)*0
     """
 
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
@@ -229,10 +230,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash          +(0 + 10)
     """
 
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
@@ -261,10 +262,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
        Cash         -0 + (10*3)
      """
 
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup) =>
             inside(txnGroup) {
@@ -295,10 +296,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
       Cash        0-(3*4)
     """
 
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(txnGroup1) =>
             inside(txnGroup1) {
@@ -334,10 +335,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     tests foreach {
       case (testInput, expectedOutput) =>
-        val parseResult = AbandonParser.numericParser(scanner(testInput))
+        val parseResult = parser.numericParser(scanner(testInput))
 
         inside(parseResult) {
-          case AbandonParser.Success(result, _) =>
+          case parser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
                 emptyContext.evaluateBD(ne) should be (expectedOutput._1)
@@ -361,10 +362,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     tests foreach {
       case (testInput, expectedOutput) =>
-        val parseResult = AbandonParser.numericParser(scanner(testInput))
+        val parseResult = parser.numericParser(scanner(testInput))
 
         inside(parseResult) {
-          case AbandonParser.Success(result, _) =>
+          case parser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
                 emptyContext.evaluateBD(ne) should be (expectedOutput._1)
@@ -381,10 +382,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     tests foreach {
       case (testInput, expectedOutput) =>
-        val parseResult = AbandonParser.numericParser(scanner(testInput))
+        val parseResult = parser.numericParser(scanner(testInput))
 
         inside(parseResult) {
-          case AbandonParser.Success(result, _) =>
+          case parser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
                 ne should be(expectedOutput._2)
@@ -412,10 +413,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     tests foreach {
       case (testInput, expectedOutput) =>
-        val parseResult = AbandonParser.numericParser(scanner(testInput))
+        val parseResult = parser.numericParser(scanner(testInput))
 
         inside(parseResult) {
-          case AbandonParser.Success(result, _) =>
+          case parser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
                 emptyContext.evaluateBD(ne) should be (expectedOutput._1)
@@ -435,10 +436,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
 
     tests foreach {
       case (testInput, expectedOutput) =>
-        val parseResult = AbandonParser.numericParser(scanner(testInput))
+        val parseResult = parser.numericParser(scanner(testInput))
 
         inside(parseResult) {
-          case AbandonParser.Success(result, _) =>
+          case parser.Success(result, _) =>
             inside(result) {
               case ne: Expr =>
                 emptyContext.evaluateBD(ne) should be (expectedOutput._1)
@@ -458,10 +459,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     )
 
     testInput foreach {input =>
-      val parseResult = AbandonParser.dateFrag(scanner(input))
+      val parseResult = parser.dateFrag(scanner(input))
 
       inside(parseResult) {
-        case AbandonParser.Success(date, _) =>
+        case parser.Success(date, _) =>
           date should be(Date(2013, 1, 1))
       }
     }
@@ -474,10 +475,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     )
 
     testInput foreach {input =>
-      val parseResult = AbandonParser.isoDateFrag(scanner(input))
+      val parseResult = parser.isoDateFrag(scanner(input))
 
       inside(parseResult) {
-        case AbandonParser.Success(date, _) =>
+        case parser.Success(date, _) =>
           date should be(Date(2013, 1, 2))
       }
     }
@@ -494,10 +495,10 @@ class ParserTest extends FlatSpec with Matchers with Inside {
     |  Cash                      900 + tax
     """.stripMargin
 
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
 
     inside(parseResult) {
-      case AbandonParser.Success(result, _) =>
+      case parser.Success(result, _) =>
         inside(result.entries) {
           case List(_, _, txnGroup1, txnGroup2, txnGroup3) =>
             inside(txnGroup1) {

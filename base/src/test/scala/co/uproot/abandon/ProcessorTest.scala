@@ -10,6 +10,7 @@ import TestHelper._
 import ParserHelper._
 
 class ProcessorTest extends FlatSpec with Matchers with Inside {
+  val parser = new AbandonParser(None)
 
   "Processor" should "export a simple transaction in ledger Format" in {
     val testInput = """
@@ -17,9 +18,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Expense       -(200 + 40)
       Cash
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
 
@@ -47,9 +48,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Cash
       Bank           0000
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
@@ -77,9 +78,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Cash
       Bank:Current           0000
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil)
@@ -105,9 +106,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
   it should "export no transaction for empty input" in {
     val testInput = """
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
@@ -126,9 +127,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Equity    10000
       Assets -13000
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
@@ -176,9 +177,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Equity    10000
       Assets -13000
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
@@ -205,9 +206,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Income        -1000
       Assets       -13000
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
         val source = Seq("Income", "Expense")
         val destination = "Equity"
@@ -230,9 +231,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Income        -1000
       Equity       -13000
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil)
         val source = Seq("Income", "Equity")
         val destination = "Equity"
@@ -256,9 +257,9 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       Income        -1000
       Equity       -13000
     """
-    val parseResult = AbandonParser.abandon(scanner(testInput))
+    val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
-      case AbandonParser.Success(scope, _) =>
+      case parser.Success(scope, _) =>
         val name = AccountName(Seq("Bank","Current"))
         val alias = "MyBank"
         val accounts = Seq(AccountSettings(name, Some(alias)))

@@ -5,16 +5,16 @@ import scala.util.parsing.input.Position
 object ASTHelper {
 
   def parseAccountName(name:String):AccountName = {
-    AbandonParser.accountName(ParserHelper.scanner(name)) match {
-      case AbandonParser.Success(result, _) => result
-      case AbandonParser.Failure(msg, next) => throw new InputError("Couldn't parse accountName: " + name)
-      case AbandonParser.Error(msg, next) => throw new InputError("Couldn't parse accountName: " + name)
+    ParserHelper.parser.accountName(ParserHelper.scanner(name)) match {
+      case ParserHelper.parser.Success(result, _) => result
+      case ParserHelper.parser.Failure(msg, next) => throw new InputError("Couldn't parse accountName: " + name)
+      case ParserHelper.parser.Error(msg, next) => throw new InputError("Couldn't parse accountName: " + name)
     }
   }
 }
 
-case class InputPosition(path: String, pos: Position) {
-  override def toString = path + " line: " + pos.line + " col: " + pos.column
+case class InputPosition(pathOpt: Option[String], pos: Position) {
+  override def toString = pathOpt.getOrElse("") + " line: " + pos.line + " col: " + pos.column
 }
 
 class InputError(msg: String) extends RuntimeException(msg)

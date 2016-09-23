@@ -102,14 +102,12 @@ object SettingsHelper {
   }
 
   private def getDateBound(name: String, config: Config) : Option[DateBound] = {
-    import AbandonParser.{Success, NoSuccess}
-
     config.optional(name) { _.getString(_) } match {
       case Some(valueStr) =>
-        val parseResult = AbandonParser.dateBoundExpr(ParserHelper.scanner(valueStr))
+        val parseResult = ParserHelper.parser.dateBoundExpr(ParserHelper.scanner(valueStr))
         parseResult match {
-          case Success(dateBound, _) => Option(dateBound)
-          case NoSuccess(_, _) =>
+          case ParserHelper.parser.Success(dateBound, _) => Option(dateBound)
+          case ParserHelper.parser.NoSuccess(_, _) =>
             throw new ConfigException.BadValue(config.origin, name, "expected a date bound of the form: <date> <inclusive|exclusive>")
         }
       case None => None

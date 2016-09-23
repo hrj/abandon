@@ -129,14 +129,15 @@ object Processor {
         val sourceOpt = getSource(inputPath)
         sourceOpt match {
           case Some(source) =>
+            val parser = new AbandonParser(Some(inputPath))
 
-            val parseResult = AbandonParser.abandon(Option(input.parentScope))(new AbandonParser.lexical.Scanner(readerForFile(inputPath)))
+            val parseResult = parser.abandon(Option(input.parentScope))(parser.scannerFromFile(inputPath))
             parseResult match {
-              case AbandonParser.Success(scope, _) =>
+              case parser.Success(scope, _) =>
                 val includes = filterByType[IncludeDirective](scope.entries)
                 inputQueue ++= includes.map(id => Input(mkRelativeFileName(id.fileName, inputPath), scope))
                 input.parentScope.addIncludedScope(scope)
-              case n: AbandonParser.NoSuccess =>
+              case n: parser.NoSuccess =>
                 println("Error while parsing %s:\n%s" format (bold(inputPath), n))
                 parseError = true
             }
@@ -196,10 +197,6 @@ object Processor {
 
   def mkAbsolutePath(path: String) = {
     (new java.io.File(path)).getCanonicalPath
-  }
-
-  private def readerForFile(fileName: String) = {
-    new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
   }
 
   def process(scope: Scope, accountSettings: Seq[AccountSettings]) = {

@@ -7,8 +7,10 @@ import scala.util.parsing.json.Lexer
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
 import scala.util.parsing.input.Position
+import scala.util.parsing.input.PagedSeqReader
+import scala.collection.immutable.PagedSeq
 
-class AbandonLexer extends StdLexical with ImplicitConversions {
+object AbandonLexer extends StdLexical with ImplicitConversions {
   import scala.util.parsing.input.CharArrayReader.EofCh
   override def token: Parser[Token] =
     //( '\"' ~ rep(charSeq | letter) ~ '\"' ^^ lift(StringLit)
@@ -27,6 +29,7 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
   case object EOL extends Token {
     def chars = "<eol>"
   }
+
   case class CommentToken(commentContents: String) extends Token {
     def chars = commentContents
   }
@@ -97,8 +100,8 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
 
 }
 
-object AbandonParser extends StandardTokenParsers with PackratParsers {
-  override val lexical = new AbandonLexer
+class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers with PackratParsers {
+  override val lexical = AbandonLexer
   private val defKeyword = "def"
   private val accountKeyword = "account"
   private val includeKeyword = "include"
@@ -161,8 +164,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
 
   private lazy val currentPosition = new Parser[InputPosition] {
     def apply(in:Input) = {
-      // TODO: path
-      Success(InputPosition(null, in.pos), in)
+      Success(InputPosition(inputPathOpt, in.pos), in)
     }
   }
 
@@ -272,15 +274,24 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
       case _: java.time.DateTimeException => false
     }
   }
+
+  def scanner(s:String) = {
+    val reader= new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
+    new lexical.Scanner(reader)
+  }
+
+  def scannerFromFile(filePath:String) = {
+    val reader= new PagedSeqReader(PagedSeq.fromFile(filePath))
+    new lexical.Scanner(reader)
+  }
 }
 
-object ParserHelper {
-  import scala.util.parsing.input.PagedSeqReader
-  import scala.collection.immutable.PagedSeq
 
-  def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
-  def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
-  def scanner(s: String) = mkScanner(reader(s))
+object ParserHelper {
+
+  val parser = new AbandonParser(None)
+
+  def scanner(s: String) = parser.scanner(s)
 
   def fixupScopeParents(s:Scope, parentOpt: Option[Scope]): Scope = {
     Scope(s.entries.map( {
