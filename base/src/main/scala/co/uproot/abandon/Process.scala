@@ -242,10 +242,10 @@ object Processor {
           case None =>
         }
       }
-      accState.updateAmounts(new PostGroup(detailedPosts, tx, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
       if (!(txTotal equals Zero)) {
         throw new ConstraintPosError(s"Transaction does not balance. Unbalanced amount: $txTotal", tx.pos)
       }
+      accState.updateAmounts(new PostGroup(detailedPosts, tx, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
     }
     // val accountDeclarations = filterByType[AccountDeclaration](entries)
     AppState(accState)
