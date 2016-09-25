@@ -34,12 +34,12 @@ object SettingsHelper {
   def getCompleteSettings(args: Seq[String]): Either[String, Settings] = {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
-    val configOpt = cliConf.config.get
+    val configOpt = cliConf.config.toOption
     configOpt match {
       case Some(configFileName) =>
         makeSettings(configFileName)
       case _ =>
-        val inputs = cliConf.inputs.get.getOrElse(Nil)
+        val inputs = cliConf.inputs.toOption.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
         Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
     }
