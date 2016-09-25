@@ -56,9 +56,6 @@ class CliTestRunner extends FlatSpec with Matchers with Inside {
         case x: Exception => println("error: " + x); assert(false)
       }
       for (testfiles <- tc.testVec) {
-        println("reference: " + testfiles.reference)
-        println("output:    " + testfiles.output)
-
         assert(testfiles.comparator(testfiles.output, testfiles.reference), "Failed comparison for " + testfiles)
       }
     }
