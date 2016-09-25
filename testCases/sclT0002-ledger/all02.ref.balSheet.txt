@@ -1,8 +1,5 @@
 Balance Sheet
 
-Balance Sheet
-─────────────
-
   -25714.10   Assets                         8500.00   Capital                 
   -13714.10    ├╴Current                    -1500.00    ├╴Reserves_And_Surplus 
    -1100.00    │  ├╴AdvanceTax              10000.00    └╴Share                

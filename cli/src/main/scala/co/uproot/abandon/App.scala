@@ -26,7 +26,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
 
     if (writesToScreen) {
-      println(head + "\n" + ("─" * head.length) + "\n")
+      Console.println(head + "\n" + ("─" * head.length) + "\n")
     }
   }
 
