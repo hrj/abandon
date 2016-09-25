@@ -9,7 +9,7 @@ class CliTestRunner extends FlatSpec with Matchers with Inside {
   "Testrunner" should "automatically test multiple dirs and confs" in {
 
     val testConfs =
-      for (d <- FileUtils.listDirs("testCases", ".*/sclT[0-9]+(-.*)$")) yield {
+      for (d <- FileUtils.listDirs("../testCases", ".*/sclT[0-9]+(-.*)$")) yield {
         for (f <- FileUtils.listFilesRecursive(d.getAbsolutePath, ".*\\.conf$")) yield { f }
       }
 
