@@ -252,6 +252,9 @@ object Reports {
 
   def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     <abandon>
+      <version>
+        { BuildInfo.version }
+      </version>
        <balance>
           { state.accState.mkTree(exportSettings.isAccountMatching).toXML }
        </balance>
@@ -260,6 +263,9 @@ object Reports {
 
   def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     <abandon>
+      <version>
+        { BuildInfo.version }
+      </version>
       <journal>
        <transactions>{
       val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
