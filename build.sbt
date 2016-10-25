@@ -33,20 +33,20 @@ lazy val commonSettings = Seq(
 lazy val abandon = (project in file(".")).
   aggregate(base, cli, gui).
   dependsOn(base, cli, gui).
-  enablePlugins(BuildInfoPlugin).
   settings(commonSettings: _*).
   settings(
     name := "abandon",
-    fork in run := true,
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "build.info"
+    fork in run := true
   )
 
 lazy val base = (project in file("base")).
   settings(commonSettings: _*).
+  enablePlugins(BuildInfoPlugin).
   settings(
     name := "abandon-base",
-    fork in run := true
+    fork in run := true,
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "co.uproot.abandon"
   )
 
 

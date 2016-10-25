@@ -16,6 +16,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
+  val version = opt[String]("version", short = 'v')
   // val trail = trailArg[String]()
 }
 
