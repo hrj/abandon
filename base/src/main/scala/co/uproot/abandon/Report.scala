@@ -252,7 +252,7 @@ object Reports {
     }
   }
 
-  def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings, withVersion: Boolean): xml.Node = {
+  def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     val balance: Elem =
       <abandon>
         <balance>
@@ -260,14 +260,14 @@ object Reports {
         </balance>
       </abandon>
 
-    if (withVersion) {
+    if (exportSettings.withVersion) {
       addAttribute(balance, "version", BuildInfo.version)
     } else {
       balance
     }
   }
 
-  def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings, withVersion: Boolean): xml.Node = {
+  def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     val journal: Elem =
       <abandon>
         <journal>
@@ -290,7 +290,7 @@ object Reports {
         </journal>
       </abandon>
 
-    if (withVersion) {
+    if (exportSettings.withVersion) {
       addAttribute(journal, "version", BuildInfo.version)
     } else {
       journal
@@ -299,10 +299,10 @@ object Reports {
 
   def addAttribute(n: Elem, k: String, v: String) = n % new xml.UnprefixedAttribute(k, v, xml.Null)
 
-  def xmlExport(state: AppState, exportSettings: XmlExportSettings, withVersion: Boolean): xml.Node = {
+  def xmlExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     exportSettings.exportType match {
-      case JournalType => xmlJournalExport(state, exportSettings, withVersion)
-      case BalanceType => xmlBalanceExport(state, exportSettings, withVersion)
+      case JournalType => xmlJournalExport(state, exportSettings)
+      case BalanceType => xmlBalanceExport(state, exportSettings)
     }
   }
 }

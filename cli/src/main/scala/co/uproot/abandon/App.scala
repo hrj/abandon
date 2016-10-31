@@ -163,7 +163,7 @@ object CLIMain  {
                 val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
                 exportAsLedger(reportWriter, ledgerRep)
               case xmlSettings: XmlExportSettings =>
-                val xmlData = Reports.xmlExport(appState, xmlSettings, true)
+                val xmlData = Reports.xmlExport(appState, xmlSettings)
                 reportWriter.printXml(xmlData)
               case _ => ???
             }
