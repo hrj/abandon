@@ -260,10 +260,10 @@ object Reports {
         </balance>
       </abandon>
 
-    if (exportSettings.withVersion) {
-      addAttribute(balance, "version", BuildInfo.version)
-    } else {
+    if (exportSettings.withoutVersion) {
       balance
+    } else {
+      addAttribute(balance, "version", BuildInfo.version)
     }
   }
 
@@ -290,10 +290,10 @@ object Reports {
         </journal>
       </abandon>
 
-    if (exportSettings.withVersion) {
-      addAttribute(journal, "version", BuildInfo.version)
-    } else {
+    if (exportSettings.withoutVersion) {
       journal
+    } else {
+      addAttribute(journal, "version", BuildInfo.version)
     }
   }
 
