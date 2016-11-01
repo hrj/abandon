@@ -16,7 +16,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
-  val version = opt[Boolean]("version", short = 'v')
+  val versioned = opt[Boolean]("version", short = 'v')
   // val trail = trailArg[String]()
 }
 
@@ -36,7 +36,7 @@ object SettingsHelper {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
     val configOpt = cliConf.config.toOption
-    val withVersion = cliConf.version.getOrElse(false)
+    val withVersion = cliConf.versioned.getOrElse(true)
     configOpt match {
       case Some(configFileName) =>
         makeSettings(configFileName, withVersion)
