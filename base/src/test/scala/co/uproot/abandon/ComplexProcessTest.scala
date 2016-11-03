@@ -17,8 +17,8 @@ class ComplexProcessTest extends FlatSpec with Matchers with Inside {
 	  val (parseError, scope, processedFiles) = Processor.parseAll(Seq("testCases/small.ledger"))
 	  assert(!parseError)
 
-	  val xmlBalSettings = XmlExportSettings(BalanceType, None, Seq("not-used.xml"))
-	  val xmlTxnSettings = XmlExportSettings(JournalType, None, Seq("not-used.xml"))
+	  val xmlBalSettings = XmlExportSettings(BalanceType, None, Seq("not-used.xml"), true)
+	  val xmlTxnSettings = XmlExportSettings(JournalType, None, Seq("not-used.xml"), true)
 	  val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(xmlBalSettings), None)
 
 	  val appState = Processor.process(scope, settings.accounts)

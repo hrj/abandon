@@ -1,5 +1,7 @@
-excludedJars in assembly <<= (fullClasspath in assembly) map { cp => 
-    cp filter {_.data.getName == "jfxrt.jar"}
+excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
+  cp filter {
+    _.data.getName == "jfxrt.jar"
+  }
 }
 
 // proguardSettings
@@ -23,10 +25,10 @@ lazy val commonSettings = Seq(
     if (isSnapshot.value)
       Some("snapshots" at nexus + "content/repositories/snapshots")
     else
-      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
 
-  )
+)
 
 lazy val abandon = (project in file(".")).
   aggregate(base, cli, gui).
@@ -39,9 +41,12 @@ lazy val abandon = (project in file(".")).
 
 lazy val base = (project in file("base")).
   settings(commonSettings: _*).
+  enablePlugins(BuildInfoPlugin).
   settings(
     name := "abandon-base",
-    fork in run := true
+    fork in run := true,
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "co.uproot.abandon"
   )
 
 

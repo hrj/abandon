@@ -16,6 +16,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
+  val unversioned = opt[Boolean]("unversioned", short = 'X')
   // val trail = trailArg[String]()
 }
 
@@ -35,9 +36,10 @@ object SettingsHelper {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
     val configOpt = cliConf.config.toOption
+    val withoutVersion = cliConf.unversioned.getOrElse(false)
     configOpt match {
       case Some(configFileName) =>
-        makeSettings(configFileName)
+        makeSettings(configFileName, withoutVersion)
       case _ =>
         val inputs = cliConf.inputs.toOption.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
@@ -57,7 +59,7 @@ object SettingsHelper {
     }
   }
 
-  def makeSettings(configFileName: String) = {
+  def makeSettings(configFileName: String, withoutVersion: Boolean) = {
     def handleInput(input: String, confPath: String): List[String] = {
       val parentPath = Processor.mkParentDirPath(confPath)
       if (input.startsWith("glob:")) {
@@ -78,7 +80,7 @@ object SettingsHelper {
         val reportOptions = config.optConfig("reportOptions")
         val isRight = reportOptions.flatMap(_.optStringList("isRight")).getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
-        val exports = exportConfigs.map(makeExportSettings)
+        val exports = exportConfigs.map(makeExportSettings(_, withoutVersion))
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
@@ -138,7 +140,7 @@ object SettingsHelper {
     }
   }
 
-  def makeExportSettings(config: Config) = {
+  def makeExportSettings(config: Config, withoutVersion: Boolean) = {
     val exportType = config.getString("type")
     val exportFormat = config.getString("format")
 
@@ -155,7 +157,7 @@ object SettingsHelper {
             LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
         case "xml" =>
             val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-            XmlExportSettings(JournalType, accountMatch, outFiles)
+            XmlExportSettings(JournalType, accountMatch, outFiles, withoutVersion)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
             throw new ConfigException.BadValue(config.origin, "type", message)
@@ -167,7 +169,7 @@ object SettingsHelper {
             throw new NotImplementedError(message)
         case "xml" =>
             val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-            XmlExportSettings(BalanceType, accountMatch, outFiles)
+            XmlExportSettings(BalanceType, accountMatch, outFiles, withoutVersion)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
             throw new ConfigException.BadValue(config.origin, "type", message)
@@ -327,6 +329,6 @@ case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[Stri
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
-case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_accountMatch, _outFiles)
+case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String], withoutVersion: Boolean) extends ExportSettings(_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])

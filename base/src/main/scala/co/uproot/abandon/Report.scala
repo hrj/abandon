@@ -1,6 +1,8 @@
 package co.uproot.abandon
 
-import Helper.{ Zero, maxElseZero, sumDeltas }
+import co.uproot.abandon.Helper.{Zero, maxElseZero, sumDeltas}
+
+import scala.xml.Elem
 
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
 case class BalanceReport(leftEntries:Seq[BalanceReportEntry], rightEntries:Seq[BalanceReportEntry], totalLeft:String, totalRight:String)
@@ -251,35 +253,52 @@ object Reports {
   }
 
   def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
-    <abandon>
-       <balance>
-          { state.accState.mkTree(exportSettings.isAccountMatching).toXML }
-       </balance>
-    </abandon>
+    val balance: Elem =
+      <abandon>
+        <balance>
+          {state.accState.mkTree(exportSettings.isAccountMatching).toXML}
+        </balance>
+      </abandon>
+
+    if (exportSettings.withoutVersion) {
+      balance
+    } else {
+      addAttribute(balance, "version", BuildInfo.version)
+    }
   }
 
   def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
-    <abandon>
-      <journal>
-       <transactions>{
-      val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
-      sortedGroups.map { txnGroup =>
-        <txn date={ txnGroup.date.formatISO8601Ext }>
-          { txnGroup.payeeOpt.map(payee => <payee>{ payee }</payee>).getOrElse(xml.Null) }
-          { txnGroup.annotationOpt.map(annotation => <annotation>{ annotation }</annotation>).getOrElse(xml.Null) }
-          { txnGroup.groupComments.map { comment => <comment>{ comment }</comment> } }
-          {
-            txnGroup.children.map(txn =>
-              <post delta={ txn.delta.toString } name={ txn.name.fullPathStr }>{
-                txn.commentOpt.map { comment => <comment>{ comment }</comment> }.getOrElse(xml.Null)
-             }</post>)
-          }
-        </txn>
-      }
-    }</transactions>
-    </journal>
-   </abandon>
+    val journal: Elem =
+      <abandon>
+        <journal>
+          <transactions>{
+            val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
+            sortedGroups.map { txnGroup =>
+              <txn date={ txnGroup.date.formatISO8601Ext }>
+                { txnGroup.payeeOpt.map(payee => <payee>{ payee }</payee>).getOrElse(xml.Null) }
+                { txnGroup.annotationOpt.map(annotation => <annotation>{ annotation }</annotation>).getOrElse(xml.Null) }
+                { txnGroup.groupComments.map { comment => <comment>{ comment }</comment> } }
+                {
+                txnGroup.children.map(txn =>
+                  <post delta={ txn.delta.toString } name={ txn.name.fullPathStr }>{
+                    txn.commentOpt.map { comment => <comment>{ comment }</comment> }.getOrElse(xml.Null)
+                    }</post>)
+                }
+              </txn>
+            }
+            }</transactions>
+        </journal>
+      </abandon>
+
+    if (exportSettings.withoutVersion) {
+      journal
+    } else {
+      addAttribute(journal, "version", BuildInfo.version)
+    }
   }
+
+  def addAttribute(n: Elem, k: String, v: String) = n % new xml.UnprefixedAttribute(k, v, xml.Null)
+
   def xmlExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
     exportSettings.exportType match {
       case JournalType => xmlJournalExport(state, exportSettings)
