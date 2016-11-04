@@ -5,7 +5,7 @@ import Helper.{ Zero, filterByType, maxElseZero }
 import java.io.FileWriter
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
-  val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
+  val writesToScreen = (outFiles.contains("-") || outFiles.isEmpty) && !settings.quiet
   val filePaths = outFiles.filterNot(_ equals "-").map(settings.getConfigRelativePath(_))
   val fileWriters = filePaths.map(path => new FileWriter(path))
   def startCodeBlock() = {
