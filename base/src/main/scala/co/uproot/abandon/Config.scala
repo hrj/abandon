@@ -17,6 +17,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
   val unversioned = opt[Boolean]("unversioned", short = 'X')
+  val quiet = opt[Boolean]("quiet", short = 'q')
   // val trail = trailArg[String]()
 }
 
@@ -37,13 +38,14 @@ object SettingsHelper {
     cliConf.verify()
     val configOpt = cliConf.config.toOption
     val withoutVersion = cliConf.unversioned.getOrElse(false)
+    val quiet = cliConf.quiet.getOrElse(false)
     configOpt match {
       case Some(configFileName) =>
-        makeSettings(configFileName, withoutVersion)
+        makeSettings(configFileName, withoutVersion, quiet)
       case _ =>
         val inputs = cliConf.inputs.toOption.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None))
+        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None, quiet))
     }
   }
 
@@ -59,7 +61,7 @@ object SettingsHelper {
     }
   }
 
-  def makeSettings(configFileName: String, withoutVersion: Boolean) = {
+  def makeSettings(configFileName: String, withoutVersion: Boolean, quiet: Boolean) = {
     def handleInput(input: String, confPath: String): List[String] = {
       val parentPath = Processor.mkParentDirPath(confPath)
       if (input.startsWith("glob:")) {
@@ -85,7 +87,7 @@ object SettingsHelper {
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
         val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateRangeConstraint(_))
-        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file)))
+        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file), quiet))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -274,10 +276,11 @@ case class Settings(
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
-  configFileOpt: Option[java.io.File]) {
-  def getConfigRelativePath(path: String) = {
-    configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
-  }
+  configFileOpt: Option[java.io.File],
+  quiet: Boolean) {
+    def getConfigRelativePath(path: String) = {
+      configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
+    }
 }
 
 trait AccountMatcher {
@@ -296,11 +299,9 @@ object LedgerType extends FormatType
 object XMLType extends FormatType
 
 
-abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
-}
+abstract class ReportSettings(val title: String, val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher
 
-abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher {
-}
+abstract class ExportSettings(val accountMatch: Option[Seq[String]], val outFiles: Seq[String]) extends AccountMatcher
 
 case class ClosureExportSettings(
   sources: Seq[String],
@@ -311,24 +312,36 @@ case class AccountSettings(
   alias: Option[String]) {
 }
 case class LedgerExportSettings(
-  _accountMatch: Option[Seq[String]],
-  _outFiles: Seq[String],
-  showZeroAmountAccounts: Boolean, closure: Seq[ClosureExportSettings]) extends ExportSettings(_accountMatch, _outFiles) {
-}
+                                 _accountMatch: Option[Seq[String]],
+                                 _outFiles: Seq[String],
+                                 showZeroAmountAccounts: Boolean,
+                                 closure: Seq[ClosureExportSettings]
+                               ) extends ExportSettings(_accountMatch, _outFiles)
 
 case class BalanceReportSettings(
-  _title: String,
-  _accountMatch: Option[Seq[String]],
-  _outFiles: Seq[String],
-  showZeroAmountAccounts: Boolean) extends ReportSettings(_title, _accountMatch, _outFiles) {
-}
+                                  _title: String,
+                                  _accountMatch: Option[Seq[String]],
+                                  _outFiles: Seq[String],
+                                  showZeroAmountAccounts: Boolean
+                                ) extends ReportSettings(_title, _accountMatch, _outFiles)
 
-case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ReportSettings(_title, _accountMatch, _outFiles) {
-}
+case class RegisterReportSettings(
+                                   _title: String,
+                                   _accountMatch: Option[Seq[String]],
+                                   _outFiles: Seq[String]
+                                 ) extends ReportSettings(_title, _accountMatch, _outFiles)
 
-case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
-}
+case class BookReportSettings(
+                               _title: String,
+                               account: String,
+                               _outFiles: Seq[String]
+                             ) extends ReportSettings(_title, Some(Seq(account)), _outFiles)
 
-case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String], withoutVersion: Boolean) extends ExportSettings(_accountMatch, _outFiles)
+case class XmlExportSettings(
+                              exportType: OutputType,
+                              _accountMatch: Option[Seq[String]],
+                              _outFiles: Seq[String],
+                              withoutVersion: Boolean
+                            ) extends ExportSettings(_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])
