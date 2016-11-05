@@ -14,12 +14,13 @@ import ParserHelper._
 class ComplexProcessTest extends FlatSpec with Matchers with Inside {
 	"Abandon" should "handle simple xml test case without configuration" in {
 
-	  val (parseError, scope, processedFiles) = Processor.parseAll(Seq("testCases/small.ledger"))
+		val quiet = true
+		val (parseError, scope, processedFiles) = Processor.parseAll(Seq("testCases/small.ledger"), quiet)
 	  assert(!parseError)
 
 	  val xmlBalSettings = XmlExportSettings(BalanceType, None, Seq("not-used.xml"), true)
 	  val xmlTxnSettings = XmlExportSettings(JournalType, None, Seq("not-used.xml"), true)
-	  val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(xmlBalSettings), None)
+	  val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(xmlBalSettings), None, quiet)
 
 	  val appState = Processor.process(scope, settings.accounts)
 	  //TODO: Processor.checkConstaints(appState, settings.eodConstraints)
