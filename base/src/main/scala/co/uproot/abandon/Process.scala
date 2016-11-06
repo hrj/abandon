@@ -115,7 +115,7 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
 object Processor {
   case class Input(path: String, parentScope: Scope)
   
-  def parseAll(inputFiles: Seq[String]) = {
+  def parseAll(inputFiles: Seq[String], quiet: Boolean) = {
     // var astEntries = List[ASTEntry]()
     val rootScope = Scope(Nil, None)
     var inputQueue = inputFiles.map(Input(_, rootScope))
@@ -127,7 +127,7 @@ object Processor {
       inputQueue = inputQueue.tail
       if (!processedFiles.contains(inputPath)) {
         processedFiles :+= inputPath
-        println("Processing:" + inputPath)
+        if (!quiet) println("Processing:" + inputPath)
         val sourceOpt = getSource(inputPath)
         sourceOpt match {
           case Some(source) =>

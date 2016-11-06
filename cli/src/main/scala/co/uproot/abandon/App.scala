@@ -148,15 +148,17 @@ object CLIMain  {
     settingsResult match {
       case Left(errorMsg) => printErrAndExit(errorMsg)
       case Right(settings) =>
-        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
+        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
         if (!parseError) {
           val appState = Processor.process(astEntries,settings.accounts)
           Processor.checkConstaints(appState, settings.constraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
-            println()
-            reportWriter.filePaths foreach { filePath =>
-              println(s"Exporting to: $filePath")
+            if (!settings.quiet) {
+              println()
+              reportWriter.filePaths foreach { filePath =>
+                println(s"Exporting to: $filePath")
+              }
             }
             exportSettings match {
               case balSettings: LedgerExportSettings =>
@@ -171,13 +173,14 @@ object CLIMain  {
           }
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
-
-            println()
-            reportWriter.filePaths foreach { filePath =>
-              println(s"Writing ${reportSettings.title} to: $filePath")
-            }
-            if (reportWriter.writesToScreen) {
+            if (!settings.quiet) {
               println()
+              reportWriter.filePaths foreach { filePath =>
+                println(s"Writing ${reportSettings.title} to: $filePath")
+              }
+              if (reportWriter.writesToScreen) {
+                println()
+              }
             }
 
             reportWriter.printHeading(reportSettings.title)
