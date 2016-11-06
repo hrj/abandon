@@ -140,7 +140,7 @@ object Processor {
                 inputQueue ++= includes.map(id => Input(mkRelativeFileName(id.fileName, inputPath), scope))
                 input.parentScope.addIncludedScope(scope)
               case n: parser.NoSuccess =>
-                if (!quiet) println("Error while parsing %s:\n%s" format (bold(inputPath), n))
+                println("Error while parsing %s:\n%s" format (bold(inputPath), n))
                 parseError = true
             }
             source.close
