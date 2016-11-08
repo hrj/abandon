@@ -15,7 +15,7 @@ lazy val commonSettings = Seq(
   // circular dependencies with sub-projects
 
   organization := "in.co.uproot",
-  version := "0.3.1",
+  version := "0.3.2",
   scalaVersion := "2.11.8",
   scalacOptions := List("-deprecation", "-optimise"),
   wartremoverWarnings ++= Warts.allBut(Wart.ToString, Wart.Throw),
