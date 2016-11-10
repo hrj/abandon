@@ -97,6 +97,19 @@ Abandon works fine for single-currency accounting. In the future, we plan to add
 
 The issue list provides a glimpse into the immediate road map.
 
+### Maven artifacts
+If you need to use abandon as a library, you can use the following maven dependency information:
+
+```
+<dependency>
+  <groupId>in.co.uproot</groupId>
+  <artifactId>abandon-base_2.11</artifactId>
+  <version>0.3.2</version>
+</dependency>
+```
+
+The library jars can be downloaded from [ Sonatype](https://oss.sonatype.org/content/repositories/releases/in/co/uproot/).
+
 ### License
 Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 (free to use, share, modify, but attribution is required)
