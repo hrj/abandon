@@ -169,7 +169,6 @@ object CLIMain  {
               }
             }
             exportSettings match {
-              // TODO missing warning
               case balSettings: LedgerExportSettings =>
                 val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
                 exportAsLedger(reportWriter, ledgerRep, FilterStackHelper.getFilterWarnings(settings.txnFilters, " "))

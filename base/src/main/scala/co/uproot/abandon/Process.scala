@@ -201,11 +201,6 @@ object Processor {
     (new java.io.File(path)).getCanonicalPath
   }
 
-  /* TODO; MERGE: REMOVE
-  private def readerForFile(fileName: String) = {
-    new PagedSeqReader(PagedSeq.fromReader(io.Source.fromFile(fileName).reader))
-  }
-  */
   def process(scope: Scope, accountSettings: Seq[AccountSettings], txnFilters: Option[TxnFilterStack]) = {
     scope.checkDupes()
     val transactions = (filterByType[ScopedTxn](scope.allTransactions)).filter { scopeTxn =>
