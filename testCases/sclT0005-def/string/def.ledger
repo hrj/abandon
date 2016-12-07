@@ -1,0 +1,11 @@
+def defaultAccount = "bank"
+
+2016/May/1
+  expenses         100
+
+2016/May/2
+  expenses2        200
+
+2016/May/3
+  expenses3        300
+

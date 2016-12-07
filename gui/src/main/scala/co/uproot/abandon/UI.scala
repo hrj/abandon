@@ -135,7 +135,7 @@ object AbandonUI extends JFXApp {
   val inputFileWatcher = new FileWatcher
 
   def createReportTabs(firstRun: Boolean, settings: Settings) = {
-    val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
+    val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
     if (!parseError) {
       val appState = Processor.process(astEntries, settings.accounts, settings.txnFilters)
       if (firstRun) {

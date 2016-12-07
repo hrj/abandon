@@ -1,0 +1,10 @@
+def x(a) = 10 * a
+
+2016/May/1
+  expenses        -x(3) * 2
+  bank
+
+2016/May/2
+  income          x(x(2))
+  bank
+

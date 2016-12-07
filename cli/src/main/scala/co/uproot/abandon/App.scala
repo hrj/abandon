@@ -26,7 +26,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
 
     if (writesToScreen) {
-      println(head + "\n" + ("─" * head.length) + "\n")
+      Console.println(head + "\n" + ("─" * head.length) + "\n")
     }
   }
 
@@ -37,7 +37,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
 
     if (writesToScreen) {
-      s.foreach { print }
+      s.foreach(print(_))
       Console.println()
     }
   }
@@ -74,7 +74,10 @@ object CLIMain  {
     val maxLeftLength = maxElseZero(left.map(_.length))
 
     def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
-    val balRender = lines.map { case (left, right) => renderBoth(left, right) }
+    val balRender = lines map {
+      case (left, right) => renderBoth(left, right)
+      case _ => ???
+    }
     reportWriter.println(balRender.mkString("\n"))
     val totalLine = renderBoth(balanceReport.totalLeft, balanceReport.totalRight)
     reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
@@ -114,25 +117,33 @@ object CLIMain  {
 
     reportWriter.println("Account Name: " + bookReportSettings.account + "\n")
 
-    val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))))
+    val maxNameLength = maxElseZero(bookReport.flatMap(_.entries.flatMap(_.txns.flatMap(_.parentOpt match {
+      case Some(parent) => parent.children.map(_.name.fullPathStr.length)
+      case _ => ???
+    }))))
     reportWriter.startCodeBlock()
 
     bookReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
         e.txns foreach { txn =>
-          val parent = txn.parentOpt.get
-          reportWriter.println(("%20.2f %20.2f        %s") format (txn.resultAmount, txn.delta, parent.dateLineStr))
-          // println(txnIndent + parent.dateLineStr)
-          val otherTxns = parent.children.filterNot(_.name equals txn.name)
-          parent.groupComments.foreach { groupComment =>
-            reportWriter.println(txnIndent + "  ; " + groupComment)
+          val maybeParent = txn.parentOpt
+          maybeParent match {
+            case Some(parent) => {
+              reportWriter.println(("%20.2f %20.2f        %s") format(txn.resultAmount, txn.delta, parent.dateLineStr))
+              // println(txnIndent + parent.dateLineStr)
+              val otherTxns = parent.children.filterNot(_.name equals txn.name)
+              parent.groupComments.foreach { groupComment =>
+                reportWriter.println(txnIndent + "  ; " + groupComment)
+              }
+              otherTxns.foreach { otherTxn =>
+                val commentStr = otherTxn.commentOpt.map("  ; " + _).getOrElse("")
+                reportWriter.println((txnIndent + "  %-" + maxNameLength + "s %20.2f %s") format(otherTxn.name, otherTxn.delta, commentStr))
+              }
+              reportWriter.println()
+            }
+            case None => ??? // What do we do in the event we have no parent?
           }
-          otherTxns.foreach { otherTxn =>
-            val commentStr = otherTxn.commentOpt.map("  ; " + _).getOrElse("")
-            reportWriter.println((txnIndent + "  %-" + maxNameLength + "s %20.2f %s") format (otherTxn.name, otherTxn.delta, commentStr))
-          }
-          reportWriter.println()
         }
       }
     }
@@ -142,20 +153,20 @@ object CLIMain  {
   def runAppThrows(args: Array[String]) {
     val settingsResult = SettingsHelper.getCompleteSettings(args)
     settingsResult match {
-      case Left(errorMsg) => Console.err.println("Error: " + errorMsg)
+      case Left(errorMsg) => printErrAndExit(errorMsg)
       case Right(settings) =>
-        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs)
+        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
         if (!parseError) {
-
           val txnFilters = None
           val appState = Processor.process(astEntries,settings.accounts, settings.txnFilters)
-
-          Processor.checkConstaints(appState, settings.eodConstraints)
+          Processor.checkConstaints(appState, settings.constraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
-            println()
-            reportWriter.filePaths foreach { filePath =>
-              println(s"Exporting to: $filePath")
+            if (!settings.quiet) {
+              println()
+              reportWriter.filePaths foreach { filePath =>
+                println(s"Exporting to: $filePath")
+              }
             }
             exportSettings match {
               // TODO missing warning
@@ -165,18 +176,20 @@ object CLIMain  {
               case xmlSettings: XmlExportSettings =>
                 val xmlData = Reports.xmlExport(appState, xmlSettings, settings.txnFilters)
                 reportWriter.printXml(xmlData)
+              case _ => ???
             }
             reportWriter.close
           }
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
-
-            println()
-            reportWriter.filePaths foreach { filePath =>
-              println(s"Writing ${reportSettings.title} to: $filePath")
-            }
-            if (reportWriter.writesToScreen) {
+            if (!settings.quiet) {
               println()
+              reportWriter.filePaths foreach { filePath =>
+                println(s"Writing ${reportSettings.title} to: $filePath")
+              }
+              if (reportWriter.writesToScreen) {
+                println()
+              }
             }
 
             reportWriter.printHeading(reportSettings.title)
@@ -197,32 +210,36 @@ object CLIMain  {
               case bookSettings: BookReportSettings =>
                 val bookReport = Reports.bookReport(appState, bookSettings)
                 printBookReport(reportWriter, bookSettings, bookReport)
+              case _ => ???
             }
 
             reportWriter.close
           }
+        } else {
+          throw new InputError("Couldn't parse input")
         }
+      case _ => ???
     }
   }
+
   def runApp(args: Array[String]) {
-  try {
-	runAppThrows(args)
-  } catch {
-    case a: AssertionError      => printErr("Error: " + a.getMessage)
-    case i: InputError          => printErr("Input error: " + i.getMessage)
-    case i: ConstraintError     => printErr("Constraint Failed: " + i.getMessage)
-    case e: NotImplementedError => printErr("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
-    case e: Error               => printErr("Unexpected error", e)
-  }
-  }
-
-  def printErr(msg: String) = {
-    println(Console.RED + Console.BOLD + msg + Console.RESET)
+    try {
+      runAppThrows(args)
+    } catch {
+      case a: AssertionError      => printErrAndExit("Internal Assertion Error (please report a bug):" + a.getMessage)
+      case i: InputError          => printErrAndExit("Input error: " + i.getMessage)
+      case i: ConstraintError     => printErrAndExit("Constraint Failed: " + i.getMessage)
+      case e: NotImplementedError => printErrAndExit("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
+      case e: Error               => printErrAndExit("Unexpected error", e)
+    }
   }
 
-  def printErr(msg: String, err:Error) = {
+  def printErrAndExit(msg: String, err:Error = null) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
-    err.printStackTrace(Console.out)
+    if (err != null) {
+      err.printStackTrace(Console.out)
+    }
+    System.exit(1)
   }
 }
 

@@ -13,7 +13,7 @@ object TestComparator extends FlatSpec  {
         val srcSecond = scala.io.Source.fromFile(second)
         val txtSecond = try srcSecond.getLines mkString "\n" finally srcSecond.close()
 
-        txtFirst == txtSecond
+        txtFirst === txtSecond
   }
 
   def xmlComparator(first: String, second: String) :Boolean = {
@@ -28,7 +28,7 @@ object TestComparator extends FlatSpec  {
   }
 }
 
-case class TestVec(output: String, reference: String, comparator: (String, String) => Boolean)
+final case class TestVec(output: String, reference: String, comparator: (String, String) => Boolean)
 
-case class TestCase(conf: String, args: Array[String], testVec: List[TestVec])
+final case class TestCase(conf: String, args: Array[String], testVec: List[TestVec])
 	  

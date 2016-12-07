@@ -6,8 +6,11 @@ import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.json.Lexer
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
+import scala.util.parsing.input.Position
+import scala.util.parsing.input.PagedSeqReader
+import scala.collection.immutable.PagedSeq
 
-class AbandonLexer extends StdLexical with ImplicitConversions {
+object AbandonLexer extends StdLexical with ImplicitConversions {
   import scala.util.parsing.input.CharArrayReader.EofCh
   override def token: Parser[Token] =
     //( '\"' ~ rep(charSeq | letter) ~ '\"' ^^ lift(StringLit)
@@ -26,6 +29,7 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
   case object EOL extends Token {
     def chars = "<eol>"
   }
+
   case class CommentToken(commentContents: String) extends Token {
     def chars = commentContents
   }
@@ -96,8 +100,8 @@ class AbandonLexer extends StdLexical with ImplicitConversions {
 
 }
 
-object AbandonParser extends StandardTokenParsers with PackratParsers {
-  override val lexical = new AbandonLexer
+class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers with PackratParsers {
+  override val lexical = AbandonLexer
   private val defKeyword = "def"
   private val accountKeyword = "account"
   private val includeKeyword = "include"
@@ -112,7 +116,7 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   lexical.reserved += falseKeyword
   lexical.reserved += payeeKeyword
   lexical.reserved += tagKeyword
-  lexical.delimiters ++= List("+", "-", "*", "/", "=", "(", ")", ":", ",", "&", ".")
+  lexical.delimiters ++= List("+", "-", "*", "/", "=", "(", ")", ":", ",", "&", ".", "?", ">", "<", "{", "}")
 
   val nameSeparator = ":"
 
@@ -130,13 +134,19 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
   private lazy val fragSeparators = anyEol*
   private def line[T](p: Parser[T]): Parser[T] = p <~ (((comment?) ~ eol)*)
 
-  // End of line commment
+  // End of line comment
   private def eolComment = (comment?) <~ eol
 
-  lazy val abandon: Parser[Seq[ASTEntry]] = phrase((fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators)
+  lazy val abandon: Parser[Scope] = abandon(None)
+  def abandon(parentScopeOpt: Option[Scope]): Parser[Scope] = phrase(frags) ^^ { case entries => ParserHelper.fixupScopeParents(Scope(entries, None), parentScopeOpt) }
+
+  private lazy val scopeBlock: Parser[Scope] = ("{" ~> frags) <~ "}"  ^^ { case entries => Scope(entries, None) }
+
   lazy val accountName: Parser[AccountName] = rep1sep(ident, nameSeparator) ^^ { case path => AccountName(path) }
 
-  private lazy val fragment: Parser[ASTEntry] = (txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
+  private lazy val frags = (fragSeparators ~> repsep(fragment, fragSeparators)) <~ fragSeparators
+
+  private lazy val fragment: Parser[ASTEntry] = (scopeBlock | compactTxFrag | txFrag | defFrag | accountDefFrag | includeFrag | payeeDefFrag | tagDefFrag)
   private lazy val includeFrag = (includeKeyword ~> fileName) ^^ { case name => IncludeDirective(name) }
   private lazy val payeeDefFrag = (payeeKeyword ~> stringOrAllUntilEOL) ^^ { case payee => PayeeDef(payee.mkString("")) }
   private lazy val tagDefFrag = (tagKeyword ~> stringOrAllUntilEOL) ^^ { case tag => TagDef(tag.mkString("")) }
@@ -147,68 +157,109 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
     case name ~ details => AccountDeclaration(name, details)
   }
   private lazy val accountDefDetails = keyValuePairs
-  private lazy val keyValuePairSingleton = (ident) ^^ { case k => (k, BooleanLiteralExpr(true)) }
-  private lazy val keyValuePairBoolean = ((ident <~ ":") ~ booleanExpression) ^^ { case k ~ v => (k, v) }
+  private lazy val keyValuePairSingleton = (currentPosition ~ ident) ^^ { case pos ~ k => (k, BooleanLiteralExpr(true)(Some(pos))) }
+  private lazy val keyValuePairBoolean = ((ident <~ ":") ~ booleanExpr) ^^ { case k ~ v => (k, v) }
   private lazy val keyValuePair = keyValuePairSingleton | keyValuePairBoolean
   private lazy val keyValuePairs = ((keyValuePair <~ anyEol)*) ^^ { case s => s.toMap }
 
-  private lazy val defFrag = (((defKeyword ~> ident) ~ (arguments?)) <~ "=") ~ expression ^^ {
-    case name ~ arg ~ expr => Definition(name, arg.getOrElse(Nil), expr)
+  private lazy val currentPosition = new Parser[InputPosition] {
+    def apply(in:Input) = {
+      Success(InputPosition(inputPathOpt, in.pos), in)
+    }
   }
-  private lazy val arguments = ("(" ~> rep1sep(ident, ",")) <~ ")"
-  private lazy val expression: PackratParser[Expr[_]] = (numericExpr | booleanExpression)
 
-  private def mkFunctionExpr[T](exprParser: Parser[Expr[T]]) = {
-    val zeroArgFunctionExpr = (ident ^^ { case x => IdentifierExpr[T](x) })
-    val multiArgFunctionExpr = (((ident <~ "(") ~ rep1sep(exprParser, ",")) <~ ")") ^^ { case x ~ es => FunctionExpr[T](x, es) }
+  private lazy val defFrag = currentPosition ~ ((((defKeyword ~> ident) ~ (arguments?)) <~ "=") ~ expression) ^^ {
+    case pos ~ (name ~ arg ~ expr) => Definition(pos, name, arg.getOrElse(Nil), expr)
+  }
+
+  private lazy val arguments = ("(" ~> rep1sep(ident, ",")) <~ ")"
+  private lazy val expression: PackratParser[Expr] = (numericExpr ||| booleanExpr ||| stringExpr)
+
+  private def mkFunctionExpr(exprParser: Parser[Expr]) = {
+    val zeroArgFunctionExpr = (currentPosition ~ ident ^^ { case pos ~ x => IdentifierExpr(x)(Some(pos)) })
+    val multiArgFunctionExpr = currentPosition ~ (((ident <~ "(") ~ rep1sep(exprParser, ",")) <~ ")") ^^ {
+      case pos ~ (x ~ es) => FunctionExpr(x, es, Some(pos))
+      }
     multiArgFunctionExpr ||| zeroArgFunctionExpr
   }
 
-  private lazy val numericFunctionExpr = mkFunctionExpr(numericExpr)
+  private lazy val functionExpr = mkFunctionExpr(expression)
 
-  import ASTHelper.NumericExpr
+  lazy val numericParser: Parser[Expr] = phrase(numericExpr)
 
-  lazy val numericParser: Parser[NumericExpr] = phrase(numericExpr)
+  private lazy val numericLiteralExpr: PackratParser[Expr] = (currentPosition ~ number ^^ { case pos ~ n => NumericLiteralExpr(n)(Some(pos)) })
+  private lazy val numericLiteralFirstExpr: PackratParser[Expr] = (numericLiteralExpr | numericExpr)
+  private lazy val unaryPosExpr: PackratParser[Expr] = ("+" ~> numericLiteralFirstExpr)
+  private lazy val unaryNegExpr: PackratParser[UnaryNegExpr] = currentPosition ~ ("-" ~> numericLiteralFirstExpr) ^^ {
+    case pos ~ expr => UnaryNegExpr(expr)(Some(pos))
+  }
+  private lazy val parenthesizedExpr: PackratParser[Expr] = (("(" ~> numericExpr) <~ ")") ^^ { case expr => expr }
 
-  private lazy val numericLiteralExpr: PackratParser[NumericExpr] = (number ^^ { case n => NumericLiteralExpr(n) })
-  private lazy val numericLiteralFirstExpr: PackratParser[NumericExpr] = (numericLiteralExpr | numericExpr)
-  private lazy val unaryPosExpr: PackratParser[NumericExpr] = ("+" ~> numericLiteralFirstExpr)
-  private lazy val unaryNegExpr: PackratParser[UnaryNegExpr] = ("-" ~> numericLiteralFirstExpr) ^^ { case expr => UnaryNegExpr(expr) }
-  private lazy val parenthesizedExpr: PackratParser[NumericExpr] = (("(" ~> numericExpr) <~ ")") ^^ { case expr => expr }
+  private lazy val ternaryIfExpr: PackratParser[Expr] = currentPosition ~ (booleanExpr <~ "?") ~ (expression <~ ":") ~ expression ^^ {
+    case pos ~ be ~ e1 ~ e2 => IfExpr(be, e1, e2)(Some(pos))
+  }
 
-  private def mkExpr(op: String, e1: NumericExpr, e2: NumericExpr) = {
+  private def mkExpr(op: String, e1: Expr, e2: Expr, pos: InputPosition) = {
     op match {
-      case "+" => AddExpr(e1, e2)
-      case "-" => SubExpr(e1, e2)
-      case "*" => MulExpr(e1, e2)
-      case "/" => DivExpr(e1, e2)
+      case "+" => AddExpr(e1, e2)(Some(pos))
+      case "-" => SubExpr(e1, e2)(Some(pos))
+      case "*" => MulExpr(e1, e2)(Some(pos))
+      case "/" => DivExpr(e1, e2)(Some(pos))
     }
   }
 
-  private lazy val numericExpr: PackratParser[NumericExpr] =
-    (term ~ termFrag) ^^ {
-      case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
+  private lazy val numericExpr: PackratParser[Expr] =
+    currentPosition ~ (term ~ termFrag) ^^ {
+      case pos ~ (t1 ~ ts) => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2, pos) }
     }
-  private lazy val term: PackratParser[NumericExpr] =
-    factor ~ factorFrag ^^ {
-      case t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2) }
+
+  private lazy val term: PackratParser[Expr] =
+    currentPosition ~ factor ~ factorFrag ^^ {
+      case pos ~ t1 ~ ts => ts.foldLeft(t1) { case (acc, op ~ t2) => mkExpr(op, acc, t2, pos) }
     }
-  private lazy val termFrag: PackratParser[Seq[String ~ NumericExpr]] = (("+" | "-") ~ term)*
-  private lazy val factor: PackratParser[NumericExpr] = numericLiteralExpr | parenthesizedExpr | unaryPosExpr | unaryNegExpr
-  private lazy val factorFrag: PackratParser[Seq[String ~ NumericExpr]] = (("*" | "/") ~ factor)*
 
-  private lazy val booleanExpression: PackratParser[BooleanExpr] = (trueKeyword ^^^ BooleanLiteralExpr(true)) | (falseKeyword ^^^ BooleanLiteralExpr(false))
+  private lazy val termFrag: PackratParser[Seq[String ~ Expr]] = (("+" | "-") ~ term)*
+  private lazy val factor: PackratParser[Expr] = ternaryIfExpr | functionExpr | numericLiteralExpr | parenthesizedExpr | unaryPosExpr | unaryNegExpr
+  private lazy val factorFrag: PackratParser[Seq[String ~ Expr]] = (("*" | "/") ~ factor)*
 
-  private lazy val txFrag = (((dateFrag | isoDateFrag) ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+) ^^ {
-    case date ~ annotationOpt ~ optPayee ~ optComment ~ posts =>
+  private lazy val stringLitExpr = (currentPosition ~ stringLit) ^^ {case pos ~ lit => StringLiteralExpr(lit)(Some(pos))}
+  private lazy val stringExpr: PackratParser[Expr] =  stringLitExpr | functionExpr
+  private lazy val booleanExpr: PackratParser[Expr] =  conditionExpr | booleanLiteralExpr | functionExpr
+  private lazy val trueExpr = currentPosition ~ trueKeyword ^^ { case pos ~ lit => BooleanLiteralExpr(true)(Some(pos))}
+  private lazy val falseExpr = currentPosition ~ falseKeyword ^^ { case pos ~ lit => BooleanLiteralExpr(false)(Some(pos))}
+  private lazy val booleanLiteralExpr = trueExpr | falseExpr
+  private lazy val conditionExpr = currentPosition ~ (numericExpr ~ comparisonExpr ~ numericExpr) ^^ {
+    case pos ~ (e1 ~ op ~ e2) => ConditionExpr(e1, op, e2)(Some(pos))
+  }
+  private lazy val comparisonExpr: PackratParser[String] = ((">" | "<" | "=") ~ "=" ^^ {case (o1 ~ o2) => o1 + o2}) | ">" | "<" 
+
+  private lazy val compactTxFrag = (currentPosition ~ ("." ~> dateExpr ~ accountName ~ numericExpr ~ eolComment) ^^ {
+    case pos ~ (date ~ accountName ~ amount ~ optComment) =>
+      Transaction(pos, date, List(Post(accountName, Option(amount), optComment)), None, None, Nil)
+  })
+
+  private lazy val txFrag = currentPosition ~ (((dateExpr ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+)) ^^ {
+    case pos ~ (date ~ annotationOpt ~ optPayee ~ optComment ~ posts) =>
       val annotationStrOpt = annotationOpt.map(_.mkString(""))
-      Transaction(date, posts, annotationStrOpt, optPayee, optComment.flatten)
+      Transaction(pos, date, posts, annotationStrOpt, optPayee, optComment.flatten)
   }
+
   private lazy val annotation = (("(" ~> (ident | numericLit)+) <~ ")")
+
   private lazy val payee = ((allButEOL)+) ^^ { case x => x.mkString(" ") }
+
   private lazy val post: PackratParser[Post] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
     case name ~ amount ~ commentOpt => Post(name, amount, commentOpt)
   }
+
+  lazy val dateExpr = dateFrag | isoDateFrag
+
+  lazy val inclusive = ident ^? {
+    case "inclusive" => true
+    case "exclusive" => false
+  }
+
+  lazy val dateBoundExpr = (dateExpr ~ inclusive) ^^ { case date ~ inclusive => DateBound(date, inclusive) }
 
   lazy val isoDateFrag = ((((integer <~ "-") ~ integer) <~ "-") ~ integer) ^? ({
     case y ~ m ~ d if (isValidDate(y, m, d)) =>
@@ -234,13 +285,29 @@ object AbandonParser extends StandardTokenParsers with PackratParsers {
       case _: java.time.DateTimeException => false
     }
   }
+
+  def scanner(s:String) = {
+    val reader= new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
+    new lexical.Scanner(reader)
+  }
+
+  def scannerFromFile(filePath:String) = {
+    val reader= new PagedSeqReader(PagedSeq.fromFile(filePath))
+    new lexical.Scanner(reader)
+  }
 }
 
-object ParserHelper {
-  import scala.util.parsing.input.PagedSeqReader
-  import scala.collection.immutable.PagedSeq
 
-  def reader(s: String) = new PagedSeqReader(PagedSeq.fromStrings(collection.immutable.Seq(s)))
-  def mkScanner(r: PagedSeqReader) = new AbandonParser.lexical.Scanner(r)
-  def scanner(s: String) = mkScanner(reader(s))
+object ParserHelper {
+
+  val parser = new AbandonParser(None)
+
+  def scanner(s: String) = parser.scanner(s)
+
+  def fixupScopeParents(s:Scope, parentOpt: Option[Scope]): Scope = {
+    Scope(s.entries.map( {
+      case c:Scope => fixupScopeParents(c, Option(s))
+      case x => x
+    }), parentOpt)
+  }
 }

@@ -16,7 +16,10 @@
    - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
  after_success: "sbt coveralls"
+
  sudo: false
+ dist: trusty
+
  addons:
   apt:
     packages:

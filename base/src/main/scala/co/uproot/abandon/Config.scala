@@ -1,18 +1,24 @@
 package co.uproot.abandon
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+
 import collection.JavaConverters._
-import com.typesafe.config.ConfigObject
 import org.rogach.scallop.ScallopConf
 import SettingsHelper._
 import com.typesafe.config.ConfigException
+import scala.util.Try
 
 class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
   val filters = propsLong[String]("filter", descr="Transaction filters", keyName=" name")
+  val unversioned = opt[Boolean]("unversioned", short = 'X')
+  val quiet = opt[Boolean]("quiet", short = 'q')
   // val trail = trailArg[String]()
 }
 
@@ -58,10 +64,12 @@ object SettingsHelper {
     }
   }
 
-  def getCompleteSettings(args: Seq[String]) = {
+  def getCompleteSettings(args: Seq[String]): Either[String, Settings] = {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
-
+    val configOpt = cliConf.config.toOption
+    val withoutVersion = cliConf.unversioned.getOrElse(false)
+    val quiet = cliConf.quiet.getOrElse(false)
     val txnFilters =
       if (cliConf.filters.isEmpty) {
         None
@@ -71,14 +79,13 @@ object SettingsHelper {
         Option(ANDTxnFilterStack(txnfs))
       }
 
-    val configOpt = cliConf.config.get
     configOpt match {
       case Some(configFileName) =>
-        makeSettings(configFileName, txnFilters)
+        makeSettings(configFileName, withoutVersion, quiet, txnFilters)
       case _ =>
-        val inputs = cliConf.inputs.get.getOrElse(Nil)
+        val inputs = cliConf.inputs.toOption.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, txnFilters, None))
+        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None, quiet, txnFilters))
     }
   }
 
@@ -94,7 +101,7 @@ object SettingsHelper {
     }
   }
 
-  def makeSettings(configFileName: String, txnFiltersCLI: Option[TxnFilterStack]) = {
+  def makeSettings(configFileName: String, withoutVersion: Boolean, quiet: Boolean, txnFiltersCLI: Option[TxnFilterStack]) = {
     def handleInput(input: String, confPath: String): List[String] = {
       val parentPath = Processor.mkParentDirPath(confPath)
       if (input.startsWith("glob:")) {
@@ -110,12 +117,12 @@ object SettingsHelper {
     if (file.exists) {
       try {
         val config = ConfigFactory.parseFile(file).resolve()
-        val inputs = config.getStringList("inputs").asScala.map(handleInput(_, configFileName)).flatten.toSeq.sorted
+        val inputs = config.getStringList("inputs").asScala.flatMap(handleInput(_, configFileName)).toSeq.sorted
         val reports = config.getConfigList("reports").asScala.map(makeReportSettings(_))
         val reportOptions = config.optConfig("reportOptions")
-        val isRight = reportOptions.map(_.optStringList("isRight")).flatten.getOrElse(Nil)
+        val isRight = reportOptions.flatMap(_.optStringList("isRight")).getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
-        val exports = exportConfigs.map(makeExportSettings)
+        val exports = exportConfigs.map(makeExportSettings(_, withoutVersion))
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
@@ -137,7 +144,8 @@ object SettingsHelper {
               case e: ConfigException.Missing => None
             }
         }
-        Right(Settings(inputs, eodConstraints, accounts, reports, ReportOptions(isRight), exports, txnFilters, Some(file)))
+        val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateRangeConstraint(_))
+        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file), quiet, txnFilters))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -153,6 +161,23 @@ object SettingsHelper {
       case "positive" => PositiveConstraint(accName)
       case "negative" => NegativeConstraint(accName)
     }
+  }
+
+  private def getDateBound(name: String, config: Config) : Option[DateBound] = {
+    config.optional(name) { _.getString(_) } match {
+      case Some(valueStr) =>
+        val parseResult = ParserHelper.parser.dateBoundExpr(ParserHelper.scanner(valueStr))
+        parseResult match {
+          case ParserHelper.parser.Success(dateBound, _) => Option(dateBound)
+          case ParserHelper.parser.NoSuccess(_, _) =>
+            throw new ConfigException.BadValue(config.origin, name, "expected a date bound of the form: <date> <inclusive|exclusive>")
+        }
+      case None => None
+    }
+  }
+
+  private def makeDateRangeConstraint(config: Config): DateRangeConstraint = {
+    DateRangeConstraint(getDateBound("from", config), getDateBound("to", config))
   }
 
   def makeReportSettings(config: Config) = {
@@ -175,7 +200,7 @@ object SettingsHelper {
     }
   }
 
-  def makeExportSettings(config: Config) = {
+  def makeExportSettings(config: Config, withoutVersion: Boolean) = {
     val exportType = config.getString("type")
     val exportFormat = config.getString("format")
 
@@ -192,7 +217,7 @@ object SettingsHelper {
             LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
         case "xml" =>
             val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-            XmlExportSettings(JournalType, accountMatch, outFiles)
+            XmlExportSettings(JournalType, accountMatch, outFiles, withoutVersion)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
             throw new ConfigException.BadValue(config.origin, "type", message)
@@ -204,7 +229,7 @@ object SettingsHelper {
             throw new NotImplementedError(message)
         case "xml" =>
             val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-            XmlExportSettings(BalanceType, accountMatch, outFiles)
+            XmlExportSettings(BalanceType, accountMatch, outFiles, withoutVersion)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
             throw new ConfigException.BadValue(config.origin, "type", message)
@@ -263,15 +288,55 @@ case class NegativeConstraint(val accName: String) extends Constraint with SignC
   val signStr = "negative"
 }
 
+case class DateBound(date: Date, inclusive: Boolean) {
+  def isNotEarlierThan(that: Date) = {
+    if (inclusive) {
+      DateOrdering.compare(this.date, that) > 0
+    } else {
+      DateOrdering.compare(this.date, that) >= 0
+    }
+  }
+
+  def isNotLaterThan(that: Date) = {
+    if (inclusive) {
+      DateOrdering.compare(this.date, that) < 0
+    } else {
+      DateOrdering.compare(this.date, that) <= 0
+    }
+  }
+}
+
+case class DateRangeConstraint(dateFromOpt: Option[DateBound], dateToOpt: Option[DateBound]) extends Constraint {
+  override def check(appState: AppState): Boolean = {
+    appState.accState.postGroups.find(postGroup => {
+      val date = postGroup.txn.date
+
+      val fromFails = dateFromOpt.map(_.isNotEarlierThan(date)).getOrElse(false)
+      val toFails = dateToOpt.map(_.isNotLaterThan(date)).getOrElse(false)
+
+      fromFails || toFails
+    }).foreach(postGroup => {
+      throw new ConstraintPosError(
+        s"Transaction dated ${postGroup.txn.date.formatISO8601Ext} is not in the range of " +
+        s"[${dateFromOpt.getOrElse("...")}, ${dateToOpt.getOrElse("...")}]. ",
+        postGroup.txn.pos
+      )
+    })
+
+    true
+  }
+}
+
 case class Settings(
   inputs: Seq[String],
-  eodConstraints: Seq[Constraint],
+  constraints: Seq[Constraint],
   accounts: Seq[AccountSettings],
   reports: Seq[ReportSettings],
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
-  txnFilters: Option[TxnFilterStack],
-  configFileOpt: Option[java.io.File]) {
+  configFileOpt: Option[java.io.File],
+  quiet: Boolean,
+  txnFilters: Option[TxnFilterStack]) {
   def getConfigRelativePath(path: String) = {
     configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
   }
@@ -326,6 +391,6 @@ case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[Stri
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
-case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ExportSettings(_accountMatch, _outFiles)
+case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String], withoutVersion: Boolean) extends ExportSettings(_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])

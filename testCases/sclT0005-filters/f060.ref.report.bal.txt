@@ -1,8 +1,5 @@
 Balance Sheet
 
-Balance Sheet
-─────────────
-
 ACTIVE FILTER
   All following conditions must be true:
     begin: Transaction date is on or after: 2016-02-03

@@ -6,6 +6,10 @@ import java.util.regex.Pattern
 
 object FileUtils {
 
+  def listFilesRecursive(dirName: String, regex: String):Array[File] = {
+    listDirTree(dirName).filter({f => f.isFile && f.getCanonicalPath.matches(regex)}).sorted.toArray
+  }
+
   def listFiles(dirName: String, regex: String):Array[File] = {
     new File(dirName).listFiles.filter({f => f.isFile && f.getCanonicalPath.matches(regex)}).sorted
   }

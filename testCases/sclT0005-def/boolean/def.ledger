@@ -1,0 +1,18 @@
+def z = 100
+
+def x(a) = a <= 10 ? 100 : 20
+
+def y(a) = a ? 2 : 3
+
+2016/May/1
+  expenses        y(z > 50) * 2
+  bank
+
+2016/May/2
+  expenses2        -(y(x(3) < 50) + 2)
+  bank
+
+2016/May/3
+  expenses3        y(x(30) == 20) * x(20)
+  bank
+

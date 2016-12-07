@@ -1,0 +1,15 @@
+def x = 100
+
+def y = 400
+
+2016/May/1
+  expenses        x * 2
+  bank
+
+2016/May/2
+  expenses        y * 3
+  bank            -y * 3
+
+2016/May/3
+  expenses        y - x
+  bank            x - y

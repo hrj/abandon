@@ -1,3 +1,10 @@
+JAVA_CMD=java
+
+if [ $JAVA_HOME ]
+then
+  JAVA_CMD=$JAVA_HOME/bin/java;
+fi
+
 BASEDIR=`dirname $0`
 
-java -jar ${BASEDIR}/start.jar -g $*
+$JAVA_CMD -jar ${BASEDIR}/lib/abandon.jar -g $*

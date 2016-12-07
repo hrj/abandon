@@ -43,6 +43,19 @@ object Helper {
     shortMonths(monthNumber - 1)
   }
 
+  // Thanks to http://stackoverflow.com/a/23761045
+  // This function checks whether all elements are unique. If not it returns the first one that is not unique.
+  def allUnique[A](to: TraversableOnce[A]): Option[A] = {
+    val set = scala.collection.mutable.Set[A]()
+    to.foreach { x =>
+      if (set(x)) {
+        return Some(x)
+      } else {
+        set += x
+      }
+    }
+    None
+  }
 }
 
 // The sole purpose of this class is to ensure that equality is checked using references
