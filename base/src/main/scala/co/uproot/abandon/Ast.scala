@@ -134,17 +134,17 @@ sealed trait TransactionFilter {
 
 /*
  * Txn:Time filters
- * To create filter for time span, stack "Begin" and "End" filters.
+ * To create filter for time span, stack "onOrAfter" and "before" filters.
  */
-case class EndDateTxnFilter(end: Date) extends TransactionFilter {
-  override def filter(txn: Transaction) = { txn.date.toInt < end.toInt }
-  override def description() = { "end: Transaction date is before: " + end.formatISO8601Ext }
-  override def xmlDescription() = { <filter type="end" date={ end.formatISO8601Ext } />}
+case class BeforeDateTxnFilter(before: Date) extends TransactionFilter {
+  override def filter(txn: Transaction) = { txn.date.toInt < before.toInt }
+  override def description() = { "before: Transaction date is before: " + before.formatISO8601Ext }
+  override def xmlDescription() = { <filter type="before" date={ before.formatISO8601Ext } />}
 }
-case class BeginDateTxnFilter(begin: Date) extends TransactionFilter {
-  override def filter(txn: Transaction) = { begin.toInt <= txn.date.toInt }
-  override def description() = { "begin: Transaction date is on or after: " + begin.formatISO8601Ext }
-  override def xmlDescription() = { <filter type="begin" date={ begin.formatISO8601Ext } />}
+case class OnOrAfterDateTxnFilter(onOrAfter: Date) extends TransactionFilter {
+  override def filter(txn: Transaction) = { onOrAfter.toInt <= txn.date.toInt }
+  override def description() = { "onOrAfter: Transaction date is on or after: " + onOrAfter.formatISO8601Ext }
+  override def xmlDescription() = { <filter type="onOrAfter" date={ onOrAfter.formatISO8601Ext } />}
 }
 
 case class PayeeTxnFilter(regex: String) extends TransactionFilter {

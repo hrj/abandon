@@ -1,4 +1,4 @@
 --filter 
-begin=2016-02-19
-end=2016-03-01
+onOrAfter=2016-02-19
+before=2016-03-01
 account=.*:MatchSubAccount:.*

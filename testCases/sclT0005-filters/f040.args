@@ -1,4 +1,4 @@
 --filter 
 annotation=(^$)|(ann) 
-begin=2016-01-31
-end=2016-03-01
+onOrAfter=2016-01-31
+before=2016-03-01

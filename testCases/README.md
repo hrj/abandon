@@ -30,8 +30,8 @@ Inside a test directory, there must be:
    For example filter-arguments:
    ```
    --filter
-   begin=2013-01-01
-   end=2013-12-31
+   onOrAfter=2013-01-01
+   before=2013-12-31
    ```
    Each argument line is trimmed, so whitespace is removed
    from begining and at end.

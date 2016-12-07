@@ -1,2 +1,2 @@
 --filter
-begin=2016-02-01
+onOrAfter=2016-02-01

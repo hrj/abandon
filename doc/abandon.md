@@ -14,14 +14,14 @@ Only those transactions which pass or match filter criteria, will be processed.
 
 Currently there are following filters available
  
- - `begin=ISO-DATE`, include transactions on or after `ISO-DATE`
- - `end=ISO-DATE`, include transactions before `ISO-DATE`
+ - `onOrAfter=ISO-DATE`, include transactions on or after `ISO-DATE`
+ - `before=ISO-DATE`, include transactions before `ISO-DATE`
  - `annotation=REGEX`, include all transactions which have `annotation` with matching `REGEX`
  - `payee=REGEX`, include all transactions which have `payee` description with matching `REGEX` 
  - `account=REGEX`, include all transactions which have an `account` with matching `REGEX`
 
 For example to query all transactions for Feb 2016 (which is leap year), you could use following filter:
- `--filter begin=2016-02-01 end=2016-03-01`. Notice that date 2016-03-01 is excluded from result set. 
+ `--filter onOrAfter=2016-02-01 before=2016-03-01`. Notice that date 2016-03-01 is excluded from result set. 
 
 There are many functional tests for filters, those tests could be also used as an example.
 Please see [readme.md](testCases/sclT0005-filters/readme.md) for filter tests, which provides more 
@@ -130,12 +130,12 @@ Filters could be also defined in configuration file, with same way as on command
 
 For example:
 ```
-filters += "begin=2015-01-01"
-filters += "end=2015-12-31"
+filters += "onOrAfter=2015-01-01"
+filters += "before=2015-12-31"
 ```
 
 Or same as single line:
 
-`filters = ["begin=2012-02-01", "end=2016-01-02"]`
+`filters = ["onOrAfter=2012-02-01", "before=2016-01-02"]`
 
 For full information about filters, please see "Transaction filters" section.

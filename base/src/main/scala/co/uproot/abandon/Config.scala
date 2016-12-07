@@ -42,11 +42,11 @@ object SettingsHelper {
     }
 
     (key, value) match {
-      case (key, value) if (key == "begin") => {
-        BeginDateTxnFilter(makeDate(value))
+      case (key, value) if (key == "onOrAfter") => {
+        OnOrAfterDateTxnFilter(makeDate(value))
       }
-      case (key, value) if (key == "end") => {
-        EndDateTxnFilter(makeDate(value))
+      case (key, value) if (key == "before") => {
+        BeforeDateTxnFilter(makeDate(value))
       }
       case (key, value) if (key == "payee") => {
         PayeeTxnFilter(value)
@@ -58,8 +58,7 @@ object SettingsHelper {
         AnnotationTxnFilter(value)
       }
       case _ => {
-        // TODO fix this
-        throw new RuntimeException("unknown filter")
+        throw new RuntimeException("Unknown filter: " + key)
       }
     }
   }

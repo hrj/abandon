@@ -1,8 +1,8 @@
 <abandon>
   <info>
     <filters type="every">
-      <filter type="begin" date="2016-02-19"/>
-      <filter type="end" date="2016-03-01"/>
+      <filter type="onOrAfter" date="2016-02-19"/>
+      <filter type="before" date="2016-03-01"/>
       <filter type="account" pattern=".*:MatchSubAccount:.*"/>
     </filters>
   </info>

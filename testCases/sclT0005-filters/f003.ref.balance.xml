@@ -1,8 +1,8 @@
 <abandon>
   <info>
     <filters type="every">
-      <filter type="begin" date="2016-02-01"/>
-      <filter type="end" date="2016-03-02"/>
+      <filter type="onOrAfter" date="2016-02-01"/>
+      <filter type="before" date="2016-03-02"/>
     </filters>
   </info>
   <balance>

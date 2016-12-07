@@ -1,7 +1,7 @@
 <abandon>
   <info>
     <filters type="every">
-      <filter type="begin" date="2016-02-01"/>
+      <filter type="onOrAfter" date="2016-02-01"/>
     </filters>
   </info>
   <journal>
