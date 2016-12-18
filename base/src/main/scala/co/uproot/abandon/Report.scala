@@ -252,9 +252,19 @@ object Reports {
     }
   }
 
-  def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+  def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings, filterXML: Option[xml.Node]): xml.Node = {
     val balance: Elem =
       <abandon>
+        {
+        filterXML match {
+          case Some(xml) => {
+            <info>
+              { xml }
+            </info>
+          }
+          case None => ;
+        }
+        }
         <balance>
           {state.accState.mkTree(exportSettings.isAccountMatching).toXML}
         </balance>
@@ -267,9 +277,19 @@ object Reports {
     }
   }
 
-  def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+  def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings, filterXML: Option[xml.Node]): xml.Node = {
     val journal: Elem =
       <abandon>
+        {
+        filterXML match {
+          case Some(xml) => {
+            <info>
+              { xml }
+            </info>
+          }
+          case None => ;
+        }
+        }
         <journal>
           <transactions>{
             val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
@@ -299,10 +319,15 @@ object Reports {
 
   def addAttribute(n: Elem, k: String, v: String) = n % new xml.UnprefixedAttribute(k, v, xml.Null)
 
-  def xmlExport(state: AppState, exportSettings: XmlExportSettings): xml.Node = {
+  def xmlExport(state: AppState, exportSettings: XmlExportSettings, txnFilters: Option[TxnFilterStack]): xml.Node = {
+    val filterXML: Option[xml.Node] = txnFilters match {
+      case Some(filters) => Option(filters.xmlDescription)
+      case None => None
+    }
+
     exportSettings.exportType match {
-      case JournalType => xmlJournalExport(state, exportSettings)
-      case BalanceType => xmlBalanceExport(state, exportSettings)
+      case JournalType => xmlJournalExport(state, exportSettings, filterXML)
+      case BalanceType => xmlBalanceExport(state, exportSettings, filterXML)
     }
   }
 }

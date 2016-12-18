@@ -1,0 +1,16 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="account" pattern=".*matchme"/>
+    </filters>
+  </info>
+  <journal>
+    <transactions>
+      <txn date="2016-02-13">
+        <payee>account</payee>
+        <post delta="13" name="Expenses:E13:matchme"></post>
+        <post delta="-13" name="Assets:A13"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

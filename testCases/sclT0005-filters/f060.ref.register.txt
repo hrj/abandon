@@ -1,0 +1,17 @@
+Register
+
+ACTIVE FILTER
+  All following conditions must be true:
+    onOrAfter: Transaction date is on or after: 2016-02-03
+    before: Transaction date is before: 2016-02-23
+    annotation: Annotation must match "(^$)|(ann)"
+    payee: Payee must match "(.*by.*)|(matchme)"
+    account: At least one of transaction's accounts must match "(.*:MatchSubAccount:.*)|(.*:E11)"
+
+2016 / Feb
+   Assets:A11                                                       -11.00               -11.00
+   Assets:A17                                                       -17.00               -17.00
+   Assets:A19                                                       -19.00               -19.00
+   Expenses:E11                                                      11.00                11.00
+   Expenses:MatchSubAccount:E17                                      17.00                17.00
+   Expenses:MatchSubAccount:E19                                      19.00                19.00

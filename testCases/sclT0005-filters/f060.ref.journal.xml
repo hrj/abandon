@@ -1,0 +1,31 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="onOrAfter" date="2016-02-03"/>
+      <filter type="before" date="2016-02-23"/>
+      <filter type="annotation" pattern="(^$)|(ann)"/>
+      <filter type="payee" pattern="(.*by.*)|(matchme)"/>
+      <filter type="account" pattern="(.*:MatchSubAccount:.*)|(.*:E11)"/>
+    </filters>
+  </info>
+  <journal>
+    <transactions>
+      <txn date="2016-02-11">
+        <payee>matchme</payee>
+        <annotation>ann</annotation>
+        <post delta="11" name="Expenses:E11"></post>
+        <post delta="-11" name="Assets:A11"></post>
+      </txn>
+      <txn date="2016-02-17">
+        <payee>by account</payee>
+        <post delta="17" name="Expenses:MatchSubAccount:E17"></post>
+        <post delta="-17" name="Assets:A17"></post>
+      </txn>
+      <txn date="2016-02-19">
+        <payee>by notme account</payee>
+        <post delta="19" name="Expenses:MatchSubAccount:E19"></post>
+        <post delta="-19" name="Assets:A19"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

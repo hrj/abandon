@@ -5,11 +5,32 @@
  - '-g' := Start graphical GUI
  - '-c' <conf-file> := path to journal's configuration file
  - '-i' <input-file> := input file, could be specified inside conf-file
+ - '--filter' <filter-definition> := Transaction filter, please Transaction filters for further info
+
+## Transaction filters
+
+With transaction filters, you can select which transactions are used for reports and exports.
+Only those transactions which pass or match filter criteria, will be processed.
+
+Currently there are following filters available
  
+ - `onOrAfter=ISO-DATE`, include transactions on or after `ISO-DATE`
+ - `before=ISO-DATE`, include transactions before `ISO-DATE`
+ - `annotation=REGEX`, include all transactions which have `annotation` with matching `REGEX`
+ - `payee=REGEX`, include all transactions which have `payee` description with matching `REGEX` 
+ - `account=REGEX`, include all transactions which have an `account` with matching `REGEX`
+
+For example to query all transactions for Feb 2016 (which is leap year), you could use following filter:
+ `--filter onOrAfter=2016-02-01 before=2016-03-01`. Notice that date 2016-03-01 is excluded from result set. 
+
+There are many functional tests for filters, those tests could be also used as an example.
+Please see [readme.md](testCases/sclT0005-filters/readme.md) for filter tests, which provides more 
+information about various use cases.
+
 ## Configuration file
 
 
-### Input -directive
+### Inputs -directive
 
 Input directive defines primary inputs for this particular journal. 
 There could be other "include" directives inside these primary inputs.
@@ -103,3 +124,18 @@ Regex based path matching is activated by prefixing input path with "regex:".
 Abandon regex system supports also basepath cooked form of regex, please see 
 documentation of glob syntax for further info how cooked mode works.
 
+### Filters -directive
+
+Filters could be also defined in configuration file, with same way as on command line.
+
+For example:
+```
+filters += "onOrAfter=2015-01-01"
+filters += "before=2015-12-31"
+```
+
+Or same as single line:
+
+`filters = ["onOrAfter=2012-02-01", "before=2016-01-02"]`
+
+For full information about filters, please see "Transaction filters" section.

@@ -201,9 +201,14 @@ object Processor {
     (new java.io.File(path)).getCanonicalPath
   }
 
-  def process(scope: Scope, accountSettings: Seq[AccountSettings]) = {
+  def process(scope: Scope, accountSettings: Seq[AccountSettings], txnFilters: Option[TxnFilterStack]) = {
     scope.checkDupes()
-    val transactions = scope.allTransactions
+    val transactions = (filterByType[ScopedTxn](scope.allTransactions)).filter { scopeTxn =>
+      txnFilters match {
+        case Some(filterStack) => filterStack.filter(scopeTxn.txn)
+        case None => { true }
+      }
+    }
     val sortedTxns = transactions.sortBy(_.txn.date)(DateOrdering)
     val accState = new AccountState()
     val aliasMap = accountSettings.collect{ case AccountSettings(name, Some(alias)) => alias -> name }.toMap

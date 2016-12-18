@@ -1,0 +1,24 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="onOrAfter" date="2016-02-19"/>
+      <filter type="before" date="2016-03-01"/>
+      <filter type="account" pattern=".*:MatchSubAccount:.*"/>
+    </filters>
+  </info>
+  <journal>
+    <transactions>
+      <txn date="2016-02-19">
+        <payee>by notme account</payee>
+        <post delta="19" name="Expenses:MatchSubAccount:E19"></post>
+        <post delta="-19" name="Assets:A19"></post>
+      </txn>
+      <txn date="2016-02-23">
+        <payee>by account</payee>
+        <annotation>ann</annotation>
+        <post delta="23" name="Expenses:E23"></post>
+        <post delta="-23" name="Assets:MatchSubAccount:A23"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

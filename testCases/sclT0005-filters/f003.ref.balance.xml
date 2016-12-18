@@ -1,0 +1,42 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="onOrAfter" date="2016-02-01"/>
+      <filter type="before" date="2016-03-02"/>
+    </filters>
+  </info>
+  <balance>
+    <accounttree>
+      <account sum="0" cumulative="-158" name="Assets">
+        <account sum="-3" cumulative="-3" name="Assets:A03"> </account>
+        <account sum="-5" cumulative="-5" name="Assets:A05"> </account>
+        <account sum="-7" cumulative="-7" name="Assets:A07"> </account>
+        <account sum="-11" cumulative="-11" name="Assets:A11"> </account>
+        <account sum="-13" cumulative="-13" name="Assets:A13"> </account>
+        <account sum="-17" cumulative="-17" name="Assets:A17"> </account>
+        <account sum="-19" cumulative="-19" name="Assets:A19"> </account>
+        <account sum="-29" cumulative="-29" name="Assets:A29"> </account>
+        <account sum="-31" cumulative="-31" name="Assets:A31"> </account>
+        <account sum="0" cumulative="-23" name="Assets:MatchSubAccount">
+          <account sum="-23" cumulative="-23" name="Assets:MatchSubAccount:A23"> </account>
+        </account>
+      </account>
+      <account sum="0" cumulative="158" name="Expenses">
+        <account sum="3" cumulative="3" name="Expenses:E03"> </account>
+        <account sum="5" cumulative="5" name="Expenses:E05"> </account>
+        <account sum="7" cumulative="7" name="Expenses:E07"> </account>
+        <account sum="11" cumulative="11" name="Expenses:E11"> </account>
+        <account sum="0" cumulative="13" name="Expenses:E13">
+          <account sum="13" cumulative="13" name="Expenses:E13:matchme"> </account>
+        </account>
+        <account sum="23" cumulative="23" name="Expenses:E23"> </account>
+        <account sum="29" cumulative="29" name="Expenses:E29"> </account>
+        <account sum="31" cumulative="31" name="Expenses:E31"> </account>
+        <account sum="0" cumulative="36" name="Expenses:MatchSubAccount">
+          <account sum="17" cumulative="17" name="Expenses:MatchSubAccount:E17"> </account>
+          <account sum="19" cumulative="19" name="Expenses:MatchSubAccount:E19"> </account>
+        </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>

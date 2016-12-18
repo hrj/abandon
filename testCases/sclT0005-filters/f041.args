@@ -1,0 +1,3 @@
+--filter 
+payee=by account
+account=.*:MatchSubAccount:.*

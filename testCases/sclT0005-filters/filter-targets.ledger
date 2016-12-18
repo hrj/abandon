@@ -1,0 +1,49 @@
+
+2016-01-31  begin off by one
+	Expenses:E02	2
+	Assets:A02
+
+2016-02-01  begin off by one
+	Expenses:E03	3
+	Assets:A03
+
+2016-02-02  begin off by one
+	Expenses:E05	5
+	Assets:A05
+
+2016-02-05 (matchme)  foobar
+	Expenses:E07	7
+	Assets:A07
+
+2016-02-11 (ann) matchme
+	Expenses:E11	11
+	Assets:A11
+
+2016-02-13  account
+	Expenses:E13:matchme	13
+	Assets:A13
+
+2016-02-17  by account
+	Expenses:MatchSubAccount:E17	17
+	Assets:A17
+
+2016-02-19  by notme account
+	Expenses:MatchSubAccount:E19	19
+	Assets:A19
+
+2016-02-23 (ann) by account
+	Expenses:E23			23
+	Assets:MatchSubAccount:A23
+
+2016-02-29  end off by one
+	Expenses:E29	29
+	Assets:A29
+
+2016-03-01  end off by one
+	Expenses:E31	31
+	Assets:A31
+
+2016-03-02  end off by one
+	Expenses:E37	37
+	Assets:A37
+

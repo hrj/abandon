@@ -93,7 +93,14 @@ object CLIMain  {
     }
   }
 
-  def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData]) = {
+  def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
+
+    if (txnFilterTxt.nonEmpty) {
+      reportWriter.println("; ACTIVE FILTER")
+      txnFilterTxt.foreach { line => reportWriter.println("; " + line) }
+      reportWriter.println(";")
+    }
+
     ledgerRep foreach { reportGroup =>
       reportWriter.println(reportGroup.date.formatCompactYYYYMMDD)
       val formatStr = "%-" + (reportGroup.maxNameLength + 4) + "s %s"
@@ -150,7 +157,8 @@ object CLIMain  {
       case Right(settings) =>
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
         if (!parseError) {
-          val appState = Processor.process(astEntries,settings.accounts)
+          val txnFilters = None
+          val appState = Processor.process(astEntries,settings.accounts, settings.txnFilters)
           Processor.checkConstaints(appState, settings.constraints)
           settings.exports.foreach { exportSettings =>
             val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
@@ -163,9 +171,9 @@ object CLIMain  {
             exportSettings match {
               case balSettings: LedgerExportSettings =>
                 val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-                exportAsLedger(reportWriter, ledgerRep)
+                exportAsLedger(reportWriter, ledgerRep, FilterStackHelper.getFilterWarnings(settings.txnFilters, " "))
               case xmlSettings: XmlExportSettings =>
-                val xmlData = Reports.xmlExport(appState, xmlSettings)
+                val xmlData = Reports.xmlExport(appState, xmlSettings, settings.txnFilters)
                 reportWriter.printXml(xmlData)
               case _ => ???
             }
@@ -184,6 +192,12 @@ object CLIMain  {
             }
 
             reportWriter.printHeading(reportSettings.title)
+
+            if (settings.txnFilters.nonEmpty) {
+              reportWriter.println("ACTIVE FILTER")
+              FilterStackHelper.getFilterWarnings(settings.txnFilters, "  ").foreach { line => reportWriter.println(line)}
+              reportWriter.println("")
+            }
 
             reportSettings match {
               case balSettings: BalanceReportSettings =>

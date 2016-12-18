@@ -1,0 +1,69 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="before" date="2016-03-02"/>
+    </filters>
+  </info>
+  <journal>
+    <transactions>
+      <txn date="2016-01-31">
+        <payee>begin off by one</payee>
+        <post delta="2" name="Expenses:E02"></post>
+        <post delta="-2" name="Assets:A02"></post>
+      </txn>
+      <txn date="2016-02-01">
+        <payee>begin off by one</payee>
+        <post delta="3" name="Expenses:E03"></post>
+        <post delta="-3" name="Assets:A03"></post>
+      </txn>
+      <txn date="2016-02-02">
+        <payee>begin off by one</payee>
+        <post delta="5" name="Expenses:E05"></post>
+        <post delta="-5" name="Assets:A05"></post>
+      </txn>
+      <txn date="2016-02-05">
+        <payee>foobar</payee>
+        <annotation>matchme</annotation>
+        <post delta="7" name="Expenses:E07"></post>
+        <post delta="-7" name="Assets:A07"></post>
+      </txn>
+      <txn date="2016-02-11">
+        <payee>matchme</payee>
+        <annotation>ann</annotation>
+        <post delta="11" name="Expenses:E11"></post>
+        <post delta="-11" name="Assets:A11"></post>
+      </txn>
+      <txn date="2016-02-13">
+        <payee>account</payee>
+        <post delta="13" name="Expenses:E13:matchme"></post>
+        <post delta="-13" name="Assets:A13"></post>
+      </txn>
+      <txn date="2016-02-17">
+        <payee>by account</payee>
+        <post delta="17" name="Expenses:MatchSubAccount:E17"></post>
+        <post delta="-17" name="Assets:A17"></post>
+      </txn>
+      <txn date="2016-02-19">
+        <payee>by notme account</payee>
+        <post delta="19" name="Expenses:MatchSubAccount:E19"></post>
+        <post delta="-19" name="Assets:A19"></post>
+      </txn>
+      <txn date="2016-02-23">
+        <payee>by account</payee>
+        <annotation>ann</annotation>
+        <post delta="23" name="Expenses:E23"></post>
+        <post delta="-23" name="Assets:MatchSubAccount:A23"></post>
+      </txn>
+      <txn date="2016-02-29">
+        <payee>end off by one</payee>
+        <post delta="29" name="Expenses:E29"></post>
+        <post delta="-29" name="Assets:A29"></post>
+      </txn>
+      <txn date="2016-03-01">
+        <payee>end off by one</payee>
+        <post delta="31" name="Expenses:E31"></post>
+        <post delta="-31" name="Assets:A31"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

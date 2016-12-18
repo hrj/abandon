@@ -1,0 +1,29 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="annotation" pattern="(ann)|(matchme)"/>
+    </filters>
+  </info>
+  <journal>
+    <transactions>
+      <txn date="2016-02-05">
+        <payee>foobar</payee>
+        <annotation>matchme</annotation>
+        <post delta="7" name="Expenses:E07"></post>
+        <post delta="-7" name="Assets:A07"></post>
+      </txn>
+      <txn date="2016-02-11">
+        <payee>matchme</payee>
+        <annotation>ann</annotation>
+        <post delta="11" name="Expenses:E11"></post>
+        <post delta="-11" name="Assets:A11"></post>
+      </txn>
+      <txn date="2016-02-23">
+        <payee>by account</payee>
+        <annotation>ann</annotation>
+        <post delta="23" name="Expenses:E23"></post>
+        <post delta="-23" name="Assets:MatchSubAccount:A23"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>

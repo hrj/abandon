@@ -1,0 +1,24 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="payee" pattern="by account"/>
+      <filter type="account" pattern=".*:MatchSubAccount:.*"/>
+    </filters>
+  </info>
+  <balance>
+    <accounttree>
+      <account sum="0" cumulative="-40" name="Assets">
+        <account sum="-17" cumulative="-17" name="Assets:A17"> </account>
+        <account sum="0" cumulative="-23" name="Assets:MatchSubAccount">
+          <account sum="-23" cumulative="-23" name="Assets:MatchSubAccount:A23"> </account>
+        </account>
+      </account>
+      <account sum="0" cumulative="40" name="Expenses">
+        <account sum="23" cumulative="23" name="Expenses:E23"> </account>
+        <account sum="0" cumulative="17" name="Expenses:MatchSubAccount">
+          <account sum="17" cumulative="17" name="Expenses:MatchSubAccount:E17"> </account>
+        </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>

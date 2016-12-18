@@ -118,6 +118,134 @@ case class Date(year: Int, month: Int, day: Int) {
   }
 }
 
+/**
+ * Trait for stackable Transaction filters
+ * These filters operate on "raw" AST level,
+ * so all filtering decisions are based on unprocessed
+ * information.
+ *
+ * TxnFilterStack is used to glue these filters together.
+ */
+sealed trait TransactionFilter {
+  def filter(txn: Transaction): Boolean
+  def description(): String
+  def xmlDescription(): xml.Node
+}
+
+/*
+ * Txn:Time filters
+ * To create filter for time span, stack "onOrAfter" and "before" filters.
+ */
+case class BeforeDateTxnFilter(before: Date) extends TransactionFilter {
+  override def filter(txn: Transaction) = { txn.date.toInt < before.toInt }
+  override def description() = { "before: Transaction date is before: " + before.formatISO8601Ext }
+  override def xmlDescription() = { <filter type="before" date={ before.formatISO8601Ext } />}
+}
+case class OnOrAfterDateTxnFilter(onOrAfter: Date) extends TransactionFilter {
+  override def filter(txn: Transaction) = { onOrAfter.toInt <= txn.date.toInt }
+  override def description() = { "onOrAfter: Transaction date is on or after: " + onOrAfter.formatISO8601Ext }
+  override def xmlDescription() = { <filter type="onOrAfter" date={ onOrAfter.formatISO8601Ext } />}
+}
+
+case class PayeeTxnFilter(regex: String) extends TransactionFilter {
+  val pattern = java.util.regex.Pattern.compile(regex)
+
+  override def filter(txn: Transaction) = {
+    pattern.matcher(txn.payeeOpt match {
+      case Some(payee) => payee
+      case None => ""
+    }).matches
+  }
+  override def description() = { "payee: Payee must match \"" + pattern.toString + "\""}
+  override def xmlDescription() = { <filter type="payee" pattern={ pattern.toString } /> }
+}
+
+/**
+ * Annotation Txn filter
+ *  - returns all transactions with matching annotation
+ */
+case class AnnotationTxnFilter(regex: String) extends TransactionFilter {
+  val pattern = java.util.regex.Pattern.compile(regex)
+
+  override def filter(txn: Transaction) = {
+    pattern.matcher(txn.annotationOpt match {
+      case Some(ann) => ann
+      case None => ""
+    }).matches
+  }
+  override def description() = { "annotation: Annotation must match \"" + pattern.toString + "\"" }
+  override def xmlDescription() = { <filter type="annotation" pattern={ pattern.toString }/> }
+}
+
+/**
+ * Account Name Txn filter
+ * Returns all transactions which have at least one matching account name
+ */
+case class AccountNameTxnFilter(regex: String) extends TransactionFilter {
+  val pattern = java.util.regex.Pattern.compile(regex)
+
+  override def filter(txn: Transaction) = {
+    txn.posts.exists { post =>
+      pattern.matcher(post.accName.toString).matches
+    }
+  }
+  override def description() = { "account: At least one of transaction's accounts must match \"" + pattern.toString + "\"" }
+  override def xmlDescription() = { <filter type="account" pattern={ pattern.toString }/> }
+}
+
+// TODO Txn comment filter
+// TODO Txn:Post comment filter
+
+object FilterStackHelper {
+  def getFilterWarnings(txnFilters: Option[TxnFilterStack], indent: String): List[String] = {
+    txnFilters match {
+      case Some(txnFilters) => {
+        indent + txnFilters.description() ::
+        txnFilters.filterDescriptions().map { desc =>
+          indent * 2 + desc
+        }.toList
+      }
+      case None => Nil
+    }
+  }
+}
+
+/**
+ * Trait for Transaction filter stacks
+ * Filter stack defines relationship between filters
+ * (e.g. f1 && f2,  f1 || f2 or some other, specialized logic)
+ */
+sealed trait TxnFilterStack {
+  def filter(txn: Transaction): Boolean
+  def description(): String
+  def filterDescriptions(): Seq[String]
+  def xmlDescription(): xml.Node
+}
+
+/**
+ * AND- TxnFilterStack (e.g. f1 && f2 && ..)
+ */
+case class ANDTxnFilterStack(filterStack: Seq[TransactionFilter]) extends TxnFilterStack {
+  override def filter(txn: Transaction): Boolean = {
+    filterStack.forall { f => f.filter(txn) }
+  }
+  override def description() = {
+    assert(!filterStack.isEmpty)
+    "All following conditions must be true:"
+  }
+  override def filterDescriptions() = {
+    assert(!filterStack.isEmpty)
+    filterStack.map({case f => f.description})
+  }
+  override def xmlDescription(): xml.Node = {
+    assert(!filterStack.isEmpty)
+    <filters type="every">
+    {
+      filterStack.map({ filt => filt.xmlDescription })
+    }
+    </filters>
+  }
+}
 
 object DateOrdering extends Ordering[Date] {
   def compare(x: Date, y: Date) = {

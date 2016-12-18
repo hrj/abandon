@@ -1,0 +1,25 @@
+<abandon>
+  <info>
+    <filters type="every">
+      <filter type="onOrAfter" date="2016-02-19"/>
+      <filter type="before" date="2016-03-01"/>
+      <filter type="account" pattern=".*:MatchSubAccount:.*"/>
+    </filters>
+  </info>
+  <balance>
+    <accounttree>
+      <account sum="0" cumulative="-42" name="Assets">
+        <account sum="-19" cumulative="-19" name="Assets:A19"> </account>
+        <account sum="0" cumulative="-23" name="Assets:MatchSubAccount">
+          <account sum="-23" cumulative="-23" name="Assets:MatchSubAccount:A23"> </account>
+        </account>
+      </account>
+      <account sum="0" cumulative="42" name="Expenses">
+        <account sum="23" cumulative="23" name="Expenses:E23"> </account>
+        <account sum="0" cumulative="19" name="Expenses:MatchSubAccount">
+          <account sum="19" cumulative="19" name="Expenses:MatchSubAccount:E19"> </account>
+        </account>
+      </account>
+    </accounttree>
+  </balance>
+</abandon>

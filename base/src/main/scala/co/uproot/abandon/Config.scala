@@ -16,6 +16,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
+  val filters = propsLong[String]("filter", descr="Transaction filters", keyName=" name")
   val unversioned = opt[Boolean]("unversioned", short = 'X')
   val quiet = opt[Boolean]("quiet", short = 'q')
   // val trail = trailArg[String]()
@@ -33,19 +34,57 @@ object SettingsHelper {
     }
   }
 
+  def createTxnFilter(key: String, value: String): TransactionFilter = {
+    def makeDate(date: String) = {
+      val jDate = java.time.LocalDate.parse(date,
+          java.time.format.DateTimeFormatter.ISO_DATE)
+      Date(jDate.getYear, jDate.getMonthValue, jDate.getDayOfMonth)
+    }
+
+    (key, value) match {
+      case (key, value) if (key == "onOrAfter") => {
+        OnOrAfterDateTxnFilter(makeDate(value))
+      }
+      case (key, value) if (key == "before") => {
+        BeforeDateTxnFilter(makeDate(value))
+      }
+      case (key, value) if (key == "payee") => {
+        PayeeTxnFilter(value)
+      }
+      case (key, value) if (key == "account") => {
+        AccountNameTxnFilter(value)
+      }
+      case (key, value) if (key == "annotation") => {
+        AnnotationTxnFilter(value)
+      }
+      case _ => {
+        throw new RuntimeException("Unknown filter: " + key)
+      }
+    }
+  }
+
   def getCompleteSettings(args: Seq[String]): Either[String, Settings] = {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
     val configOpt = cliConf.config.toOption
     val withoutVersion = cliConf.unversioned.getOrElse(false)
     val quiet = cliConf.quiet.getOrElse(false)
+    val txnFilters =
+      if (cliConf.filters.isEmpty) {
+        None
+      }else {
+        val txnfs: Seq[TransactionFilter] =
+          cliConf.filters.map({case (k,v) => createTxnFilter(k, v)}).toSeq
+        Option(ANDTxnFilterStack(txnfs))
+      }
+
     configOpt match {
       case Some(configFileName) =>
-        makeSettings(configFileName, withoutVersion, quiet)
+        makeSettings(configFileName, withoutVersion, quiet, txnFilters)
       case _ =>
         val inputs = cliConf.inputs.toOption.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None, quiet))
+        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None, quiet, txnFilters))
     }
   }
 
@@ -61,7 +100,7 @@ object SettingsHelper {
     }
   }
 
-  def makeSettings(configFileName: String, withoutVersion: Boolean, quiet: Boolean) = {
+  def makeSettings(configFileName: String, withoutVersion: Boolean, quiet: Boolean, txnFiltersCLI: Option[TxnFilterStack]) = {
     def handleInput(input: String, confPath: String): List[String] = {
       val parentPath = Processor.mkParentDirPath(confPath)
       if (input.startsWith("glob:")) {
@@ -86,8 +125,26 @@ object SettingsHelper {
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
+
+       /*
+        * filters, precedence
+        *  - conf none, cli none => None
+        *  - conf none, cli some => cli
+        *  - conf some, cli some => cli
+        */
+        val txnFilters = txnFiltersCLI match {
+          case Some(txnfs) => Option(txnfs)
+          case None =>
+            try {
+              val txnfs = config.getStringList("filters").asScala.map(s => s.split("=", 2)).
+                  map({ case Array(k, v) => createTxnFilter(k, v) })
+              Option(ANDTxnFilterStack(txnfs))
+            } catch {
+              case e: ConfigException.Missing => None
+            }
+        }
         val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateRangeConstraint(_))
-        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file), quiet))
+        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file), quiet, txnFilters))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -277,7 +334,8 @@ case class Settings(
   reportOptions: ReportOptions,
   exports: Seq[ExportSettings],
   configFileOpt: Option[java.io.File],
-  quiet: Boolean) {
+  quiet: Boolean,
+  txnFilters: Option[TxnFilterStack]) {
   def getConfigRelativePath(path: String) = {
     configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
   }

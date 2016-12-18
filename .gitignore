@@ -14,5 +14,5 @@ project/target/
 /gui/bin/
 /gui/.cache-main
 /gui/.cache-tests
-/testCases/*/out.*
-*.idea/
+/testCases/**/out.*
+/**/.idea/
