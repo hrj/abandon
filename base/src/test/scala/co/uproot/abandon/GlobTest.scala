@@ -136,7 +136,7 @@ class WildcardInputTest extends FlatSpec with Matchers with Inside {
     for (p <- ps) println(p)
   }
 
-  val testDirPath = "testCases/globtree"
+  val testDirPath = "tests/globtree"
 
   "glob" should "match plain file (e.g. 'file.ext')" in {
     val refPaths = List(

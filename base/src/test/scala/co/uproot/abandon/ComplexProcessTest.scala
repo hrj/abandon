@@ -15,7 +15,7 @@ class ComplexProcessTest extends FlatSpec with Matchers with Inside {
 	"Abandon" should "handle simple xml test case without configuration" in {
 
 		val quiet = true
-		val (parseError, scope, processedFiles) = Processor.parseAll(Seq("testCases/small.ledger"), quiet)
+		val (parseError, scope, processedFiles) = Processor.parseAll(Seq("tests/small.ledger"), quiet)
 	  assert(!parseError)
 
 	  val xmlBalSettings = XmlExportSettings(BalanceType, None, Seq("not-used.xml"), true)
@@ -28,8 +28,8 @@ class ComplexProcessTest extends FlatSpec with Matchers with Inside {
 	  val xmlBalance = Reports.xmlExport(appState, xmlBalSettings, settings.txnFilters)
 	  val xmlJournal = Reports.xmlExport(appState, xmlTxnSettings, settings.txnFilters)
 
-	  val refXMLBalance = scala.xml.XML.loadFile("testCases/refSmallBalance.xml")
-	  val refXMLJournal = scala.xml.XML.loadFile("testCases/refSmallJournal.xml")
+	  val refXMLBalance = scala.xml.XML.loadFile("tests/refSmallBalance.xml")
+	  val refXMLJournal = scala.xml.XML.loadFile("tests/refSmallJournal.xml")
 	  
 	  //val prettyPrinter = new scala.xml.PrettyPrinter(1024,2)
 	  //println(prettyPrinter.format(xmlJournal))
