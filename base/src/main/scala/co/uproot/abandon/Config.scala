@@ -18,7 +18,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val filters = propsLong[String]("filter", descr="Transaction filters", keyName=" name")
   val unversioned = opt[Boolean]("unversioned", short = 'X')
   val quiet = opt[Boolean]("quiet", short = 'q')
-  // val trail = trailArg[String]()
+  val version = opt[Boolean]("version", noshort = true)
 }
 
 object SettingsHelper {
@@ -62,9 +62,7 @@ object SettingsHelper {
     }
   }
 
-  def getCompleteSettings(args: Seq[String], version: String): Either[String, Settings] = {
-    val cliConf = new AbandonCLIConf(args)
-    cliConf.verify()
+  def getCompleteSettings(cliConf: AbandonCLIConf, version: String): Either[String, Settings] = {
     val configOpt = cliConf.config.toOption
     val versionId = if (cliConf.unversioned.getOrElse(false)) {
       None
@@ -328,6 +326,8 @@ case class DateRangeConstraint(dateFromOpt: Option[DateBound], dateToOpt: Option
     true
   }
 }
+
+class SettingsError(msg: String) extends RuntimeException(msg)
 
 case class Settings(
   inputs: Seq[String],

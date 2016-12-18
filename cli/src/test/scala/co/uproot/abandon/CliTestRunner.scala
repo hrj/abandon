@@ -55,7 +55,7 @@ class CliTestSuite extends FunSuite {
 
   def runTest(tc: TestCase) {
       try {
-        co.uproot.abandon.CLIMain.runAppThrows(Array("-c", tc.conf) ++ tc.args ++ Array("-X", "-q"))
+        co.uproot.abandon.CLIMain.run(Array("-c", tc.conf) ++ tc.args ++ Array("-X", "-q"))
       } catch {
         case x: Exception => println("error: " + x); assert(false)
       }

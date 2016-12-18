@@ -65,7 +65,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   }
 }
 
-object CLIMain  {
+object CLIMain {
   def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
     val left = balanceReport.leftEntries.map(_.render)
     val right = balanceReport.rightEntries.map(_.render)
@@ -149,15 +149,16 @@ object CLIMain  {
     }
     reportWriter.endCodeBlock()
   }
+
   def buildId: String = {
     "Base: " + BaseBuildInfo.version + " [" + BaseBuildInfo.builtAtString + "];" +
       "CLI: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "];"
   }
 
-  def runAppThrows(args: Array[String]) {
-    val settingsResult = SettingsHelper.getCompleteSettings(args, buildId)
+  private def runApp(cliConf: AbandonCLIConf) {
+    val settingsResult = SettingsHelper.getCompleteSettings(cliConf, buildId)
     settingsResult match {
-      case Left(errorMsg) => printErrAndExit(errorMsg)
+      case Left(errorMsg) => throw new SettingsError(errorMsg)
       case Right(settings) =>
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
         if (!parseError) {
@@ -225,27 +226,35 @@ object CLIMain  {
     }
   }
 
-  def runApp(args: Array[String]) {
+  def run(args: Array[String]) {
+    val cliConf = new AbandonCLIConf(args)
+    cliConf.verify()
+
+    if (cliConf.version.supplied) {
+      println("Version: " + buildId)
+    } else {
+      runApp(cliConf)
+    }
+  }
+
+  def main(args: Array[String]): Unit = {
     try {
-      runAppThrows(args)
+      run(args)
     } catch {
       case a: AssertionError      => printErrAndExit("Internal Assertion Error (please report a bug):" + a.getMessage)
       case i: InputError          => printErrAndExit("Input error: " + i.getMessage)
       case i: ConstraintError     => printErrAndExit("Constraint Failed: " + i.getMessage)
       case e: NotImplementedError => printErrAndExit("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
+      case e: SettingsError       => printErrAndExit("Configuration error: " + e.getMessage)
       case e: Error               => printErrAndExit("Unexpected error", e)
     }
   }
 
-  def printErrAndExit(msg: String, err:Error = null) = {
+  private def printErrAndExit(msg: String, err: Error = null) = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
     if (err != null) {
       err.printStackTrace(Console.out)
     }
     System.exit(1)
   }
-}
-
-object CLIApp extends App {
-   co.uproot.abandon.CLIMain.runApp(args)
 }

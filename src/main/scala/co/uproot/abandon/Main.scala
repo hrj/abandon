@@ -8,7 +8,7 @@ object Main extends App {
     // ensureJFXIsAvailable()
     AbandonUI.main(args.tail)
   } else {
-    CLIMain.runApp(args)
+    CLIMain.main(args)
   }
 
   private def ensureJFXIsAvailable(): Unit = {
