@@ -24,7 +24,7 @@ For example to query all transactions for Feb 2016 (which is leap year), you cou
  `--filter onOrAfter=2016-02-01 before=2016-03-01`. Notice that date 2016-03-01 is excluded from result set. 
 
 There are many functional tests for filters, those tests could be also used as an example.
-Please see [readme.md](testCases/sclT0005-filters/readme.md) for filter tests, which provides more 
+Please see [readme.md](tests/sclT0005-filters/readme.md) for filter tests, which provides more 
 information about various use cases.
 
 ## Configuration file

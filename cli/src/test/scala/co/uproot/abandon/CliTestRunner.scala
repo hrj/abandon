@@ -7,11 +7,11 @@ import org.scalatest.{FunSuite}
 class CliTestSuite extends FunSuite {
 
   val testConfs =
-    for (d <- FileUtils.listDirs("../testCases", ".*/sclT[0-9]+(-.*)$")) yield {
+    for (d <- FileUtils.listDirs("../tests", ".*/sclT[0-9]+(-.*)$")) yield {
       for (f <- FileUtils.listFilesRecursive(d.getAbsolutePath, ".*\\.conf$")) yield { f }
     }
 
-  val testCases = for (f <- testConfs.flatten) yield {
+  val tests = for (f <- testConfs.flatten) yield {
     val testDir = f.toPath.getParent
     val basename = f.toPath.getFileName.toString.stripSuffix(".conf")
 
@@ -47,7 +47,7 @@ class CliTestSuite extends FunSuite {
     TestCase(f.toPath().toString, args, testVecs.toList)
   }
 
-  for (tc <- testCases) {
+  for (tc <- tests) {
     registerTest(tc.conf) {
       runTest(tc)
     }
