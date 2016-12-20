@@ -1,8 +1,8 @@
 package co.uproot.abandon
 
-import org.rogach.scallop.{ ScallopConf, stringListConverter }
-import Helper.{ Zero, filterByType, maxElseZero }
 import java.io.FileWriter
+
+import co.uproot.abandon.Helper.maxElseZero
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
@@ -149,9 +149,13 @@ object CLIMain  {
     }
     reportWriter.endCodeBlock()
   }
+  def buildId: String = {
+    "Base: " + BaseBuildInfo.version + " [" + BaseBuildInfo.builtAtString + "];" +
+      "CLI: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "];"
+  }
 
   def runAppThrows(args: Array[String]) {
-    val settingsResult = SettingsHelper.getCompleteSettings(args)
+    val settingsResult = SettingsHelper.getCompleteSettings(args, buildId)
     settingsResult match {
       case Left(errorMsg) => printErrAndExit(errorMsg)
       case Right(settings) =>

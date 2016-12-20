@@ -40,30 +40,42 @@ lazy val abandon = (project in file(".")).
   )
 
 lazy val base = (project in file("base")).
-  settings(commonSettings: _*).
   enablePlugins(BuildInfoPlugin).
+  settings(commonSettings: _*).
   settings(
     name := "abandon-base",
     fork in run := true,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "co.uproot.abandon"
+    buildInfoOptions += BuildInfoOption.BuildTime,
+    buildInfoPackage := "co.uproot.abandon",
+    buildInfoObject := "BaseBuildInfo"
   )
 
 
 lazy val cli = (project in file("cli")).
+  enablePlugins(BuildInfoPlugin).
   dependsOn(base).
   settings(commonSettings: _*).
   settings(
     name := "abandon-cli",
-    fork in run := true
+    fork in run := true,
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoOptions += BuildInfoOption.BuildTime,
+    buildInfoPackage := "co.uproot.abandon",
+    buildInfoObject := "CliBuildInfo"
   )
 
 lazy val gui = (project in file("gui")).
+  enablePlugins(BuildInfoPlugin).
   dependsOn(base).
   settings(commonSettings: _*).
   settings(
     name := "abandon-gui",
-    fork in run := true
+    fork in run := true,
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoOptions += BuildInfoOption.BuildTime,
+    buildInfoPackage := "co.uproot.abandon",
+    buildInfoObject := "GuiBuildInfo"
   )
 
 

@@ -1,16 +1,15 @@
 package co.uproot.abandon
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory
-
-import collection.JavaConverters._
+import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import org.rogach.scallop.ScallopConf
-import SettingsHelper._
-import com.typesafe.config.ConfigException
-import scala.util.Try
+
+import scala.collection.JavaConverters._
+
+/**
+  * Holder for application's version identification
+  * @param id (combined) version information as string
+  */
+case class VersionId(id: String)
 
 class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val inputs = opt[List[String]]("input", short = 'i')
@@ -63,11 +62,15 @@ object SettingsHelper {
     }
   }
 
-  def getCompleteSettings(args: Seq[String]): Either[String, Settings] = {
+  def getCompleteSettings(args: Seq[String], version: String): Either[String, Settings] = {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
     val configOpt = cliConf.config.toOption
-    val withoutVersion = cliConf.unversioned.getOrElse(false)
+    val versionId = if (cliConf.unversioned.getOrElse(false)) {
+      None
+    } else {
+      Option(VersionId(version))
+    }
     val quiet = cliConf.quiet.getOrElse(false)
     val txnFilters =
       if (cliConf.filters.isEmpty) {
@@ -80,11 +83,11 @@ object SettingsHelper {
 
     configOpt match {
       case Some(configFileName) =>
-        makeSettings(configFileName, withoutVersion, quiet, txnFilters)
+        makeSettings(configFileName, versionId,  quiet, txnFilters)
       case _ =>
         val inputs = cliConf.inputs.toOption.getOrElse(Nil)
         val allReport = BalanceReportSettings("All Balances", None, Nil, true)
-        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None, quiet, txnFilters))
+        Right(Settings(inputs, Nil, Nil, Seq(allReport), ReportOptions(Nil), Nil, None, quiet, versionId, txnFilters))
     }
   }
 
@@ -100,7 +103,7 @@ object SettingsHelper {
     }
   }
 
-  def makeSettings(configFileName: String, withoutVersion: Boolean, quiet: Boolean, txnFiltersCLI: Option[TxnFilterStack]) = {
+  def makeSettings(configFileName: String, version: Option[VersionId], quiet: Boolean, txnFiltersCLI: Option[TxnFilterStack]) = {
     def handleInput(input: String, confPath: String): List[String] = {
       val parentPath = Processor.mkParentDirPath(confPath)
       if (input.startsWith("glob:")) {
@@ -121,7 +124,7 @@ object SettingsHelper {
         val reportOptions = config.optConfig("reportOptions")
         val isRight = reportOptions.flatMap(_.optStringList("isRight")).getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
-        val exports = exportConfigs.map(makeExportSettings(_, withoutVersion))
+        val exports = exportConfigs.map(makeExportSettings(_, version))
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
@@ -144,7 +147,7 @@ object SettingsHelper {
             }
         }
         val dateConstraints = config.optConfigList("dateConstraints").getOrElse(Nil).map(makeDateRangeConstraint(_))
-        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file), quiet, txnFilters))
+        Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file), quiet, version, txnFilters))
       } catch {
         case e: ConfigException => Left(e.getMessage)
       }
@@ -199,7 +202,7 @@ object SettingsHelper {
     }
   }
 
-  def makeExportSettings(config: Config, withoutVersion: Boolean) = {
+  def makeExportSettings(config: Config, version: Option[VersionId]) = {
     val exportType = config.getString("type")
     val exportFormat = config.getString("format")
 
@@ -216,7 +219,7 @@ object SettingsHelper {
             LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
         case "xml" =>
             val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-            XmlExportSettings(JournalType, accountMatch, outFiles, withoutVersion)
+            XmlExportSettings(JournalType, accountMatch, outFiles, version)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
             throw new ConfigException.BadValue(config.origin, "type", message)
@@ -228,7 +231,7 @@ object SettingsHelper {
             throw new NotImplementedError(message)
         case "xml" =>
             val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-            XmlExportSettings(BalanceType, accountMatch, outFiles, withoutVersion)
+            XmlExportSettings(BalanceType, accountMatch, outFiles, version)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
             throw new ConfigException.BadValue(config.origin, "type", message)
@@ -335,6 +338,7 @@ case class Settings(
   exports: Seq[ExportSettings],
   configFileOpt: Option[java.io.File],
   quiet: Boolean,
+  version: Option[VersionId],
   txnFilters: Option[TxnFilterStack]) {
   def getConfigRelativePath(path: String) = {
     configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
@@ -390,6 +394,6 @@ case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[Stri
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {
 }
 
-case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String], withoutVersion: Boolean) extends ExportSettings(_accountMatch, _outFiles)
+case class XmlExportSettings(exportType: OutputType, _accountMatch: Option[Seq[String]], _outFiles: Seq[String], version: Option[VersionId]) extends ExportSettings(_accountMatch, _outFiles)
 
 case class ReportOptions(isRight: Seq[String])

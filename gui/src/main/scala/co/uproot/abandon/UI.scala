@@ -1,17 +1,16 @@
 package co.uproot.abandon
 
-import scalafx.Includes._
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
-import scalafx.application.JFXApp
+
+import scala.collection.JavaConverters._
+import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
-import scalafx.geometry.Insets
-import scalafx.scene.{ Node, Scene }
-import scalafx.scene.control.{ Label, Tab, TabPane, TreeItem }
-import scalafx.scene.layout.{ BorderPane, HBox, Priority }
-import scalafx.application.Platform
-import collection.JavaConverters._
-import scalafx.geometry.Pos
+import scalafx.application.{JFXApp, Platform}
+import scalafx.geometry.{Insets, Pos}
+import scalafx.scene.control.{Label, Tab, TabPane}
+import scalafx.scene.layout.{BorderPane, HBox}
+import scalafx.scene.{Node, Scene}
 
 trait UIReport {
   protected val styleClassName = "report"
@@ -149,9 +148,13 @@ object AbandonUI extends JFXApp {
     }
     processedFiles
   }
+  def buildId: String = {
+    "Base: " + BaseBuildInfo.version + " [" + BaseBuildInfo.builtAtString + "];" +
+      "GUI: " +  GuiBuildInfo.version + " [" + GuiBuildInfo.builtAtString + "];"
+  }
 
   try {
-    val settingsResult = SettingsHelper.getCompleteSettings(parameters.raw)
+    val settingsResult = SettingsHelper.getCompleteSettings(parameters.raw, buildId)
     settingsResult match {
       case Left(errorMsg) => handleError("Error: " + errorMsg)
       case Right(settings) =>
