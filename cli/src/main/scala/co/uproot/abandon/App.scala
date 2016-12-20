@@ -231,7 +231,7 @@ object CLIMain {
     cliConf.verify()
 
     if (cliConf.version.supplied) {
-      println("Version: " + buildId)
+      println("Version: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "]")
     } else {
       runApp(cliConf)
     }

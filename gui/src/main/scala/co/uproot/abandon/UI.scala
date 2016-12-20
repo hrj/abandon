@@ -158,7 +158,7 @@ object AbandonUI extends JFXApp {
     cliConf.verify()
 
     if (cliConf.version.supplied) {
-      val msg = "Version: " + buildId
+      val msg = "Version: " + GuiBuildInfo.version + " [" + GuiBuildInfo.builtAtString + "]"
       System.err.println(msg)
     }
 
