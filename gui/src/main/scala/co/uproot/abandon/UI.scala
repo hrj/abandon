@@ -38,7 +38,7 @@ object CurrReports {
         BalanceUIReport.mkBalanceReport(appState, settings, balSettings)
       case bookSettings: BookReportSettings =>
         // TODO
-        RegUIReport.mkRegisterReport(appState, RegisterReportSettings(bookSettings.title, bookSettings.accountMatch, Nil))
+        RegUIReport.mkRegisterReport(appState, RegisterReportSettings(bookSettings.title, bookSettings.accountMatch, Nil, GroupByMonth()))
     }
     AbandonUI.tabPane.addOrSetTab(rs.title, reportRender, canClose)
   }

@@ -180,7 +180,7 @@ class AstTest extends FlatSpec with Matchers {
     dates.forall({
       case (date, refWeek, refWeekDay) => {
         date.formatISO8601Week == refWeek &&
-        date.formatISO8601WeekDay == refWeekDay
+        date.formatISO8601WeekDate == refWeekDay
       }
     }) should be(true)
   }

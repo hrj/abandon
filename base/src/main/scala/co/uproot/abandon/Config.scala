@@ -208,7 +208,8 @@ object SettingsHelper {
         val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
         BalanceReportSettings(title, accountMatch, outFiles, showZeroAmountAccounts)
       case "register" =>
-        RegisterReportSettings(title, accountMatch, outFiles)
+        val groupBy = GroupBy(config.optional("groupBy"){_.getString(_)})
+        RegisterReportSettings(title, accountMatch, outFiles, groupBy)
       case "book" =>
         val account = config.getString("account")
         BookReportSettings(title, account, outFiles)
@@ -406,7 +407,52 @@ case class BalanceReportSettings(
   showZeroAmountAccounts: Boolean) extends ReportSettings(_title, _accountMatch, _outFiles) {
 }
 
-case class RegisterReportSettings(_title: String, _accountMatch: Option[Seq[String]], _outFiles: Seq[String]) extends ReportSettings(_title, _accountMatch, _outFiles) {
+/**
+  * GroupBy selectors
+  */
+sealed trait GroupBy
+sealed case class GroupByYear() extends GroupBy
+sealed case class GroupByMonth() extends GroupBy
+sealed case class GroupByDay() extends GroupBy
+sealed case class GroupByIsoWeek() extends GroupBy
+sealed case class GroupByIsoWeekDate() extends GroupBy
+
+object GroupBy {
+  def apply(groupBy: Option[String]): GroupBy = {
+    groupBy match {
+      case Some("year") => GroupByYear()
+      case Some("month") => GroupByMonth()
+      case Some("day") => GroupByDay()
+      case Some("isoWeek") => GroupByIsoWeek()
+      case Some("isoWeekDate") => GroupByIsoWeekDate()
+      /* default */
+      case None => GroupByMonth()
+      /* Error*/
+      case _ => throw new SettingsError(
+        "GroupBy: unknown operator. Valid operators are: year, month, day, isoWeek, isoWeekDate")
+    }
+  }
+}
+
+case class RegisterReportSettings(_title: String,  _accountMatch: Option[Seq[String]], _outFiles: Seq[String], groupBy: GroupBy) extends ReportSettings(_title, _accountMatch, _outFiles) {
+
+  /**
+    * Get groupOp, either Int or String based groupByOp
+    *
+    * @return Left(groupIntOp), Right(groupStrOp)
+    */
+  def groupOp: Either[(PostGroup) => Int, (PostGroup) => String] = {
+    groupBy match {
+      /* groupIntOp */
+      case GroupByDay() => Left({ case txn: PostGroup => txn.date.toInt })
+      case GroupByMonth() => Left({ case txn: PostGroup => txn.date.toIntYYYYMM })
+      case GroupByYear() => Left({ case txn: PostGroup => txn.date.toIntYYYY })
+
+      /* groupStrOp */
+      case GroupByIsoWeek() => Right({ case txn: PostGroup => txn.date.formatISO8601Week })
+      case GroupByIsoWeekDate() => Right({ case txn: PostGroup => txn.date.formatISO8601WeekDate })
+    }
+  }
 }
 
 case class BookReportSettings(_title: String, account: String, _outFiles: Seq[String]) extends ReportSettings(_title, Some(Seq(account)), _outFiles) {

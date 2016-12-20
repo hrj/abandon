@@ -102,19 +102,50 @@ object Reports {
     BalanceReport(leftRender, rightRender, "%" + leftAmountWidth + ".2f" format leftTotal, "%" + rightAmountWidth + ".2f = %s" format (rightTotal, totalStr))
   }
 
+
+  /**
+    * Formats int date used for grouping to text, based on it's resolution
+    *
+    * @param groupingDate
+    * @return Date as string with correct resolution
+    */
   private def formatGroupingDate(groupingDate: Int) = {
     val date = Date.fromInt(groupingDate)
     if (date.hasDayResolution) {
       date.formatISO8601Ext
     }
-    else {
+    else if (date.hasMonthResolution) {
       s"${date.year} / ${Helper.monthLabels(date.month - 1)}"
+    }
+    else {
+      s"${date.year}"
     }
   }
 
   def registerReport(state: AppState, reportSettings: RegisterReportSettings): Seq[RegisterReportGroup] = {
     val postGroups = state.accState.postGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
-    val monthlyGroups = postGroups.groupBy(d => d.date.toIntYYYYMM).toSeq.sortBy(_._1)
+
+    /**
+      * Grouping is done by truncated int numbers. The end result (groups) is
+      * Seq[(String, Seq[PostGroup])] so we need mapping from truncated intDate -> String
+      * For dates this fairly trivial, but for iso weeks and ISO week dates it gets complicated.
+      * For this reason, for now, let's use two different groupBy operators: Int and String based
+      *
+      * With groupStrOp we can group by non-trivial dates, e.g. by ISO week dates,
+      * and we don't have to convert the result, because it is already String
+      */
+    val monthlyGroups: Seq[(String, Seq[PostGroup])] = reportSettings.groupOp match {
+      case Left(groupIntOp) => {
+        postGroups.groupBy(groupIntOp).toSeq.sortBy(_._1).map({
+          // groupIntOp result (Int, Seq) has to be converted to (String, Seq)
+          case (intDate, groups) => (formatGroupingDate(intDate), groups)
+        })
+      }
+      case Right(groupTxtOp) => {
+        // this is (String, Seq) already
+        postGroups.groupBy(groupTxtOp).toSeq.sortBy(_._1)
+      }
+    }
 
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
@@ -138,7 +169,7 @@ object Reports {
         val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
 
         reportGroups :+= RegisterReportGroup(
-          formatGroupingDate(month),
+          month,
           sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) })
     }
     reportGroups
