@@ -123,7 +123,7 @@ object Reports {
   }
 
   def registerReport(state: AppState, reportSettings: RegisterReportSettings): Seq[RegisterReportGroup] = {
-    val postGroups = state.accState.postGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
+    val txns = state.accState.postGroups.filter(_.children.exists(c => reportSettings.isAccountMatching(c.name.fullPathStr)))
 
     /**
       * Grouping is done by truncated int numbers. The end result (groups) is
@@ -134,43 +134,43 @@ object Reports {
       * With groupStrOp we can group by non-trivial dates, e.g. by ISO week dates,
       * and we don't have to convert the result, because it is already String
       */
-    val monthlyGroups: Seq[(String, Seq[PostGroup])] = reportSettings.groupOp match {
+    val txnGroups: Seq[(String, Seq[PostGroup])] = reportSettings.groupOp match {
       case Left(groupIntOp) => {
-        postGroups.groupBy(groupIntOp).toSeq.sortBy(_._1).map({
+        txns.groupBy(groupIntOp).toSeq.sortBy(_._1).map({
           // groupIntOp result (Int, Seq) has to be converted to (String, Seq)
           case (intDate, groups) => (formatGroupingDate(intDate), groups)
         })
       }
       case Right(groupTxtOp) => {
         // this is (String, Seq) already
-        postGroups.groupBy(groupTxtOp).toSeq.sortBy(_._1)
+        txns.groupBy(groupTxtOp).toSeq.sortBy(_._1)
       }
     }
 
     var reportGroups = Seq[RegisterReportGroup]()
     var groupState = new AccountState()
 
-    monthlyGroups.foreach {
-      case (month, monthlyGroup) =>
-        monthlyGroup foreach { g =>
+    txnGroups.foreach {
+      case (groupName, txnGroup) =>
+        txnGroup foreach { g =>
           groupState.updateAmounts(g)
         }
-        val matchingNames = monthlyGroup.flatMap(_.children.map(_.name)).toSet.filter(name => reportSettings.isAccountMatching(name.fullPathStr))
+        val matchingNames = txnGroup.flatMap(_.children.map(_.name)).toSet.filter(name => reportSettings.isAccountMatching(name.fullPathStr))
         val amounts = groupState.amounts
         val matchingAmounts = amounts.filter { case (accountName, amount) => matchingNames.contains(accountName) }
 
         val totalDeltasPerAccount = matchingAmounts.map {
           case (accountName, amount) =>
-            val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
-            val render = "%-50s %20.2f %20.2f" format (accountName, sumDeltas(myTxns), amount)
-            (accountName, myTxns, render)
+            val myPostings = txnGroup.flatMap(_.children).filter(_.name equals accountName)
+            val render = "%-50s %20.2f %20.2f" format (accountName, sumDeltas(myPostings), amount)
+            (accountName, myPostings, render)
         }
 
         val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
 
         reportGroups :+= RegisterReportGroup(
-          month,
-          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) })
+          groupName,
+          sortedTotalDeltasPerAccount.map { case (accountName, postings, render) => RegisterReportEntry(postings, render) })
     }
     reportGroups
   }
