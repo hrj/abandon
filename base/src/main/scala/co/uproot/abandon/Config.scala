@@ -2,6 +2,7 @@ package co.uproot.abandon
 
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import org.rogach.scallop.ScallopConf
+import org.rogach.scallop.exceptions.ScallopException
 
 import scala.collection.JavaConverters._
 
@@ -12,6 +13,14 @@ import scala.collection.JavaConverters._
 case class VersionId(id: String)
 
 class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
+  override def onError(e: Throwable): Unit = e match {
+    case ex: ScallopException => {
+      printHelp
+      throw ex
+    }
+    case other => super.onError(other)
+  }
+
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
@@ -57,7 +66,7 @@ object SettingsHelper {
         AnnotationTxnFilter(value)
       }
       case _ => {
-        throw new RuntimeException("Unknown filter: " + key)
+        throw new SettingsError("Unknown filter: " + key)
       }
     }
   }
