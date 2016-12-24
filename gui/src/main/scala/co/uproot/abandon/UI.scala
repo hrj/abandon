@@ -154,7 +154,15 @@ object AbandonUI extends JFXApp {
   }
 
   try {
-    val settingsResult = SettingsHelper.getCompleteSettings(parameters.raw, buildId)
+    val cliConf = new AbandonCLIConf(parameters.raw)
+    cliConf.verify()
+
+    if (cliConf.version.supplied) {
+      val msg = "Version: " + GuiBuildInfo.version + " [" + GuiBuildInfo.builtAtString + "]"
+      System.err.println(msg)
+    }
+
+    val settingsResult = SettingsHelper.getCompleteSettings(cliConf, buildId)
     settingsResult match {
       case Left(errorMsg) => handleError("Error: " + errorMsg)
       case Right(settings) =>
