@@ -1,5 +1,7 @@
 package co.uproot.abandon
 
+import java.time.format.DateTimeParseException
+
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import org.rogach.scallop.ScallopConf
 import org.rogach.scallop.exceptions.ScallopException
@@ -44,8 +46,15 @@ object SettingsHelper {
 
   def createTxnFilter(key: String, value: String): TransactionFilter = {
     def makeDate(date: String) = {
-      val jDate = java.time.LocalDate.parse(date,
+      val jDate = try {
+        java.time.LocalDate.parse(date,
           java.time.format.DateTimeFormatter.ISO_DATE)
+      } catch {
+        case ex: DateTimeParseException =>
+          throw new SettingsError("Filters" + "\n" +
+            "   Invalid date: " + date + "\n" +
+            "   Reason: " + ex.getMessage)
+      }
       Date(jDate.getYear, jDate.getMonthValue, jDate.getDayOfMonth)
     }
 
