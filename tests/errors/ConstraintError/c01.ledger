@@ -1,0 +1,9 @@
+
+2016-12-14  initial equity
+	Assets:Cash	2
+	Equity
+
+2016-12-15  real, materialized cash should not be negative
+	Expenses:E01	3
+	Assets:Cash
+
