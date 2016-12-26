@@ -3,6 +3,7 @@ package co.uproot.abandon
 import java.io.FileWriter
 
 import co.uproot.abandon.Helper.maxElseZero
+import org.rogach.scallop.exceptions.ScallopException
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
@@ -65,7 +66,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   }
 }
 
-object CLIMain {
+object CLIApp {
   def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
     val left = balanceReport.leftEntries.map(_.render)
     val right = balanceReport.rightEntries.map(_.render)
@@ -226,7 +227,13 @@ object CLIMain {
     }
   }
 
-  def run(args: Array[String]) {
+  /**
+    * This runs the app, and throws errors and exceptions in case of malfunction.
+    * Could be used for testing with assertThrows[ ... ]
+    *
+    * @param args cli arguments
+    */
+  def run(args: Array[String]): Unit = {
     val cliConf = new AbandonCLIConf(args)
     cliConf.verify()
 
@@ -237,24 +244,52 @@ object CLIMain {
     }
   }
 
-  def main(args: Array[String]): Unit = {
+
+  val SUCCEEDED = 0
+  val FAILED = 1
+
+  def mainStatus(args: Array[String]): Int = {
     try {
-      run(args)
+        co.uproot.abandon.CLIApp.run(args)
+      SUCCEEDED
     } catch {
-      case a: AssertionError      => printErrAndExit("Internal Assertion Error (please report a bug):" + a.getMessage)
-      case i: InputError          => printErrAndExit("Input error: " + i.getMessage)
-      case i: ConstraintError     => printErrAndExit("Constraint Failed: " + i.getMessage)
-      case e: NotImplementedError => printErrAndExit("Some functionality has not yet been implemented. We intend to implement it eventually. More details:\n" + e.getMessage)
-      case e: SettingsError       => printErrAndExit("Configuration error: " + e.getMessage)
-      case e: Error               => printErrAndExit("Unexpected error", e)
+      case ex: AssertionError =>
+        printErrAndFail("Internal Assertion Error (please report a bug):" + ex.getMessage, Some(ex))
+
+      case ex: ConstraintError =>
+        printErrAndFail("Constraint Failed: " + ex.getMessage, None)
+
+      case ex: InputError =>
+        printErrAndFail("Input error: " + ex.getMessage, None)
+
+      case ex: NotImplementedError =>
+        printErrAndFail("Some functionality has not yet been implemented. " +
+          "We intend to implement it eventually. More details:\n" + ex.getMessage, None)
+
+      case ex: ScallopException =>
+        printErrAndFail("CLI Argument error: " + ex.getMessage, None)
+
+      case ex: SettingsError =>
+        printErrAndFail("Configuration error: " + ex.getMessage, None)
+
+      case t: Exception =>
+        printErrAndFail("Unexpected error", Some(t))
+
+      case t: Error =>
+        printErrAndFail("Unexpected error", Some(t))
     }
   }
 
-  private def printErrAndExit(msg: String, err: Error = null) = {
+  def printErrAndFail(msg: String, exOpt: Option[Throwable]): Int = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
-    if (err != null) {
-      err.printStackTrace(Console.out)
+    exOpt match {
+      case Some(ex) => ex.printStackTrace(Console.out)
+      case None =>
     }
-    System.exit(1)
+    FAILED
+  }
+
+  def main(args: Array[String]): Unit = {
+    System.exit(co.uproot.abandon.CLIApp.mainStatus(args))
   }
 }

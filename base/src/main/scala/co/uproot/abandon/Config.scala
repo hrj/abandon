@@ -1,7 +1,10 @@
 package co.uproot.abandon
 
+import java.time.format.DateTimeParseException
+
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import org.rogach.scallop.ScallopConf
+import org.rogach.scallop.exceptions.ScallopException
 
 import scala.collection.JavaConverters._
 
@@ -12,6 +15,14 @@ import scala.collection.JavaConverters._
 case class VersionId(id: String)
 
 class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
+  override def onError(e: Throwable): Unit = e match {
+    case ex: ScallopException => {
+      printHelp
+      throw ex
+    }
+    case other => super.onError(other)
+  }
+
   val inputs = opt[List[String]]("input", short = 'i')
   val reports = opt[List[String]]("report", short = 'r')
   val config = opt[String]("config", short = 'c')
@@ -35,8 +46,15 @@ object SettingsHelper {
 
   def createTxnFilter(key: String, value: String): TransactionFilter = {
     def makeDate(date: String) = {
-      val jDate = java.time.LocalDate.parse(date,
+      val jDate = try {
+        java.time.LocalDate.parse(date,
           java.time.format.DateTimeFormatter.ISO_DATE)
+      } catch {
+        case ex: DateTimeParseException =>
+          throw new SettingsError("Filters" + "\n" +
+            "   Invalid date: " + date + "\n" +
+            "   Reason: " + ex.getMessage)
+      }
       Date(jDate.getYear, jDate.getMonthValue, jDate.getDayOfMonth)
     }
 
@@ -57,7 +75,7 @@ object SettingsHelper {
         AnnotationTxnFilter(value)
       }
       case _ => {
-        throw new RuntimeException("Unknown filter: " + key)
+        throw new SettingsError("Unknown filter: " + key)
       }
     }
   }
