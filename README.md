@@ -111,8 +111,7 @@ If you need to use abandon as a library, you can use the following maven depende
 The library jars can be downloaded from [ Sonatype](https://oss.sonatype.org/content/repositories/releases/in/co/uproot/).
 
 ### License
-Creative Commons [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
-(free to use, share, modify, but attribution is required)
+[Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0)
 
 ### Contact
 Join us in the chat room here: [![Gitter chat room](https://badges.gitter.im/hrj/abandon.png)](https://gitter.im/hrj/abandon).
