@@ -1,6 +1,7 @@
 package co.uproot.abandon
 
 import java.io.FileWriter
+import java.nio.file.{Files, Paths}
 
 import co.uproot.abandon.Helper.maxElseZero
 import org.rogach.scallop.exceptions.ScallopException
@@ -8,7 +9,26 @@ import org.rogach.scallop.exceptions.ScallopException
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
   val filePaths = outFiles.filterNot(_ equals "-").map(settings.getConfigRelativePath(_))
-  val fileWriters = filePaths.map(path => new FileWriter(path))
+  val fileWriters = filePaths.map(pathStr =>  {
+      val path = Paths.get(pathStr).normalize
+      val parentPath = path.getParent
+      if (parentPath != null) {
+        if (!Files.exists(parentPath)) {
+          if (!settings.quiet) {
+            Console.println("Creating directory: " + parentPath)
+          }
+          Files.createDirectories(parentPath)
+        }
+      }
+
+
+      try {
+        new FileWriter(pathStr)
+      } catch {
+        case fnf : java.io.FileNotFoundException => throw new SettingsError("Could not write to " + pathStr + ". " + fnf.getMessage)
+      }
+  })
+
   def startCodeBlock() = {
     fileWriters foreach { fileWriter =>
       fileWriter.write("```\n")
