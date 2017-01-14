@@ -69,7 +69,7 @@ case class Date(year: Int, month: Int, day: Int) {
   /**
     * @return ISO-8601 week with week day (2010-01-01 => 2009-W53-5)
     */
-  def formatISO8601WeekDay = {
+  def formatISO8601WeekDate = {
     val frmtISOWeek = java.time.format.DateTimeFormatter.ISO_WEEK_DATE
     val jDate = java.time.LocalDate.of(year, month, day)
 

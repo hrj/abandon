@@ -1,0 +1,26 @@
+Register
+
+2016-W04
+   Assets                                                            -2.00                -2.00
+   Expenses:E02                                                       2.00                 2.00
+2016-W05
+   Assets                                                           -15.00               -17.00
+   Expenses:E03                                                       3.00                 3.00
+   Expenses:E05                                                       5.00                 5.00
+   Expenses:E07                                                       7.00                 7.00
+2016-W06
+   Assets                                                           -24.00               -41.00
+   Expenses:E11                                                      11.00                11.00
+   Expenses:E13:matchme                                              13.00                13.00
+2016-W07
+   Assets                                                           -36.00               -77.00
+   Expenses:MatchSubAccount:E17                                      17.00                17.00
+   Expenses:MatchSubAccount:E19                                      19.00                19.00
+2016-W08
+   Assets:MatchSubAccount                                           -23.00               -23.00
+   Expenses:E23                                                      23.00                23.00
+2016-W09
+   Assets                                                           -97.00              -174.00
+   Expenses:E29                                                      29.00                29.00
+   Expenses:E31                                                      31.00                31.00
+   Expenses:E37                                                      37.00                37.00

@@ -29,7 +29,8 @@ object BalanceUIReport extends UIReport {
             RegisterReportSettings(
               selectedAccountNames.map(_.fullPathStr).mkString(","),
               Some(selectedAccountPatterns),
-              Nil
+              Nil,
+              GroupByMonth()
             )
           CurrReports.addReport(appState, settings, regSettings, canClose = true)
         }
