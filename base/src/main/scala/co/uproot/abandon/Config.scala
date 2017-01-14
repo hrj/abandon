@@ -434,7 +434,7 @@ object GroupBy {
   }
 }
 
-case class RegisterReportSettings(_title: String,  _accountMatch: Option[Seq[String]], _outFiles: Seq[String], groupBy: GroupBy) extends ReportSettings(_title, _accountMatch, _outFiles) {
+case class RegisterReportSettings(_title: String,  _accountMatch: Option[Seq[String]], _outFiles: Seq[String], _groupBy: GroupBy) extends ReportSettings(_title, _accountMatch, _outFiles) {
 
   /**
     * Get groupOp, either Int or String based groupByOp
@@ -442,7 +442,7 @@ case class RegisterReportSettings(_title: String,  _accountMatch: Option[Seq[Str
     * @return Left(groupIntOp), Right(groupStrOp)
     */
   def groupOp: Either[(PostGroup) => Int, (PostGroup) => String] = {
-    groupBy match {
+    _groupBy match {
       /* groupIntOp */
       case GroupByDay() => Left({ case txn: PostGroup => txn.date.toInt })
       case GroupByMonth() => Left({ case txn: PostGroup => txn.date.toIntYYYYMM })
