@@ -1,7 +1,6 @@
-excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
-  cp filter {
-    _.data.getName == "jfxrt.jar"
-  }
+assemblyExcludedJars in assembly := {
+  val cp = (fullClasspath in assembly).value
+  cp filter { _.data.getName == "jfxrt.jar" }
 }
 
 // proguardSettings
