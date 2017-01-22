@@ -1,15 +1,21 @@
 package co.uproot.abandon
 
+import java.nio.file.Paths
+
+import fi.sn127.utils.fs.Glob
+
 /**
   * Test valid and invalid input with full CLI App
   * and verify return value of main app.
   */
-class CliAppTests extends DirSuite {
+class CliAppTests extends DefaultArgsDirSuite {
+  val basedir = Paths.get("../tests").toAbsolutePath.normalize
+
 
   /**
     * OK Cases (should succeed)
     */
-  testDirSuite("../tests", ".*/sclT[0-9]+(-.*)$") { args: Array[String] =>
+  runDirSuiteTestCases(basedir, Glob("sclT*/**.exec")) { args: Array[String] =>
     assertResult(CLIApp.SUCCEEDED) {
       CLIApp.mainStatus(args)
     }
@@ -19,7 +25,7 @@ class CliAppTests extends DirSuite {
     * Error cases (should fail)
     * Pending bugs are kept inside bugs* so don't match that
     */
-  testDirSuite("../tests/errors", ".*/[A-Z]([a-zA-Z])+$") { args: Array[String] =>
+  runDirSuiteTestCases(basedir, Glob("errors/[A-Z]*/**.exec")) { args: Array[String] =>
     assertResult(CLIApp.FAILED) {
       CLIApp.mainStatus(args)
     }
@@ -30,14 +36,13 @@ class CliAppTests extends DirSuite {
   * Test invalid input and options with CliApp
   * and verify that specific exception is thrown.
   */
-class CliAppErrors extends DirSuite {
-
-  val errorRoot = "../tests/errors"
+class CliAppErrors extends DefaultArgsDirSuite {
+  val errorRoot = Paths.get("../tests/errors").toAbsolutePath.normalize
 
   /**
     * these should fail, but they are not failing
     */
-  ignoreDirSuite(errorRoot, ".*/bugsInputError$") { args: Array[String] =>
+  ignoreDirSuiteTestCases(errorRoot, Glob("bugsInputError/**.exec")) { args: Array[String] =>
     assertThrows[SettingsError] {
       CLIApp.run(args)
     }
@@ -45,7 +50,7 @@ class CliAppErrors extends DirSuite {
   /**
     * These errors should be specialized, but at least they error out at the moment
     */
-  testDirSuite(errorRoot, ".*/AssertionError$") { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("AssertionError/**.exec")) { args: Array[String] =>
     assertThrows[AssertionError] {
       CLIApp.run(args)
     }
@@ -55,25 +60,25 @@ class CliAppErrors extends DirSuite {
    * OK errors follows
    */
 
-  testDirSuite(errorRoot, ".*/InputFileNotFoundError$") { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("InputFileNotFoundError/**.exec")) { args: Array[String] =>
     assertThrows[InputFileNotFoundError] {
       CLIApp.run(args)
     }
   }
 
-  testDirSuite(errorRoot, ".*/InputError$") { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("InputError/**.exec")) { args: Array[String] =>
     assertThrows[InputError] {
       CLIApp.run(args)
     }
   }
 
-  testDirSuite(errorRoot, ".*/SettingsError$") { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("SettingsError/**.exec")) { args: Array[String] =>
     assertThrows[SettingsError] {
       CLIApp.run(args)
     }
   }
 
-  testDirSuite(errorRoot, ".*/ConstraintError$") { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("ConstraintError/**.exec")) { args: Array[String] =>
     assertThrows[ConstraintError] {
       CLIApp.run(args)
     }
