@@ -1,0 +1,2 @@
+# format: exec
+exec:--filter;payee=.*matchme;
