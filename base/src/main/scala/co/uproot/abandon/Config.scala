@@ -30,6 +30,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val unversioned = opt[Boolean]("unversioned", short = 'X')
   val quiet = opt[Boolean]("quiet", short = 'q')
   val version = opt[Boolean]("version", noshort = true)
+  val help = opt[Boolean]("help", short = 'h')
 }
 
 object SettingsHelper {
