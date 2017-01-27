@@ -224,7 +224,7 @@ object Processor {
       val (postsWithAmount, postsNoAmount) = tx.posts.partition(p => p.amount.isDefined)
 
       if (postsNoAmount.length > 1) {
-        throw new ConstraintPosError(s"More than one account with unspecified amount: $postsNoAmount", tx.pos)
+        throw new InputPosError(s"More than one account posted with unspecified amount: ${postsNoAmount.map(_.accName).mkString(",")}", tx.pos)
       }
 
       var txTotal = Zero
