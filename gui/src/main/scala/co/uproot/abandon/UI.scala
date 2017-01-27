@@ -3,6 +3,8 @@ package co.uproot.abandon
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
 
+import org.rogach.scallop.exceptions.{Help, Version}
+
 import scala.collection.JavaConverters._
 import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
@@ -155,12 +157,8 @@ object AbandonUI extends JFXApp {
 
   try {
     val cliConf = new AbandonCLIConf(parameters.raw)
+    cliConf.version("Version: " + GuiBuildInfo.version + " [" + GuiBuildInfo.builtAtString + "]")
     cliConf.verify()
-
-    if (cliConf.version.supplied) {
-      val msg = "Version: " + GuiBuildInfo.version + " [" + GuiBuildInfo.builtAtString + "]"
-      System.err.println(msg)
-    }
 
     val settingsResult = SettingsHelper.getCompleteSettings(cliConf, buildId)
     settingsResult match {
@@ -186,6 +184,8 @@ object AbandonUI extends JFXApp {
 
     }
   } catch {
+    case Help(_)                =>
+    case Version                =>
     case a: AssertionError      => handleError("Error: " + a.getMessage)
     case i: InputError          => handleError("Input error: " + i.getMessage)
     case i: ConstraintError     => handleError("Constraint Failed: " + i.getMessage)
