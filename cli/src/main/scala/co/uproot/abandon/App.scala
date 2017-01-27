@@ -4,7 +4,7 @@ import java.io.FileWriter
 import java.nio.file.{Files, Paths}
 
 import co.uproot.abandon.Helper.maxElseZero
-import org.rogach.scallop.exceptions.ScallopException
+import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
@@ -255,12 +255,14 @@ object CLIApp {
     */
   def run(args: Array[String]): Unit = {
     val cliConf = new AbandonCLIConf(args)
-    cliConf.verify()
+    cliConf.version("Version: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "]")
 
-    if (cliConf.version.supplied) {
-      println("Version: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "]")
-    } else {
+    try {
+      cliConf.verify()
       runApp(cliConf)
+    } catch {
+      case Help(_) =>
+      case Version =>
     }
   }
 
