@@ -4,7 +4,7 @@ import java.time.format.DateTimeParseException
 
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import org.rogach.scallop.ScallopConf
-import org.rogach.scallop.exceptions.ScallopException
+import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 
 import scala.collection.JavaConverters._
 
@@ -18,7 +18,19 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   override def onError(e: Throwable): Unit = e match {
     case ex: ScallopException => {
       printHelp
-      throw ex
+      throw e
+    }
+    case Help("") => {
+      builder.printHelp
+      throw e
+    }
+    case Help(subname) => {
+      builder.findSubbuilder(subname).get.printHelp
+      throw e
+    }
+    case Version => {
+      builder.vers.foreach(println)
+      throw e
     }
     case other => super.onError(other)
   }
@@ -30,6 +42,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val unversioned = opt[Boolean]("unversioned", short = 'X')
   val quiet = opt[Boolean]("quiet", short = 'q')
   val version = opt[Boolean]("version", noshort = true)
+  val help = opt[Boolean]("help", short = 'h')
 }
 
 object SettingsHelper {
