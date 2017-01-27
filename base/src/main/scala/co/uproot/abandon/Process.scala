@@ -222,7 +222,11 @@ object Processor {
       val evaluationContext = new EvaluationContext(txScope, Nil)
 
       val (postsWithAmount, postsNoAmount) = tx.posts.partition(p => p.amount.isDefined)
-      assert(postsNoAmount.length <= 1, "More than one account with unspecified amount: " + postsNoAmount)
+
+      if (postsNoAmount.length > 1) {
+        throw new ConstraintPosError(s"More than one account with unspecified amount: $postsNoAmount", tx.pos)
+      }
+
       var txTotal = Zero
       var detailedPosts = Seq[DetailedPost]()
       postsWithAmount foreach { p =>

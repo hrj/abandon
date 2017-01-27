@@ -47,14 +47,6 @@ class CliAppErrors extends DefaultArgsDirSuite {
       CLIApp.run(args)
     }
   }
-  /**
-    * These errors should be specialized, but at least they error out at the moment
-    */
-  runDirSuiteTestCases(errorRoot, Glob("AssertionError/**.exec")) { args: Array[String] =>
-    assertThrows[AssertionError] {
-      CLIApp.run(args)
-    }
-  }
 
   /*
    * OK errors follows
