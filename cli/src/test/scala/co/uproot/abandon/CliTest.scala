@@ -42,8 +42,8 @@ class CliAppErrors extends DefaultArgsDirSuite {
   /**
     * these should fail, but they are not failing
     */
-  ignoreDirSuiteTestCases(errorRoot, Glob("bugsInputError/**.exec")) { args: Array[String] =>
-    assertThrows[SettingsError] {
+  runDirSuiteTestCases(errorRoot, Glob("bugsInputError/**.exec")) { args: Array[String] =>
+    assertThrows[InputPosError] {
       CLIApp.run(args)
     }
   }
