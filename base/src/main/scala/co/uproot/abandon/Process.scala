@@ -226,7 +226,7 @@ object Processor {
       if (postsNoAmount.length > 1) {
         throw new InputPosError(s"More than one account posted with unspecified amount: ${postsNoAmount.map(_.accName).mkString(",")}", tx.pos)
       } else if (postsWithAmount.isEmpty) {
-        throw new InputPosError(s"Transaction with single posting: ${tx.posts.head.accName}", tx.pos)
+        throw new InputPosError(s"Transaction with unspecified amount: ${tx.posts.head.accName}", tx.pos)
       }
 
       var txTotal = Zero
