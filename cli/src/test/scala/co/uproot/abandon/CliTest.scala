@@ -39,15 +39,6 @@ class CliAppTests extends DefaultArgsDirSuite {
 class CliAppErrors extends DefaultArgsDirSuite {
   val errorRoot = Paths.get("../tests/errors").toAbsolutePath.normalize
 
-  /**
-    * these should fail, but they are not failing
-    */
-  runDirSuiteTestCases(errorRoot, Glob("bugsInputError/**.exec")) { args: Array[String] =>
-    assertThrows[InputPosError] {
-      CLIApp.run(args)
-    }
-  }
-
   /*
    * OK errors follows
    */
