@@ -144,25 +144,6 @@ object SettingsHelper {
       }
     }
 
-    def ensureInputProtection(inputs: List[String], reports: List[ReportSettings], exports: List[ExportSettings]): Unit = {
-      val inputFiles: Seq[java.io.File] = inputs.map(new java.io.File(_))
-      val repOutFiles: Seq[String] = reports.flatMap(_.outFiles)
-      val expOutFiles: Seq[String] = exports.flatMap(_.outFiles)
-
-      val overwritten = for {
-        inputFile <- inputFiles
-        repOutFile <- repOutFiles
-        expOutFile <- expOutFiles
-        if inputFile.exists() && (inputFile == new java.io.File(inputFile.getParent, repOutFile) || inputFile == new java.io.File(inputFile.getParent, expOutFile))
-      } yield inputFile
-
-      val result = overwritten.toSet
-      if (result.nonEmpty) {
-        val fileNames = result.mkString(", ")
-        throw new ConfigException.Generic(s"Overwriting input files: $fileNames")
-      }
-    }
-
     val file = new java.io.File(configFileName)
     if (file.exists) {
       try {
@@ -176,8 +157,6 @@ object SettingsHelper {
         val accountConfigs = config.optConfigList("accounts").getOrElse(Nil)
         val accounts = accountConfigs.map(makeAccountSettings)
         val eodConstraints = config.optConfigList("eodConstraints").getOrElse(Nil).map(makeEodConstraints(_))
-
-        ensureInputProtection(inputs.toList, reports.toList, exports.toList)
 
        /*
         * filters, precedence
@@ -302,6 +281,24 @@ object SettingsHelper {
     val name = config.getString("name")
     val alias = config.optional("alias") { _.getString(_) }
     AccountSettings(ASTHelper.parseAccountName(name), alias)
+  }
+
+  def ensureInputProtection(inputs: Set[String], reports: Set[ReportSettings], exports: Set[ExportSettings]): Unit = {
+    val inputFiles: Set[java.io.File] = inputs.map(new java.io.File(_))
+    val repOutFiles: Set[String] = reports.flatMap(_.outFiles)
+    val expOutFiles: Set[String] = exports.flatMap(_.outFiles)
+
+    val overwritten = for {
+      inputFile <- inputFiles
+      repOutFile <- repOutFiles
+      expOutFile <- expOutFiles
+      if inputFile.exists() && (inputFile == new java.io.File(inputFile.getParent, repOutFile) || inputFile == new java.io.File(inputFile.getParent, expOutFile))
+    } yield inputFile
+
+    if (overwritten.nonEmpty) {
+      val fileNames = overwritten.mkString(", ")
+      throw new SettingsError(s"Your configuration would overwrite input files: $fileNames")
+    }
   }
 }
 
