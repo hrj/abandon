@@ -1,5 +1,6 @@
 package co.uproot.abandon
 
+import java.nio.file.{Path, Paths}
 import java.time.format.DateTimeParseException
 
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
@@ -283,21 +284,17 @@ object SettingsHelper {
     AccountSettings(ASTHelper.parseAccountName(name), alias)
   }
 
-  def ensureInputProtection(inputs: Set[String], reports: Set[ReportSettings], exports: Set[ExportSettings]): Unit = {
-    val inputFiles: Set[java.io.File] = inputs.map(new java.io.File(_))
-    val repOutFiles: Set[String] = reports.flatMap(_.outFiles)
-    val expOutFiles: Set[String] = exports.flatMap(_.outFiles)
+  def ensureInputProtection(inputs: Set[String], settings: Settings): Unit = {
+    def filenamesToPaths: Seq[String] => Seq[Path] = _.map(Paths.get(_).normalize)
+    def filenamesToConfRelPaths: Seq[String] => Seq[String] = _.filterNot(_ equals "-").map(settings.getConfigRelativePath)
 
-    val overwritten = for {
-      inputFile <- inputFiles
-      repOutFile <- repOutFiles
-      expOutFile <- expOutFiles
-      if inputFile.exists() && (inputFile == new java.io.File(inputFile.getParent, repOutFile) || inputFile == new java.io.File(inputFile.getParent, expOutFile))
-    } yield inputFile
+    val inputFiles = filenamesToPaths(inputs.toSeq)
+    val repOutFiles = filenamesToPaths(settings.reports.flatMap(rep => filenamesToConfRelPaths(rep.outFiles)))
+    val expOutFiles = filenamesToPaths(settings.exports.flatMap(exp => filenamesToConfRelPaths(exp.outFiles)))
 
+    val overwritten = (inputFiles intersect repOutFiles) ++ (inputFiles intersect expOutFiles)
     if (overwritten.nonEmpty) {
-      val fileNames = overwritten.mkString(", ")
-      throw new SettingsError(s"Your configuration would overwrite input files: $fileNames")
+      throw new SettingsError("Your configuration would overwrite input files:\n" + overwritten.mkString("\n"))
     }
   }
 }

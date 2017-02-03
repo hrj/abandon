@@ -183,7 +183,7 @@ object CLIApp {
       case Right(settings) =>
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
         if (!parseError) {
-          SettingsHelper.ensureInputProtection(processedFiles, settings.reports.toSet, settings.exports.toSet)
+          SettingsHelper.ensureInputProtection(processedFiles, settings)
           val txnFilters = None
           val appState = Processor.process(astEntries,settings.accounts, settings.txnFilters)
           Processor.checkConstaints(appState, settings.constraints)
