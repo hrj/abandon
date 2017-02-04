@@ -7,8 +7,8 @@ import co.uproot.abandon.Helper.maxElseZero
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
-  val writesToScreen = outFiles.contains("-") || outFiles.isEmpty
-  val filePaths = outFiles.filterNot(_ equals "-").map(settings.getConfigRelativePath(_))
+  val writesToScreen = settings.writesToScreen(outFiles)
+  val filePaths = settings.getConfigRelativePaths(outFiles)
   val fileWriters = filePaths.map(pathStr =>  {
       val path = Paths.get(pathStr).normalize
       val parentPath = path.getParent

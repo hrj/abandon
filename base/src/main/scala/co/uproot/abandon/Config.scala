@@ -285,14 +285,9 @@ object SettingsHelper {
   }
 
   def ensureInputProtection(inputs: Set[String], settings: Settings): Unit = {
-    def filenamesToPaths: Seq[String] => Seq[Path] = _.map(Paths.get(_).normalize)
-    def filenamesToConfRelPaths: Seq[String] => Seq[String] = _.filterNot(_ equals "-").map(settings.getConfigRelativePath)
-
-    val inputFiles = filenamesToPaths(inputs.toSeq)
-    val repOutFiles = filenamesToPaths(settings.reports.flatMap(rep => filenamesToConfRelPaths(rep.outFiles)))
-    val expOutFiles = filenamesToPaths(settings.exports.flatMap(exp => filenamesToConfRelPaths(exp.outFiles)))
-
-    val overwritten = (inputFiles intersect repOutFiles) ++ (inputFiles intersect expOutFiles)
+    val inputFiles = inputs map Processor.mkPath
+    val outputFiles = settings.getOutputFiles
+    val overwritten = inputFiles intersect outputFiles
     if (overwritten.nonEmpty) {
       throw new SettingsError("Your configuration would overwrite input files:\n" + overwritten.mkString("\n"))
     }
@@ -387,8 +382,17 @@ case class Settings(
   quiet: Boolean,
   version: Option[VersionId],
   txnFilters: Option[TxnFilterStack]) {
-  def getConfigRelativePath(path: String) = {
+  def writesToScreen(outFiles: Seq[String]): Boolean = {
+    outFiles.contains("-") || outFiles.isEmpty
+  }
+  def getConfigRelativePath(path: String): String = {
     configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
+  }
+  def getConfigRelativePaths(paths: Seq[String]): Seq[String] = {
+    paths filterNot (_ equals "-") map getConfigRelativePath
+  }
+  def getOutputFiles: Set[Path] = {
+    (reports.map(_.outFiles) ++ exports.map(_.outFiles)).flatMap(getConfigRelativePaths).map(Processor.mkPath).toSet
   }
 }
 
