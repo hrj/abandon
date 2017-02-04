@@ -1,0 +1,5 @@
+; March 2012
+2012/3/1  OpeningBalance
+  Capital:Owner                                  6,000
+  Assets:Current:BankAccount                    -5,000
+  Assets:Fixed:Computer                         -1,000

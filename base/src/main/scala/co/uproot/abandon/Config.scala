@@ -1,5 +1,6 @@
 package co.uproot.abandon
 
+import java.nio.file.{Path, Paths}
 import java.time.format.DateTimeParseException
 
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
@@ -282,6 +283,15 @@ object SettingsHelper {
     val alias = config.optional("alias") { _.getString(_) }
     AccountSettings(ASTHelper.parseAccountName(name), alias)
   }
+
+  def ensureInputProtection(inputs: Set[String], settings: Settings): Unit = {
+    val inputFiles = inputs map Processor.mkPath
+    val outputFiles = settings.getOutputFiles
+    val overwritten = inputFiles intersect outputFiles
+    if (overwritten.nonEmpty) {
+      throw new SettingsError("Your configuration would overwrite input files:\n" + overwritten.mkString("\n"))
+    }
+  }
 }
 
 abstract class Constraint {
@@ -372,8 +382,17 @@ case class Settings(
   quiet: Boolean,
   version: Option[VersionId],
   txnFilters: Option[TxnFilterStack]) {
-  def getConfigRelativePath(path: String) = {
+  def writesToScreen(outFiles: Seq[String]): Boolean = {
+    outFiles.contains("-") || outFiles.isEmpty
+  }
+  def getConfigRelativePath(path: String): String = {
     configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
+  }
+  def getConfigRelativePaths(paths: Seq[String]): Seq[String] = {
+    paths filterNot (_ equals "-") map getConfigRelativePath
+  }
+  def getOutputFiles: Set[Path] = {
+    (reports.map(_.outFiles) ++ exports.map(_.outFiles)).flatMap(getConfigRelativePaths).map(Processor.mkPath).toSet
   }
 }
 

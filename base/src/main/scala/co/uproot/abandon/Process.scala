@@ -5,6 +5,8 @@ import scala.util.parsing.input.PagedSeqReader
 import scala.collection.immutable.PagedSeq
 import java.io.FileNotFoundException
 
+import java.nio.file.{Path, Paths}
+
 case class AppState(accState: AccountState)
 
 class PostGroup(
@@ -199,6 +201,10 @@ object Processor {
 
   def mkAbsolutePath(path: String) = {
     (new java.io.File(path)).getCanonicalPath
+  }
+
+  def mkPath(path: String): Path = {
+    Paths.get(path).normalize()
   }
 
   def process(scope: Scope, accountSettings: Seq[AccountSettings], txnFilters: Option[TxnFilterStack]) = {
