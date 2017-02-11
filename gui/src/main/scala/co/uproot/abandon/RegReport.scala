@@ -17,8 +17,8 @@ object RegUIReport extends UIReport {
     }
   }
 
-  var selectedItem: TreeItem[RegisterReportEntry] = null
-  var txStage: Stage = null
+  var selectedItem: TreeItem[RegisterReportEntry] = _
+  var txStage: Stage = _
   var trxShown: Boolean = false
 
   def mkRegisterReport(appState: AppState, reportSettings: RegisterReportSettings) = {
@@ -39,6 +39,9 @@ object RegUIReport extends UIReport {
         if (e.character.equals("\r") && !selectionModel().isEmpty) {
           // println(e)
           selectedItem = selectionModel().getSelectedItem
+          // show all transactions of the parent of the selected item if the latter has any transactions
+          // this will allow for an update of the transaction view when an input file changes
+          if (selectedItem.getValue.txns.nonEmpty) selectedItem = selectedItem.getParent
           txStage = new Stage() {
             scene = new Scene(800, 600) {
               root = getTxContent(selectedItem)
@@ -64,7 +67,7 @@ object RegUIReport extends UIReport {
               })
             }
           }
-          override def updateItem(t: RegisterReportEntry, empty: Boolean) = {
+          override def updateItem(t: RegisterReportEntry, empty: Boolean): Unit = {
             super.updateItem(t, empty)
             if (t == null) {
               setText(null)
