@@ -187,6 +187,7 @@ object AbandonUI extends JFXApp {
   } catch {
     case Help(_)                =>
     case Version                =>
+    case s: SettingsError       => handleError("Settings Error: " + s.getMessage)
     case a: AssertionError      => handleError("Error: " + a.getMessage)
     case i: InputError          => handleError("Input error: " + i.getMessage)
     case i: ConstraintError     => handleError("Constraint Failed: " + i.getMessage)
