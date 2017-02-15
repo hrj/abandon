@@ -7,23 +7,23 @@ import Helper._
 
 import scalafx.Includes._
 object TxnUIReport extends UIReport {
-  def mkTxnGroupViews(posts: Seq[DetailedPost]) = {
+  private def mkTxnGroupViews(posts: Seq[DetailedPost]) = {
     val groups = posts.map(t => new RefWrap(t.parentOpt.get)).distinct.map(_.t)
     val sortedGroups = groups.sortBy(_.date)(DateOrdering)
 
     sortedGroups.map(grp => new VBox {
-      val grpLabel = {
+      private val grpLabel = {
         new Label(grp.dateLineStr) {
           styleClass += "txn-date-line"
         }
       }
-      val grpCommentLabels = grp.groupComments.map(
+      private val grpCommentLabels = grp.groupComments.map(
         c => new Label("  ;" + c) {
           styleClass += "txn-comment"
         })
 
-      val maxNameLength = maxElseZero(posts.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))
-      val childLabels = grp.children.map { c =>
+      private val maxNameLength = maxElseZero(posts.flatMap(_.parentOpt.get.children.map(_.name.fullPathStr.length)))
+      private val childLabels = grp.children.map { c =>
         val commentStr = c.commentOpt.map("  ; " + _).getOrElse("")
         ("  %-" + maxNameLength + "s %20.2f %s") format (c.name, c.delta, commentStr)
       }.map(new Label(_))

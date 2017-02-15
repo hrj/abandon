@@ -59,7 +59,7 @@ object AbandonUI extends JFXApp {
       }
     }
 
-  def updateInfo(appState: AppState, settings: Settings, processedFiles: Set[String]) = {
+  private def updateInfo(appState: AppState, settings: Settings, processedFiles: Set[String]) = {
     val warnings = FilterStackHelper.getFilterWarnings(settings.txnFilters, "   ")
     val warningsTxt =
       if (warnings.isEmpty) {
@@ -101,7 +101,7 @@ object AbandonUI extends JFXApp {
     tabs = Seq(infoTab)
   }
 
-  object StatusBar extends HBox {
+  private object StatusBar extends HBox {
     style = "-fx-font:14 Sans; -fx-background-color:#ddd"
     val label = new Label("Ready")
     padding = Insets(10, 10, 10, 10)
@@ -114,7 +114,7 @@ object AbandonUI extends JFXApp {
     }
   }
 
-  val mainPane =
+  private val mainPane =
     new BorderPane {
       center = tabPane
       bottom = StatusBar
@@ -133,9 +133,9 @@ object AbandonUI extends JFXApp {
     }
   }
 
-  val inputFileWatcher = new FileWatcher
+  private val inputFileWatcher = new FileWatcher
 
-  def createReportTabs(firstRun: Boolean, settings: Settings) = {
+  private def createReportTabs(firstRun: Boolean, settings: Settings) = {
     val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
     if (!parseError) {
       val appState = Processor.process(astEntries, settings.accounts, settings.txnFilters)
@@ -150,7 +150,8 @@ object AbandonUI extends JFXApp {
     }
     processedFiles
   }
-  def buildId: String = {
+
+  private def buildId: String = {
     "Base: " + BaseBuildInfo.version + " [" + BaseBuildInfo.builtAtString + "];" +
       "GUI: " +  GuiBuildInfo.version + " [" + GuiBuildInfo.builtAtString + "];"
   }

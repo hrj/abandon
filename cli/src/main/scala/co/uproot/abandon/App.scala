@@ -87,7 +87,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
 }
 
 object CLIApp {
-  def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
+  private def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
     val left = balanceReport.leftEntries.map(_.render)
     val right = balanceReport.rightEntries.map(_.render)
 
@@ -105,7 +105,7 @@ object CLIApp {
     reportWriter.println(totalLine)
   }
 
-  def printRegReport(reportWriter: ReportWriter, regReport: Seq[RegisterReportGroup]) = {
+  private def printRegReport(reportWriter: ReportWriter, regReport: Seq[RegisterReportGroup]) = {
     regReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
@@ -114,7 +114,7 @@ object CLIApp {
     }
   }
 
-  def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
+  private def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
 
     if (txnFilterTxt.nonEmpty) {
       reportWriter.println("; ACTIVE FILTER")
@@ -133,7 +133,7 @@ object CLIApp {
     }
   }
 
-  def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
+  private def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
     val txnIndent = " " * 49
 
     reportWriter.println("Account Name: " + bookReportSettings.account + "\n")
@@ -268,8 +268,8 @@ object CLIApp {
   }
 
 
-  val SUCCEEDED = 0
-  val FAILED = 1
+  private val SUCCEEDED = 0
+  private val FAILED = 1
 
   def mainStatus(args: Array[String]): Int = {
     try {
