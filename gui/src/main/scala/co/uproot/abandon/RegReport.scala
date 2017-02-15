@@ -18,12 +18,12 @@ object RegUIReport extends UIReport {
   def mkRegisterReport(appState: AppState, reportSettings: RegisterReportSettings) = {
     val registers = Reports.registerReport(appState, reportSettings)
     val registerItems = registers.map { rg =>
-      new TreeItem(RegisterReportEntry(Nil, rg.groupTitle)) {
+      new TreeItem(RegisterReportEntry(null, Nil, rg.groupTitle)) {
         children = rg.entries.map(new TreeItem(_))
         expanded = true
       }
     }
-    val reportRoot = new TreeItem(RegisterReportEntry(Nil, "Register report (account, delta, total)")) {
+    val reportRoot = new TreeItem(RegisterReportEntry(null, Nil, "Register report (account, change during period, balance at end of period)")) {
       children = registerItems
       expanded = true
     }
@@ -33,7 +33,13 @@ object RegUIReport extends UIReport {
         if (e.character equals "\r") {
           val selectedItemOpt = selectionModel().getSelectedItems().headOption
           selectedItemOpt foreach { selectedItem =>
-            // println(e)
+            val heading =
+              if (selectedItem.getValue.accountName == null) {
+                selectedItem.getValue.render
+              } else {
+                selectedItem.getParent.getValue.render + " / " + selectedItem.getValue.accountName
+              }
+
             val txStage = new Stage() {
               scene = new Scene(800, 600) {
                 root = new ScrollPane {
@@ -42,7 +48,7 @@ object RegUIReport extends UIReport {
                 stylesheets += "default_theme.css"
               }
               initModality(Modality.ApplicationModal)
-              title = "Transactions"
+              title = "Transactions for " + heading
             }
             txStage.show
           }

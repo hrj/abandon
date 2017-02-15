@@ -7,7 +7,7 @@ import scala.xml.Elem
 case class BalanceReportEntry(accName: Option[AccountName], render: String)
 case class BalanceReport(leftEntries:Seq[BalanceReportEntry], rightEntries:Seq[BalanceReportEntry], totalLeft:String, totalRight:String)
 
-case class RegisterReportEntry(txns: Seq[DetailedPost], render: String)
+case class RegisterReportEntry(accountName: String, txns: Seq[DetailedPost], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
 
 case class LedgerExportEntry(accountName: AccountName, amount: BigDecimal)
@@ -163,14 +163,12 @@ object Reports {
           case (accountName, amount) =>
             val myPostings = txnGroup.flatMap(_.children).filter(_.name equals accountName)
             val render = "%-50s %20.2f %20.2f" format (accountName, sumDeltas(myPostings), amount)
-            (accountName, myPostings, render)
+            RegisterReportEntry(accountName.toString, myPostings, render)
         }
 
-        val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
+        val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_.accountName)
 
-        reportGroups :+= RegisterReportGroup(
-          groupName,
-          sortedTotalDeltasPerAccount.map { case (accountName, postings, render) => RegisterReportEntry(postings, render) })
+        reportGroups :+= RegisterReportGroup(groupName, sortedTotalDeltasPerAccount)
     }
     reportGroups
   }
@@ -193,14 +191,12 @@ object Reports {
           case (accountName, amount) =>
             val myTxns = monthlyGroup.flatMap(_.children).filter(_.name equals accountName)
             val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
-            (accountName, myTxns, render)
+            RegisterReportEntry(accountName.toString, myTxns, render)
         }
 
-        val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_._1.toString)
+        val sortedTotalDeltasPerAccount = totalDeltasPerAccount.toSeq.sortBy(_.accountName)
 
-        reportGroups :+= RegisterReportGroup(
-          formatGroupingDate(month),
-          sortedTotalDeltasPerAccount.map { case (accountName, txns, render) => RegisterReportEntry(txns, render) })
+        reportGroups :+= RegisterReportGroup(formatGroupingDate(month), sortedTotalDeltasPerAccount)
     }
     reportGroups
   }
