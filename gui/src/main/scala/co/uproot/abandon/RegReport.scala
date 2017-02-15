@@ -15,7 +15,49 @@ object RegUIReport extends UIReport {
     item.getValue.txns ++ item.children.flatMap(getNestedTxns(_))
   }
 
-  def mkRegisterReport(appState: AppState, reportSettings: RegisterReportSettings) = {
+  case class SelectionFilter(itemName: String, parentNameOpt: Option[String]) {
+    def heading = parentNameOpt.map(_ + " / ").getOrElse("") + itemName
+
+    def isMatching(entry: TreeItem[RegisterReportEntry]): Boolean = {
+      parentNameOpt match {
+        case Some(pn) =>
+          itemName == entry.getValue.accountName && pn == entry.getParent.getValue.render
+        case None =>
+          itemName == entry.getValue.render
+      }
+    }
+
+  }
+
+  private var transactionViewRegTitle: String = _
+  private var selectedFilterOpt: Option[SelectionFilter] = None
+
+  private val txnRootSP: ScrollPane = new ScrollPane { }
+  private val txStage = new Stage() {
+    scene = new Scene(800, 600) {
+      root = txnRootSP
+      stylesheets += "default_theme.css"
+    }
+    initModality(Modality.ApplicationModal)
+    onCloseRequest = () => selectedFilterOpt = None
+  }
+
+  private def showTransactions(selectedItemOpt: Option[javafx.scene.control.TreeItem[RegisterReportEntry]]):Unit = {
+    val txns = selectedItemOpt.map(si => getNestedTxns(si)).getOrElse(Nil)
+    txnRootSP.content = TxnUIReport.mkTxnView(txns)
+    txStage.title = "Transactions for " + selectedFilterOpt.get.heading
+    txStage.show
+  }
+
+  private def findMatchingEntry(entry: TreeItem[RegisterReportEntry], filter: SelectionFilter):Option[javafx.scene.control.TreeItem[RegisterReportEntry]] = {
+    if(filter.isMatching(entry)) {
+      Some(entry.delegate)
+    } else {
+      entry.children.map(c => findMatchingEntry(c, filter)).find(_.isDefined).getOrElse(None)
+    }
+  }
+
+  def mkRegisterReport(title: String, appState: AppState, reportSettings: RegisterReportSettings) = {
     val registers = Reports.registerReport(appState, reportSettings)
     val registerItems = registers.map { rg =>
       new TreeItem(RegisterReportEntry(null, Nil, rg.groupTitle)) {
@@ -27,31 +69,26 @@ object RegUIReport extends UIReport {
       children = registerItems
       expanded = true
     }
+
+    if (title == transactionViewRegTitle) {
+      // update transactions view
+      selectedFilterOpt foreach {sf => showTransactions(findMatchingEntry(reportRoot, sf))}
+    }
+
     new TreeView(reportRoot) {
       styleClass += styleClassName
       onKeyTyped = { e: KeyEvent =>
         if (e.character equals "\r") {
           val selectedItemOpt = selectionModel().getSelectedItems().headOption
-          selectedItemOpt foreach { selectedItem =>
-            val heading =
-              if (selectedItem.getValue.accountName == null) {
-                selectedItem.getValue.render
-              } else {
-                selectedItem.getParent.getValue.render + " / " + selectedItem.getValue.accountName
-              }
-
-            val txStage = new Stage() {
-              scene = new Scene(800, 600) {
-                root = new ScrollPane {
-                  content = TxnUIReport.mkTxnView(getNestedTxns(selectedItem))
-                }
-                stylesheets += "default_theme.css"
-              }
-              initModality(Modality.ApplicationModal)
-              title = "Transactions for " + heading
+          selectedFilterOpt = selectedItemOpt map {selectedItem =>
+            if (selectedItem.getValue.accountName == null) {
+              SelectionFilter(selectedItem.getValue.render, None)
+            } else {
+              SelectionFilter(selectedItem.getValue.accountName, Option(selectedItem.getParent.getValue.render))
             }
-            txStage.show
           }
+          transactionViewRegTitle = title
+          showTransactions(selectedItemOpt)
         }
       }
       cellFactory = { v =>

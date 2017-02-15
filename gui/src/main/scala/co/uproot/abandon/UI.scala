@@ -35,12 +35,12 @@ object CurrReports {
   def showReport(appState: AppState, settings: Settings, rs: ReportSettings, canClose: Boolean) = {
     val reportRender = rs match {
       case regSettings: RegisterReportSettings =>
-        RegUIReport.mkRegisterReport(appState, regSettings)
+        RegUIReport.mkRegisterReport(rs.title, appState, regSettings)
       case balSettings: BalanceReportSettings =>
         BalanceUIReport.mkBalanceReport(appState, settings, balSettings)
       case bookSettings: BookReportSettings =>
         // TODO
-        RegUIReport.mkRegisterReport(appState, RegisterReportSettings(bookSettings.title, bookSettings.accountMatch, Nil, GroupByMonth()))
+        RegUIReport.mkRegisterReport(rs.title, appState, RegisterReportSettings(bookSettings.title, bookSettings.accountMatch, Nil, GroupByMonth()))
     }
     AbandonUI.tabPane.addOrSetTab(rs.title, reportRender, canClose)
   }
