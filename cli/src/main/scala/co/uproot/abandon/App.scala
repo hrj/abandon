@@ -268,8 +268,8 @@ object CLIApp {
   }
 
 
-  private val SUCCEEDED = 0
-  private val FAILED = 1
+  val SUCCEEDED = 0
+  val FAILED = 1
 
   def mainStatus(args: Array[String]): Int = {
     try {
