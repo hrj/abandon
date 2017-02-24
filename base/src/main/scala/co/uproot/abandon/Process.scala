@@ -82,7 +82,7 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
   assert(amount != null)
   assert(childStates != null)
   lazy val total: BigDecimal = amount + childStates.foldLeft(Zero)(_ + _.total)
-  lazy val childrenNonZero: Int = childStates.count(c => (!(c.total equals Zero)) || (c.childrenNonZero != 0))
+  lazy val childrenNonZero: Seq[AccountTreeState] = childStates.filter(c => (!(c.total equals Zero)) || c.childrenNonZero.nonEmpty)
   def countRenderableChildren(isRenderable: (AccountTreeState) => Boolean): Int = {
     childStates.count(c => (!(c.total equals Zero)) || (c.countRenderableChildren(isRenderable) != 0))
   }
