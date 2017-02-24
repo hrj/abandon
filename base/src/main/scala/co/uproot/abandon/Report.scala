@@ -48,11 +48,10 @@ object Reports {
           }
         })
 
-      val children = a.childStates
-      val lastChildIndex = children.length - 1
-      val renderedChildren = children.sortBy(_.name.toString).zipWithIndex.flatMap {
-        case (c, i) =>
-          show(width, c, maxNameLength, childTreePrefix, i == lastChildIndex, isLastChild || (prefix.isDefined && isParentLastChild),
+      val children = a.childStates.sortBy(_.name.toString)
+      val lastRenderable = children.filter(c => !(c.total equals Zero) || c.childrenNonZero > 0).lastOption
+      val renderedChildren = children.flatMap { c =>
+          show(width, c, maxNameLength, childTreePrefix, lastRenderable.contains(c), isLastChild || (prefix.isDefined && isParentLastChild),
             if (onlyChildren) Some(prefix.map(_ + ":").getOrElse("") + a.name.name) else None,
             if (onlyChildren) Some(indent) else None)
       }
