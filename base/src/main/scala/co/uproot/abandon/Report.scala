@@ -24,7 +24,7 @@ object Reports {
       val amountIsZero = a.amount equals Zero
       val hideAccount = (!reportSettings.showZeroAmountAccounts) && amountIsZero
       val renderableChildren = a.childrenNonZero
-      val onlyChildren = (renderableChildren == 1) && hideAccount
+      val onlyChildren = (renderableChildren.length == 1) && hideAccount
 
       val myPrefix = treePrefix + (
         if (indent <= 1) {
@@ -49,20 +49,19 @@ object Reports {
         })
 
       val children = a.childStates
-      val lastChildIndex = children.length - 1
-      val renderedChildren = children.sortBy(_.name.toString).zipWithIndex.flatMap {
-        case (c, i) =>
-          show(width, c, maxNameLength, childTreePrefix, i == lastChildIndex, isLastChild || (prefix.isDefined && isParentLastChild),
+      val lastRenderable = renderableChildren.sortBy(_.name.toString).lastOption
+      val renderedChildren = children.sortBy(_.name.toString).flatMap { c =>
+          show(width, c, maxNameLength, childTreePrefix, lastRenderable.contains(c), isLastChild || (prefix.isDefined && isParentLastChild),
             if (onlyChildren) Some(prefix.map(_ + ":").getOrElse("") + a.name.name) else None,
             if (onlyChildren) Some(indent) else None)
       }
-      val selfAmount = if (a.amount != 0 && !a.childStates.isEmpty) { " (" + a.amount + ")" } else { "" }
+      val selfAmount = if (!amountIsZero && a.childStates.nonEmpty) { " (" + a.amount + ")" } else { "" }
       lazy val selfRender =
         BalanceReportEntry(Some(a.name),
           ("%" + width + ".2f   %-" + maxNameLength + "s") format (
             a.total, myPrefix + (prefix.map(_ + ":").getOrElse("") + a.name.name) + selfAmount))
 
-      if (renderableChildren == 0) {
+      if (renderableChildren.isEmpty) {
         if (hideAccount) {
           Nil
         } else {
