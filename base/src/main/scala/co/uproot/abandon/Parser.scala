@@ -40,7 +40,7 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
   }
 
   def eol = elem("eol", _ == '\n')
-  override def comment = ';' ~> rep(chrExcept(EofCh, '\n')) ^^ { case chars => chars.mkString }
+  override def comment = ';' ~> rep(chrExcept(EofCh, '\n', ';')) ^^ { case chars => chars.mkString }
 
   /** A string is a collection of zero or more Unicode characters, wrapped in
     * double quotes, using backslash escapes (cf. http://www.json.org/).
@@ -124,7 +124,8 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
   private lazy val number: PackratParser[BigDecimal] = accept("number", { case lexical.NumericLit(n) => BigDecimal(n) })
   private lazy val eol = accept("<eol>", { case lexical.EOL => })
   private lazy val comment = accept("<comment>", { case lexical.CommentToken(c) => c })
-  private lazy val anyEol = ((comment?) ~ eol)
+  private lazy val comments = comment*
+  private lazy val anyEol = comments ~ eol
   private lazy val allButEOL: PackratParser[String] = accept("any", {
     case t: lexical.Token if !t.isInstanceOf[lexical.EOL.type] && !t.isInstanceOf[lexical.ErrorToken] => t.chars
   })
@@ -132,10 +133,11 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
   private lazy val stringOrAllUntilEOL = stringLit | allUntilEOL
 
   private lazy val fragSeparators = anyEol*
-  private def line[T](p: Parser[T]): Parser[T] = p <~ (((comment?) ~ eol)*)
+  private def line[T](p: Parser[T]): Parser[T] = p <~ ((comments ~ eol)*)
 
-  // End of line comment
+  // End of line comments
   private def eolComment = (comment?) <~ eol
+  private def eolComments = comments <~ eol
 
   lazy val abandon: Parser[Scope] = abandon(None)
   def abandon(parentScopeOpt: Option[Scope]): Parser[Scope] = phrase(frags) ^^ { case entries => ParserHelper.fixupScopeParents(Scope(entries, None), parentScopeOpt) }
@@ -233,10 +235,11 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
   }
   private lazy val comparisonExpr: PackratParser[String] = ((">" | "<" | "=") ~ "=" ^^ {case (o1 ~ o2) => o1 + o2}) | ">" | "<" 
 
-  private lazy val compactTxFrag = (currentPosition ~ ("." ~> dateExpr ~ accountName ~ numericExpr ~ eolComment) ^^ {
-    case pos ~ (date ~ accountName ~ amount ~ optComment) =>
-      Transaction(pos, date, List(Post(accountName, Option(amount), optComment)), None, None, Nil)
-  })
+  private lazy val compactTxFrag = currentPosition ~ ("." ~> dateExpr ~ accountName ~ numericExpr ~ eolComments) ^^ {
+    case pos ~ (date ~ accountName ~ amount ~ comments) =>
+      Transaction(pos, date, List(Post(accountName, Option(amount), comments.headOption)), None, None,
+        if (comments.isEmpty) Nil else comments.tail)
+  }
 
   private lazy val txFrag = currentPosition ~ (((dateExpr ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+)) ^^ {
     case pos ~ (date ~ annotationOpt ~ optPayee ~ optComment ~ posts) =>
