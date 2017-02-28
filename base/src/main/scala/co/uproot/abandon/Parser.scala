@@ -136,6 +136,7 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
   private def line[T](p: Parser[T]): Parser[T] = p <~ ((comments ~ eol)*)
 
   // End of line comments
+  private def eolComment = (comment?) <~ eol
   private def eolComments = comments <~ eol
 
   lazy val abandon: Parser[Scope] = abandon(None)
@@ -240,20 +241,18 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
         if (comments.isEmpty) Nil else comments.tail)
   }
 
-  private lazy val txFrag = currentPosition ~ (((dateExpr ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComments*) ~ (postAndRestComments+)) ^^ {
-    case pos ~ (date ~ annotationOpt ~ optPayee ~ comments ~ postsAndComments) =>
+  private lazy val txFrag = currentPosition ~ (((dateExpr ~ (annotation?) ~ (payee?)) <~ eol) ~ (eolComment*) ~ (post+)) ^^ {
+    case pos ~ (date ~ annotationOpt ~ optPayee ~ optComment ~ posts) =>
       val annotationStrOpt = annotationOpt.map(_.mkString(""))
-      val (ps, cs) = postsAndComments.unzip
-      Transaction(pos, date, ps, annotationStrOpt, optPayee, (comments ++ cs).flatten)
+      Transaction(pos, date, posts, annotationStrOpt, optPayee, optComment.flatten)
   }
 
   private lazy val annotation = (("(" ~> (ident | numericLit)+) <~ ")")
 
   private lazy val payee = ((allButEOL)+) ^^ { case x => x.mkString(" ") }
 
-  private lazy val postAndRestComments: PackratParser[(Post, List[String])] = (accountName ~ opt(numericExpr) ~ eolComments) ^^ {
-    case name ~ amount ~ comments => (Post(name, amount, comments.headOption),
-      if (comments.isEmpty) Nil else comments.tail)
+  private lazy val post: PackratParser[Post] = (accountName ~ opt(numericExpr) ~ eolComment) ^^ {
+    case name ~ amount ~ commentOpt => Post(name, amount, commentOpt)
   }
 
   lazy val dateExpr = dateFrag | isoDateFrag
