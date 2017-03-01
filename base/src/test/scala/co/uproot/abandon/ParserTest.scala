@@ -612,4 +612,32 @@ class ParserTest extends FlatSpec with Matchers with Inside {
         }
     }
   }
+
+  it should "parse multiple comments in multiline transactions" in {
+    implicit val testInput =
+      """
+    2013/1/2
+      ; Part 1 ; Part 2
+      Expense       -200   ; Part 3 ; Part 4
+      Cash                 ; Part 5 ; Part 6
+    """
+
+    val parseResult = parser.abandon(scanner(testInput))
+
+    inside(parseResult) {
+      case parser.Success(result, _) =>
+        inside(result.entries) {
+          case List(txnGroup) =>
+            inside(txnGroup) {
+              case Transaction(_, _, posts, None, None, comment1 :: Nil) =>
+                comment1 should be (" Part 1 ; Part 2")
+                inside(posts) {
+                  case List(Post(_, _, comment1), Post(_, _, comment2)) =>
+                    comment1 should be (Some(" Part 3 ; Part 4"))
+                    comment2 should be (Some(" Part 5 ; Part 6"))
+                }
+            }
+        }
+    }
+  }
 }
