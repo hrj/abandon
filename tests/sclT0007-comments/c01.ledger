@@ -1,0 +1,38 @@
+; March 2012
+2012/3/1  OpeningBalance
+  Capital:Owner                                  6,000
+  Assets:Current:BankAccount                    -5,000
+  Assets:Fixed:Computer                         -1,000
+
+; Oct 2012
+2012/Oct/5
+  Expenses:Bank_Charges                               -200
+  Assets:Current:BankAccount
+
+; Jan 2013
+2013/Jan/15  (89000) Alice Enterprises
+  ; For Office Stationary
+  Expenses:Consumables                                -400
+  Assets:Current:BankAccount
+
+
+2013/1/29 (89001) Bob Traders
+  ; For 14" monitor ; Dell
+  Assets:Fixed:Computer                            -2000   ; Dell WS
+  Assets:Current:BankAccount
+
+2013/Feb/14  Persistent Helpers
+  ; Loan
+  Liability:Loan              5,000
+  Assets:Current:BankAccount
+
+2013/Feb/16  (80005) Deepika
+  ; January Salary
+  Expenses:Salaries                                 -2,000
+  Assets:Current:BankAccount
+
+2013/1/4
+  ; Invoice a ; Part 1
+  Assets:Current:Sundry_Debtors:Vikings         -25,000
+  Income:Receipts               
+

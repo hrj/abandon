@@ -74,7 +74,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
   def unaryNegExpr(e1: Expr, pos: Option[InputPosition] = None) = {
     UnaryNegExpr(e1)(pos)
   }
-  
+
   it should "parse a simple transaction" in {
     implicit val testInput = """
     2013/1/2
@@ -582,6 +582,85 @@ class ParserTest extends FlatSpec with Matchers with Inside {
                   case List(Post(acc1, expr1, _)) =>
                     acc1 should be (cashAccount)
                     expr1 should be (Some(addExpr(nlit(900), identifierExpr("tax"))))
+                }
+            }
+        }
+    }
+  }
+
+  it should "parse one comment each before and after a post" in {
+    implicit val testInput =
+      """
+    2013/1/2
+      ; Part 1
+      Expense       -200  ; Part 2
+      Cash
+    """
+
+    val parseResult = parser.abandon(scanner(testInput))
+
+    inside(parseResult) {
+      case parser.Success(result, _) =>
+        inside(result.entries) {
+          case List(txnGroup) =>
+            inside(txnGroup) {
+              case Transaction(_, _, posts, None, None, comment1 :: Nil) =>
+                comment1 should be (" Part 1")
+                inside(posts) {
+                  case List(Post(_, _, Some(postComment)), Post(_, _, None)) =>
+                    postComment should be (" Part 2")
+                }
+            }
+        }
+    }
+  }
+
+  it should "parse posts with no comments" in {
+    implicit val testInput =
+      """
+    2013/1/2
+      Expense       -200
+      Cash
+    """
+
+    val parseResult = parser.abandon(scanner(testInput))
+
+    inside(parseResult) {
+      case parser.Success(result, _) =>
+        inside(result.entries) {
+          case List(txnGroup) =>
+            inside(txnGroup) {
+              case Transaction(_, _, posts, None, None, comments) =>
+                comments should be (Nil)
+                inside(posts) {
+                  case List(Post(_, _, post1Comment), Post(_, _, post2Comment)) =>
+                    post1Comment should be (None)
+                    post2Comment should be (None)
+                }
+            }
+        }
+    }
+  }
+
+  it should "parse compact transactions with multiple comments in a line" in {
+    val testInput = """
+                      |def defaultAccount = bank
+                      |def tax = 0.1
+                      |. 2016/May/1 Expense        100 * tax            ; multiple ; comments ; in a line
+                    """.stripMargin
+
+    val parseResult = parser.abandon(scanner(testInput))
+
+    inside(parseResult) {
+      case parser.Success(result, _) =>
+        inside(result.entries) {
+          case List(_, _, txnGroup1) =>
+            inside(txnGroup1) {
+              case Transaction(_, _, posts, None, None, comments) =>
+                comments should be(List(" comments ", " in a line"))
+                inside(posts) {
+                  case List(Post(_, _, commentOpt)) =>
+                    commentOpt should be (Some(" multiple "))
                 }
             }
         }
