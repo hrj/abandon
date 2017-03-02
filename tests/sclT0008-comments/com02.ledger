@@ -1,0 +1,7 @@
+; ignored comment
+2017/march/30
+  ; comment 1 ; comment 2
+  bank 200   ; comment 3; comment 4
+  cash
+
+; ignored comment2

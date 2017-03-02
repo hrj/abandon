@@ -1,0 +1,11 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2017-03-30">
+        <comment> comment 1 ; comment 2</comment>
+        <post delta="200" name="bank"></post>
+        <post delta="-200" name="cash"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>
