@@ -644,7 +644,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
   it should "parse a payee with an apostrophe in the name" in {
     implicit val testInput =
       """
-      2017-02-23 Wendy's
+      2017-02-23 Wendy's Inn #1
          Expenses:Restaurants    2.76
          amexbce
       """
@@ -656,7 +656,7 @@ class ParserTest extends FlatSpec with Matchers with Inside {
           case List(txnGroup) =>
             inside(txnGroup) {
               case Transaction(_, _, _, None, payee, Nil) =>
-                payee should be(Some("Wendy's"))
+                payee should be(Some("Wendy's Inn #1"))
             }
         }
     }

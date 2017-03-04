@@ -13,7 +13,7 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
   override def token: Parser[Token] =
     //( '\"' ~ rep(charSeq | letter) ~ '\"' ^^ lift(StringLit)
     (string ^^ StringLit
-      | identChar ~ rep(identChar | digit | '\'') ^^ { case first ~ rest => processIdent(first :: rest mkString "") }
+      | identChar ~ rep(identChar | digit) ^^ { case first ~ rest => processIdent(first :: rest mkString "") }
       | number ~ letter ^^ { case n ~ l => ErrorToken("Invalid number format : " + n + l) }
       | number ^^ NumericLit
       | eol ^^^ EOL
@@ -23,6 +23,8 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
       | '\"' ~> failure("Unterminated string")
       | rep(letter) ^^ checkKeyword
       | failure("Illegal character"))
+
+  override def identChar = super.identChar | elem(''')| elem('#')
 
   case object EOL extends Token {
     def chars = "<eol>"
