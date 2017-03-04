@@ -3,10 +3,8 @@ package co.uproot.abandon
 import scala.language.postfixOps
 import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
-import scala.util.parsing.json.Lexer
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
-import scala.util.parsing.input.Position
 import scala.util.parsing.input.PagedSeqReader
 import scala.collection.immutable.PagedSeq
 
@@ -15,7 +13,7 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
   override def token: Parser[Token] =
     //( '\"' ~ rep(charSeq | letter) ~ '\"' ^^ lift(StringLit)
     (string ^^ StringLit
-      | identChar ~ rep(identChar | digit) ^^ { case first ~ rest => processIdent(first :: rest mkString "") }
+      | identChar ~ rep(identChar | digit | '\'') ^^ { case first ~ rest => processIdent(first :: rest mkString "") }
       | number ~ letter ^^ { case n ~ l => ErrorToken("Invalid number format : " + n + l) }
       | number ^^ NumericLit
       | eol ^^^ EOL

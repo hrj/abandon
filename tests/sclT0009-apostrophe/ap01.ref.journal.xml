@@ -1,0 +1,11 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2017-02-23">
+        <payee>Wendy's</payee>
+        <post delta="2.76" name="Expenses:Restaurants"></post>
+        <post delta="-2.76" name="amexbce"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>
