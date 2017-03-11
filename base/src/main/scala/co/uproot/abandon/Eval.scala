@@ -18,7 +18,7 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
 
   // println("Context created\n" + definitions.map(_.prettyPrint).mkString("\n"))
 
-  private val usedDefinitions = mutable.MutableList[Definition]()
+  private val usedDefinitions = mutable.Set[Definition]()
   private val localNames = localDefs.map(_.name)
   private val definitions = scope.definitions.filter(d => !localNames.contains(d.name)) ++ localDefs
   private val defined = definitions.map(d => d.name -> d).toMap
@@ -107,7 +107,7 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
   }
 
   def warnAboutUnusedSymbols(): Unit = {
-    definitions.diff(usedDefinitions)
+    definitions.diff(usedDefinitions.toSeq)
       .foreach(d => println(s"symbol `${d.name}` defined in ${d.pos} but never used"))
   }
 }
