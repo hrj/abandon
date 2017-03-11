@@ -263,6 +263,7 @@ object Processor {
         throw new ConstraintPosError(s"Transaction does not balance. Unbalanced amount: $txTotal", tx.pos)
       }
       accState.updateAmounts(new PostGroup(detailedPosts, tx, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
+      evaluationContext.warnAboutUnusedSymbols()
     }
     // val accountDeclarations = filterByType[AccountDeclaration](entries)
     AppState(accState)
