@@ -1,7 +1,5 @@
 package co.uproot.abandon
 
-import scala.collection.mutable
-
 case class Ref(name: String, argCount: Int, pos: Option[InputPosition])
 
 object EvaluationContext {
@@ -18,7 +16,6 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
 
   // println("Context created\n" + definitions.map(_.prettyPrint).mkString("\n"))
 
-  private val usedDefinitions = mutable.Set[Definition]()
   private val localNames = localDefs.map(_.name)
   private val definitions = scope.definitions.filter(d => !localNames.contains(d.name)) ++ localDefs
   private val defined = definitions.map(d => d.name -> d).toMap
@@ -60,7 +57,7 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
         }
         val newLocalDefs = d.params.zip(params).map(pairs => Definition(d.pos, pairs._1, Nil, pairs._2))
         val result = mkContext(newLocalDefs).evaluateInternal(d.rhs)
-        usedDefinitions += d
+        defined(name).markAsUsed()
         // println("evaluated", name, params, result)
         result
       case None =>
@@ -104,10 +101,5 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
         }
       }
     }
-  }
-
-  def warnAboutUnusedSymbols(): Unit = {
-    definitions.diff(usedDefinitions.toSeq)
-      .foreach(d => println(s"symbol `${d.name}` defined in ${d.pos} but never used"))
   }
 }
