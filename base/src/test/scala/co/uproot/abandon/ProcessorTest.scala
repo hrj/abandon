@@ -312,7 +312,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
         val unusedDefs: Seq[Definition] = scope.definitions.filterNot(_.isUsed)
         inside(unusedDefs) {
-          case Seq(Definition(_, name, _, _, _)) =>
+          case Seq(Definition(_, name, _, _)) =>
             name should be ("unused1")
         }
     }
