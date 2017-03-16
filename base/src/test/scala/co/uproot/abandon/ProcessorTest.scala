@@ -1,10 +1,10 @@
 package co.uproot.abandon
 
+import java.io.ByteArrayOutputStream
+
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.Matcher
 import org.scalatest.Matchers
 import org.scalatest.Inside
-import java.lang.Exception
 
 import TestHelper._
 import ParserHelper._
@@ -308,14 +308,18 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), showZeroAmountAccounts = false, Nil)
         val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None, quiet = false, None, None)
 
-        Processor.process(scope, settings.accounts, None)
+        val myOut = new ByteArrayOutputStream()
+        Console.withOut(myOut) {
+          Processor.process(scope, settings.accounts, None)
+        }
 
         val unusedDefs: Seq[Definition] = scope.definitions.filterNot(_.isUsed)
         inside(unusedDefs) {
           case Seq(Definition(_, name, _, _)) =>
             name should be ("unused1")
         }
-    }
 
+        myOut.toString should (include("symbol 'unused1' defined ") and include(" but never used"))
+    }
   }
 }

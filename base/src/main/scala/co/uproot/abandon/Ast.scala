@@ -375,6 +375,6 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
 
   def checkUnusedSymbols() {
     definitions.filterNot(_.isUsed)
-      .foreach(d => println(s"symbol `${d.name}` defined in ${d.pos} but never used"))
+      .foreach(d => println(s"${Console.YELLOW}${Console.BOLD}symbol '${d.name}' defined in ${d.pos} but never used${Console.RESET}"))
   }
 }
