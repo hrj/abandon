@@ -273,7 +273,10 @@ sealed class ASTTangibleEntry extends ASTEntry
 case class Transaction(pos: InputPosition, date: Date, posts: Seq[Post], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
 
 case class Definition(pos: InputPosition, name: String, params: List[String], rhs: Expr) extends ASTTangibleEntry {
-  def prettyPrint = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)
+  private var used: Boolean = false
+  def markAsUsed(): Unit = used = true
+  def isUsed: Boolean = used
+  def prettyPrint: String = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)
 }
 
 case class AccountDeclaration(name: AccountName, details: Map[String, Expr]) extends ASTTangibleEntry
@@ -368,5 +371,10 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
       case None =>
         includedScopes.foreach(_.checkDupes())
     }
+  }
+
+  def checkUnusedSymbols() {
+    definitions.filterNot(_.isUsed)
+      .foreach(d => println(s"${Console.YELLOW}${Console.BOLD}symbol '${d.name}' defined in ${d.pos} but never used${Console.RESET}"))
   }
 }

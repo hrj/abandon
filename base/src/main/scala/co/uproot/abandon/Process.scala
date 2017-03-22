@@ -264,6 +264,7 @@ object Processor {
       }
       accState.updateAmounts(new PostGroup(detailedPosts, tx, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))
     }
+    scope.checkUnusedSymbols
     // val accountDeclarations = filterByType[AccountDeclaration](entries)
     AppState(accState)
   }
