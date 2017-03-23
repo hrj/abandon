@@ -380,7 +380,7 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
     import Console.{YELLOW, BOLD, RESET}
     definitions.filterNot(_.isUsed)
       .foreach(d => {
-        println(s"${YELLOW}${BOLD}Symbol '${d.name}' is defined in ${d.pos.filename} line: ${d.pos.pos.line} but never used${RESET}")
+        println(s"${YELLOW}${BOLD}symbol '${d.name}' defined in ${d.pos.filename} line: ${d.pos.pos.line} but never used${RESET}")
       })
   }
 }
