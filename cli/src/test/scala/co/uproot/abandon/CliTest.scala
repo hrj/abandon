@@ -1,5 +1,6 @@
 package co.uproot.abandon
 
+import java.io.FileOutputStream
 import java.nio.file.Paths
 
 import fi.sn127.utils.fs.Glob
@@ -28,6 +29,23 @@ class CliAppTests extends DefaultArgsDirSuite {
   runDirSuiteTestCases(basedir, Glob("errors/[A-Z]*/**.exec")) { args: Array[String] =>
     assertResult(CLIApp.FAILED) {
       CLIApp.mainStatus(args)
+    }
+  }
+}
+
+class CliStdoutTests extends StdoutArgsDirSuite {
+  val basedir = Paths.get("../tests").toAbsolutePath.normalize
+
+  /**
+    * OK Cases with stdout/stderr output (should succeed)
+    */
+  runDirSuiteTestCases(basedir, Glob("sclX*/**.exec")) { args: Array[String] =>
+    assertResult(CLIApp.SUCCEEDED) {
+      Console.withOut(new FileOutputStream(args(0))) {
+        Console.withErr(new FileOutputStream(args(1))) {
+          CLIApp.mainStatus(args.drop(2))
+        }
+      }
     }
   }
 }

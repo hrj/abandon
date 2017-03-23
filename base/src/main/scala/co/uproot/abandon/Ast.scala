@@ -1,5 +1,7 @@
 package co.uproot.abandon
 
+import java.nio.file.Paths
+
 import scala.util.parsing.input.Position
 
 object ASTHelper {
@@ -14,7 +16,8 @@ object ASTHelper {
 }
 
 case class InputPosition(pathOpt: Option[String], pos: Position) {
-  override def toString = pathOpt.getOrElse("") + " line: " + pos.line + " col: " + pos.column
+  def filename: String = pathOpt.map(path => Paths.get(path).normalize().getFileName.toString).getOrElse("")
+  override def toString: String = pathOpt.getOrElse("") + " line: " + pos.line + " col: " + pos.column
 }
 
 class InputError(msg: String) extends RuntimeException(msg)
@@ -374,7 +377,10 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
   }
 
   def checkUnusedSymbols() {
+    import Console.{YELLOW, BOLD, RESET}
     definitions.filterNot(_.isUsed)
-      .foreach(d => println(s"${Console.YELLOW}${Console.BOLD}symbol '${d.name}' defined in ${d.pos} but never used${Console.RESET}"))
+      .foreach(d => {
+        println(s"${YELLOW}${BOLD}Symbol '${d.name}' is defined in ${d.pos.filename} line: ${d.pos.pos.line} but never used${RESET}")
+      })
   }
 }
