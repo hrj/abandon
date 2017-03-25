@@ -293,6 +293,10 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       def used1   = 1
       def unused1 = 1
 
+      {
+      def unused2 = 2
+      }
+
       2013/1/1
       MyBank       14000 * used1
       Income        -1000
@@ -313,13 +317,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
           Processor.process(scope, settings.accounts, None)
         }
 
-        val unusedDefs: Seq[Definition] = scope.definitions.filterNot(_.isUsed)
-        inside(unusedDefs) {
-          case Seq(Definition(_, name, _, _)) =>
-            name should be ("unused1")
-        }
-
-        myOut.toString should (include("symbol 'unused1' defined ") and include(" but never used"))
+        myOut.toString should (include("symbol 'unused1' defined ") and include("symbol 'unused2' defined ") and include(" but never used"))
     }
   }
 }

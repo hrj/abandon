@@ -377,10 +377,11 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
   }
 
   def checkUnusedSymbols() {
-    import Console.{YELLOW, BOLD, RESET}
-    definitions.filterNot(_.isUsed)
-      .foreach(d => {
-        println(s"${YELLOW}${BOLD}symbol '${d.name}' defined in ${d.pos.filename} line: ${d.pos.pos.line} but never used${RESET}")
-      })
+    def printUnusedDefinitionWarning(d: Definition) = {
+      import Console.{YELLOW, BOLD, RESET}
+      println(s"${YELLOW}${BOLD}symbol '${d.name}' defined in ${d.pos.filename} line ${d.pos.pos.line} but never used${RESET}")
+    }
+    localDefinitions.filterNot(_.isUsed).foreach(printUnusedDefinitionWarning)
+    (includedScopes union childScopes).foreach(_.checkUnusedSymbols())
   }
 }

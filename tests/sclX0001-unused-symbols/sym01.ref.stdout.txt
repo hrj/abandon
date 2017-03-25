@@ -1,2 +1,4 @@
-[33m[1msymbol 'unusedTxns' defined in sym01-txns.ledger line: 3 but never used[0m
-[33m[1msymbol 'unusedSym' defined in sym01-include.ledger line: 1 but never used[0m
+[33m[1msymbol 'unusedTxns' defined in sym01-txns.ledger line 3 but never used[0m
+[33m[1msymbol 'unusedInclude' defined in sym01-include.ledger line 1 but never used[0m
+[33m[1msymbol 'nestedUnused2' defined in sym01-include.ledger line 6 but never used[0m
+[33m[1msymbol 'nestedUnused1' defined in sym01-txns.ledger line 7 but never used[0m
