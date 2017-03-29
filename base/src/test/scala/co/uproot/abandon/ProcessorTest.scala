@@ -1,10 +1,10 @@
 package co.uproot.abandon
 
+import java.io.ByteArrayOutputStream
+
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.Matcher
 import org.scalatest.Matchers
 import org.scalatest.Inside
-import java.lang.Exception
 
 import TestHelper._
 import ParserHelper._
@@ -286,5 +286,38 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
 
     }
 
+  }
+
+  it should "scope after process should contain unused definitions" in {
+    val testInput = """
+      def used1   = 1
+      def unused1 = 1
+
+      {
+      def unused2 = 2
+      }
+
+      2013/1/1
+      MyBank       14000 * used1
+      Income        -1000
+      Equity       -13000
+    """
+    val parseResult = parser.abandon(scanner(testInput))
+    inside(parseResult) {
+      case parser.Success(scope: Scope, _) =>
+        val name = AccountName(Seq("Bank","Current"))
+        val alias = "MyBank"
+        val accounts = Seq(AccountSettings(name, Some(alias)))
+
+        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), showZeroAmountAccounts = false, Nil)
+        val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None, quiet = false, None, None)
+
+        val myOut = new ByteArrayOutputStream()
+        Console.withOut(myOut) {
+          Processor.process(scope, settings.accounts, None)
+        }
+
+        myOut.toString should (include("symbol 'unused1' defined ") and include("symbol 'unused2' defined ") and include(" but never used"))
+    }
   }
 }

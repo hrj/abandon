@@ -1,5 +1,7 @@
 package co.uproot.abandon
 
+import java.nio.file.Paths
+
 import scala.util.parsing.input.Position
 
 object ASTHelper {
@@ -14,7 +16,8 @@ object ASTHelper {
 }
 
 case class InputPosition(pathOpt: Option[String], pos: Position) {
-  override def toString = pathOpt.getOrElse("") + " line: " + pos.line + " col: " + pos.column
+  def filename: String = pathOpt.map(path => Paths.get(path).normalize().getFileName.toString).getOrElse("")
+  override def toString: String = pathOpt.getOrElse("") + " line: " + pos.line + " col: " + pos.column
 }
 
 class InputError(msg: String) extends RuntimeException(msg)
@@ -273,7 +276,10 @@ sealed class ASTTangibleEntry extends ASTEntry
 case class Transaction(pos: InputPosition, date: Date, posts: Seq[Post], annotationOpt: Option[String], payeeOpt: Option[String], comments: List[String]) extends ASTTangibleEntry
 
 case class Definition(pos: InputPosition, name: String, params: List[String], rhs: Expr) extends ASTTangibleEntry {
-  def prettyPrint = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)
+  private var used: Boolean = false
+  def markAsUsed(): Unit = used = true
+  def isUsed: Boolean = used
+  def prettyPrint: String = "def %s(%s) = %s" format (name, params.mkString(", "), rhs.prettyPrint)
 }
 
 case class AccountDeclaration(name: AccountName, details: Map[String, Expr]) extends ASTTangibleEntry
@@ -368,5 +374,14 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
       case None =>
         includedScopes.foreach(_.checkDupes())
     }
+  }
+
+  def checkUnusedSymbols() {
+    def printUnusedDefinitionWarning(d: Definition) = {
+      import Console.{YELLOW, BOLD, RESET}
+      println(s"${YELLOW}${BOLD}symbol '${d.name}' defined in ${d.pos.filename} line ${d.pos.pos.line} but never used${RESET}")
+    }
+    localDefinitions.filterNot(_.isUsed).foreach(printUnusedDefinitionWarning)
+    (includedScopes union childScopes).foreach(_.checkUnusedSymbols())
   }
 }

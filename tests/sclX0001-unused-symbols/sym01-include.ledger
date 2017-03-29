@@ -1,0 +1,11 @@
+def unusedInclude = 0
+def x = 200
+def y = 400
+
+{
+def nestedUnused2 = 10
+}
+
+2016/May/2
+  inExpenses                topX
+  inBank

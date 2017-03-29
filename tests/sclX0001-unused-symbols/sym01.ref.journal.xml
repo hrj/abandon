@@ -1,0 +1,22 @@
+<abandon>
+  <journal>
+    <transactions>
+      <txn date="2016-05-01">
+        <post delta="400" name="expenses"></post>
+        <post delta="-400" name="bank"></post>
+      </txn>
+      <txn date="2016-05-02">
+        <post delta="1200" name="expenses"></post>
+        <post delta="-1200" name="bank"></post>
+      </txn>
+      <txn date="2016-05-02">
+        <post delta="2000" name="inExpenses"></post>
+        <post delta="-2000" name="inBank"></post>
+      </txn>
+      <txn date="2016-05-03">
+        <post delta="200" name="expenses"></post>
+        <post delta="-200" name="bank"></post>
+      </txn>
+    </transactions>
+  </journal>
+</abandon>
