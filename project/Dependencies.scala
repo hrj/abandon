@@ -3,7 +3,7 @@ import Keys._
 
 object Dependencies {
   // Versions
-  val scalatestVersion = "3.0.1"
+  val scalatestVersion = "3.0.2"
   val scallopVersion = "2.1.1"
   val scalaMockVersion = "3.5.0"
   val configVersion = "1.3.1"
