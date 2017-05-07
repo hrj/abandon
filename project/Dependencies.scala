@@ -8,7 +8,7 @@ object Dependencies {
   val scalaMockVersion = "3.5.0"
   val configVersion = "1.3.1"
   val scalaXMLVersion = "1.0.6"
-  val scalaParserCombinatorsVersion = "1.0.5"
+  val scalaParserCombinatorsVersion = "1.0.6"
   val scalaFXVersion = "8.0.102-R11"
   val dirSuiteVersion = "0.6.0"
 
