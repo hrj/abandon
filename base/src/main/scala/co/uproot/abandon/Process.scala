@@ -33,8 +33,8 @@ case class DetailedPost(name: AccountName, delta: BigDecimal, commentOpt: Option
 class AccountState {
 
   private var _amounts = Map[AccountName, BigDecimal]() // initAmounts
-  private var _posts = Seq[DetailedPost]() 
-  private var _postGroups = Seq[PostGroup]() 
+  private var _posts = Vector[DetailedPost]()
+  private var _postGroups = Vector[PostGroup]()
 
   def amounts = _amounts
   def posts = _posts
