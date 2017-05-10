@@ -135,7 +135,7 @@ object Processor {
           case Some(source) =>
             val parser = new AbandonParser(Some(inputPath))
 
-            val parseResult = parser.abandon(Option(input.parentScope))(parser.scannerFromFile(inputPath))
+            val parseResult = parser.abandon(Option(input.parentScope))(parser.scannerFromSource(source))
             parseResult match {
               case parser.Success(scope, _) =>
                 val includes = filterByType[IncludeDirective](scope.entries)

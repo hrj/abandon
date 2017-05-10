@@ -295,8 +295,8 @@ class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers w
     new lexical.Scanner(reader)
   }
 
-  def scannerFromFile(filePath:String) = {
-    val reader= new PagedSeqReader(PagedSeq.fromFile(filePath))
+  def scannerFromSource(source:io.Source) = {
+    val reader= new PagedSeqReader(PagedSeq.fromIterator(source))
     new lexical.Scanner(reader)
   }
 }
