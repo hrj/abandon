@@ -3,10 +3,8 @@ package co.uproot.abandon
 import scala.language.postfixOps
 import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
-import scala.util.parsing.json.Lexer
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
-import scala.util.parsing.input.Position
 import scala.util.parsing.input.PagedSeqReader
 import scala.collection.immutable.PagedSeq
 
@@ -25,6 +23,8 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
       | '\"' ~> failure("Unterminated string")
       | rep(letter) ^^ checkKeyword
       | failure("Illegal character"))
+
+  override def identChar = super.identChar | elem(''')| elem('#')
 
   case object EOL extends Token {
     def chars = "<eol>"
