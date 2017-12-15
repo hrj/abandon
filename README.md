@@ -7,6 +7,9 @@ and collaboration.
 From these input text files, Abandon can present textual reports
 or graphical reports. The graphical reports are useful when you need to interactively explore the data.
 
+In addition, PDF reports can be generated using [abandon-reports](https://github.com/hrj/abandon-reports). PDFs are useful
+when you need to print the report or share it with someone by email, etc.
+
 Abandon is inspired by [Ledger](http://ledger-cli.org/) but is simpler to use, has a more regular syntax, has a GUI
 and is cross-platform. Abandon tries to maintain syntax compatibility with Ledger whenever possible.
 
