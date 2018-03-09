@@ -8,7 +8,7 @@ import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
 import scala.util.parsing.input.Position
 import scala.util.parsing.input.PagedSeqReader
-import scala.collection.immutable.PagedSeq
+import scala.util.parsing.input.PagedSeq
 
 object AbandonLexer extends StdLexical with ImplicitConversions {
   import scala.util.parsing.input.CharArrayReader.EofCh
