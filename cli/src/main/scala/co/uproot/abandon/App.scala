@@ -124,9 +124,9 @@ object CLIApp {
 
     ledgerRep foreach { reportGroup =>
       reportWriter.println(reportGroup.date.formatCompactYYYYMMDD)
-      val formatStr = "%-" + (reportGroup.maxNameLength + 4) + "s %s"
+      val formatStr = "%-" + (reportGroup.maxNameLength + 4) + "s %s%s"
       reportGroup.ledgerEntries foreach { e =>
-        val render = formatStr format (e.accountName, e.amount.toString())
+        val render = formatStr format (e.accountName, e.amount.toString(), e.comment.map("  ; " + _).getOrElse(""))
         reportWriter.println("   " + render)
       }
       reportWriter.println("")

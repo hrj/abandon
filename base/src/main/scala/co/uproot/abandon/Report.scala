@@ -10,7 +10,7 @@ case class BalanceReport(leftEntries:Seq[BalanceReportEntry], rightEntries:Seq[B
 case class RegisterReportEntry(accountName: String, txns: Seq[DetailedPost], render: String)
 case class RegisterReportGroup(groupTitle: String, entries: Seq[RegisterReportEntry])
 
-case class LedgerExportEntry(accountName: AccountName, amount: BigDecimal)
+case class LedgerExportEntry(accountName: AccountName, amount: BigDecimal, comment: Option[String] = None)
 case class LedgerExportData(date: Date, ledgerEntries: Seq[LedgerExportEntry]) {
   val maxNameLength = maxElseZero(ledgerEntries.map(_.accountName.toString.length))
   val maxAmountWidth = maxElseZero(ledgerEntries.map(_.amount.toString.length))
@@ -269,8 +269,10 @@ object Reports {
         } else {
           val destClosure = destEntry match {
             case (accountName, amount) =>
-              val srcTotal = srcClosure.map(_.amount).sum
-              LedgerExportEntry(accountName, -(srcTotal))
+              val srcTotalNeg = srcClosure.map(_.amount).sum
+              val srcTotal = -srcTotalNeg
+              val resultAmt = srcTotal + amount
+              LedgerExportEntry(accountName, srcTotal, Some(" result: " + resultAmt.toString))
           }
           LedgerExportData(latestDate, srcClosureSorted :+ destClosure)
         }
