@@ -31,7 +31,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
             inside(ledgerEntries) {
-              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None)) =>
                 acc1 should be (cashAccount)
                 acc2 should be (expenseAccount)
                 expr1 should be (240)
@@ -61,7 +61,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
             inside(ledgerEntries) {
-              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2)) =>
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None)) =>
                 acc1 should be (cashAccount)
                 acc2 should be (expenseAccount)
                 expr1 should be (240)
@@ -91,7 +91,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
             inside(ledgerEntries) {
-              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None), LedgerExportEntry(acc3, expr3, None)) =>
                 acc1 should be (bankAccount)
                 acc2 should be (cashAccount)
                 acc3 should be (expenseAccount)
@@ -143,7 +143,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
           case Seq(LedgerExportData(date, ledgerEntries), LedgerExportData(date1, ledgerEntries1)) =>
             date should be(Date(2013, 1, 1))
             inside(ledgerEntries) {
-              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3), LedgerExportEntry(acc4, expr4)) =>
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None), LedgerExportEntry(acc3, expr3, None), LedgerExportEntry(acc4, expr4, None)) =>
                 acc1 should be (assetsAccount)
                 acc2 should be (equityAccount)
                 acc3 should be (expenseAccount)
@@ -155,7 +155,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
             }
             date1 should be(Date(2013, 1, 1))
             inside(ledgerEntries1) {
-              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None), LedgerExportEntry(acc3, expr3, Some(" result: 13000"))) =>
                 acc1 should be (expenseAccount)
                 acc2 should be (incomeAccount)
                 acc3 should be (equityAccount)
@@ -274,7 +274,7 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
             inside(ledgerEntries) {
-              case Seq(LedgerExportEntry(acc1, expr1), LedgerExportEntry(acc2, expr2), LedgerExportEntry(acc3, expr3)) =>
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None), LedgerExportEntry(acc3, expr3, None)) =>
                 acc1 should be (bankAccount)
                 acc2 should be (equityAccount)
                 acc3 should be (incomeAccount)
