@@ -30,8 +30,8 @@ lazy val commonSettings = Seq(
 )
 
 lazy val abandon = (project in file(".")).
-  aggregate(base, cli, gui).
-  dependsOn(base, cli, gui).
+  aggregate(base, cli).
+  dependsOn(base, cli).
   settings(commonSettings: _*).
   settings(
     name := "abandon",
