@@ -8,6 +8,6 @@ addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.2.7")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.2")
 
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.0")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.5")
 
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.9.0")
