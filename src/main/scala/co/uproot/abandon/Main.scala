@@ -6,7 +6,7 @@ object Main extends App {
 
   if(args.headOption.getOrElse("") equals "-g") {
     // ensureJFXIsAvailable()
-    AbandonUI.main(args.tail)
+    // AbandonUI.main(args.tail)
   } else {
     CLIApp.main(args)
   }

@@ -3,7 +3,8 @@ package co.uproot.abandon
 import java.io.FileOutputStream
 import java.nio.file.Paths
 
-import fi.sn127.utils.fs.Glob
+import fi.e257.testing.Glob
+
 
 /**
   * Test valid and invalid input with full CLI App

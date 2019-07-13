@@ -126,10 +126,10 @@ object SettingsHelper {
       config.optional(name) { _.getConfig(_) }
     }
     def optConfigList(name: String) = {
-      config.optional(name) { _.getConfigList(_).asScala }
+      config.optional(name) { _.getConfigList(_).asScala.toSeq }
     }
     def optStringList(name: String) = {
-      config.optional(name) { _.getStringList(_).asScala }
+      config.optional(name) { _.getStringList(_).asScala.toSeq }
     }
   }
 
@@ -150,7 +150,7 @@ object SettingsHelper {
       try {
         val config = ConfigFactory.parseFile(file).resolve()
         val inputs = config.getStringList("inputs").asScala.flatMap(handleInput(_, configFileName)).toSeq.sorted
-        val reports = config.getConfigList("reports").asScala.map(makeReportSettings(_))
+        val reports = config.getConfigList("reports").asScala.toSeq.map(makeReportSettings(_))
         val reportOptions = config.optConfig("reportOptions")
         val isRight = reportOptions.flatMap(_.optStringList("isRight")).getOrElse(Nil)
         val exportConfigs = config.optConfigList("exports").getOrElse(Nil)
@@ -169,7 +169,7 @@ object SettingsHelper {
           case Some(txnfs) => Option(txnfs)
           case None =>
             try {
-              val txnfs = config.getStringList("filters").asScala.map(s => s.split("=", 2)).
+              val txnfs = config.getStringList("filters").asScala.toSeq.map(s => s.split("=", 2)).
                   map({ case Array(k, v) => createTxnFilter(k, v) })
               Option(ANDTxnFilterStack(txnfs))
             } catch {
@@ -215,8 +215,8 @@ object SettingsHelper {
   def makeReportSettings(config: Config) = {
     val title = config.getString("title")
     val reportType = config.getString("type")
-    val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-    val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
+    val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala.toSeq }
+    val outFiles = config.optional("outFiles") { _.getStringList(_).asScala.toSeq }.getOrElse(Nil)
     reportType match {
       case "balance" =>
         val showZeroAmountAccounts = config.optional("showZeroAmountAccounts") { _.getBoolean(_) }.getOrElse(false)
@@ -237,8 +237,8 @@ object SettingsHelper {
     val exportType = config.getString("type")
     val exportFormat = config.getString("format")
 
-    val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
-    val outFiles = config.optional("outFiles") { _.getStringList(_).asScala }.getOrElse(Nil)
+    val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala.toSeq }
+    val outFiles = config.optional("outFiles") { _.getStringList(_).asScala.toSeq }.getOrElse(Nil)
 
     exportType match {
       case "journal" =>
@@ -249,7 +249,7 @@ object SettingsHelper {
             val closure = closureConfig.map(makeClosureSettings)
             LedgerExportSettings(accountMatch, outFiles, showZeroAmountAccounts, closure)
         case "xml" =>
-            val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+            val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala.toSeq }
             XmlExportSettings(JournalType, accountMatch, outFiles, version)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
@@ -261,7 +261,7 @@ object SettingsHelper {
             val message = s"Found type: '$exportType' format: '$exportFormat'; This is not implemented."
             throw new NotImplementedError(message)
         case "xml" =>
-            val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala }
+            val accountMatch = config.optional("accountMatch") { _.getStringList(_).asScala.toSeq }
             XmlExportSettings(BalanceType, accountMatch, outFiles, version)
         case _ =>
             val message = s"Found '$exportType', '$exportFormat'; expected 'ledger' or 'xml'."
@@ -274,7 +274,7 @@ object SettingsHelper {
   }
 
   def makeClosureSettings(config: Config) = {
-    val sources = config.getStringList("sources").asScala
+    val sources = config.getStringList("sources").asScala.toSeq
     val destination = config.getString("destination")
     ClosureExportSettings(sources, destination)
   }

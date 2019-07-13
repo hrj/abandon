@@ -1,8 +1,9 @@
 package co.uproot.abandon
 
 import java.nio.file.Path
+import better.files.File
 
-import fi.sn127.utils.testing.DirSuiteLike
+import fi.e257.testing.DirSuiteLike
 
 /**
  * Abandon specific default arguments for test cases.
@@ -18,13 +19,12 @@ class DefaultArgsDirSuite extends DirSuiteLike  {
    */
   override
   protected def mapArgs(testname: Path, args: Array[String]): Array[String] = {
-    val fu = fi.sn127.utils.fs.FileUtils(testname.getFileSystem)
-    val testDir = fu.getParentDirPath(testname)
+    val testDir = File(testname).parent
 
-    val basename = fu.getBasename(testname) match { case (base, ext) => base }
+    val basename = File(testname).nameWithoutExtension(true)
     val conf = basename.toString + ".conf"
 
-    val fullPathConf = fu.getPath(testDir.toString, conf.toString).toString
+    val fullPathConf = (testDir / conf).toString()
 
     Array("-c", fullPathConf) ++ Array("-X", "-q") ++ args
   }

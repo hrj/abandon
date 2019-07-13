@@ -1,8 +1,7 @@
 package co.uproot.abandon
 
 import Helper._
-import scala.util.parsing.input.PagedSeqReader
-import scala.collection.immutable.PagedSeq
+import scala.util.parsing.input.{PagedSeqReader, PagedSeq}
 import java.io.FileNotFoundException
 
 import java.nio.file.{Path, Paths}
