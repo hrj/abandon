@@ -9,7 +9,7 @@ object Dependencies {
   val configVersion = "1.3.4"
   val scalaXMLVersion = "1.2.0"
   val scalaParserCombinatorsVersion = "1.1.2"
-  val scalaFXVersion = "8.0.192-R14"
+  val scalaFXVersion = "12.0.1-R17"
   val dirSuiteVersion = "0.30.1"
 
   // Libraries
