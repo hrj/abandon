@@ -30,8 +30,8 @@ lazy val commonSettings = Seq(
 )
 
 lazy val abandon = (project in file(".")).
-  aggregate(base, cli, gui).
-  dependsOn(base, cli, gui).
+  aggregate(base, cli).
+  dependsOn(base, cli).
   settings(commonSettings: _*).
   settings(
     name := "abandon",
@@ -64,6 +64,7 @@ lazy val cli = (project in file("cli")).
     buildInfoObject := "CliBuildInfo"
   )
 
+  /*
 lazy val gui = (project in file("gui")).
   enablePlugins(BuildInfoPlugin).
   dependsOn(base).
@@ -76,6 +77,7 @@ lazy val gui = (project in file("gui")).
     buildInfoPackage := "co.uproot.abandon",
     buildInfoObject := "GuiBuildInfo"
   )
+  */
 
 
 
