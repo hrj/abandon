@@ -7,7 +7,7 @@
     - $HOME/.coursier/cache
     - $HOME/.sbt/boot/
 
- jdk: openjdk11
+ jdk: openjdk8
  scala: "2.13.0"
 
  script:
