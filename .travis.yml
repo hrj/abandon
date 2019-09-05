@@ -2,23 +2,21 @@
 
  cache:
    directories:
-    - $HOME/.ivy2/cache
+    - $HOME/.coursier/cache
     - $HOME/.sbt/boot/
 
  matrix:
    include:
      - jdk: oraclejdk8
-       scala: "2.12.1"
+       scala: "2.12.8"
 
  script:
    - sbt clean coverage test coverageReport coverageAggregate
    - find $HOME/.sbt -name "*.lock" | xargs rm
-   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
  after_success: "sbt coveralls"
 
- sudo: false
- dist: trusty
+ dist: bionic
 
  addons:
   apt:
