@@ -4,13 +4,14 @@ import java.net.{URL, URLClassLoader}
 
 object Main extends App {
 
-  if(args.headOption.getOrElse("") equals "-g") {
+  // if(args.headOption.getOrElse("") equals "-g") {
     // ensureJFXIsAvailable()
     // AbandonUI.main(args.tail)
-  } else {
+  // } else {
     CLIApp.main(args)
-  }
+  // }
 
+  /*
   private def ensureJFXIsAvailable(): Unit = {
     try {
       Class.forName{"javafx.event.EventTarget"}
@@ -30,4 +31,5 @@ object Main extends App {
       method.setAccessible(true);
       method.invoke(ClassLoader.getSystemClassLoader(), file.toURI.toURL);
   }
+  */
 }

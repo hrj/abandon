@@ -64,6 +64,7 @@ lazy val cli = (project in file("cli")).
     buildInfoObject := "CliBuildInfo"
   )
 
+  /*
 lazy val gui = (project in file("gui")).
   enablePlugins(BuildInfoPlugin).
   dependsOn(base).
@@ -76,6 +77,7 @@ lazy val gui = (project in file("gui")).
     buildInfoPackage := "co.uproot.abandon",
     buildInfoObject := "GuiBuildInfo"
   )
+  */
 
 
 
