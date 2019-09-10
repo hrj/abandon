@@ -211,16 +211,37 @@ class ProcessorTest extends FlatSpec with Matchers with Inside {
       case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil, None)
         val source = Seq("Income", "Expense")
-        val destination = "Equity"
+        val destination = "NewAccount"
         val closure = Seq(ClosureExportSettings(source, destination))
 
         val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
-        val ledgerRep = intercept[MissingDestinationError] {
-          Reports.ledgerExport(appState, settings, balSettings)
-        }
+        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
 
+        inside(ledgerRep) {
+          case Seq(LedgerExportData(date, ledgerEntries), LedgerExportData(date1, ledgerEntries1)) =>
+            date should be(Date(2013, 1, 1))
+            inside(ledgerEntries) {
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None), LedgerExportEntry(acc3, expr3, None)) =>
+                acc1 should be (assetsAccount)
+                acc2 should be (expenseAccount)
+                acc3 should be (incomeAccount)
+                expr1 should be (-13000)
+                expr2 should be (14000)
+                expr3 should be (-1000)
+            }
+            date1 should be(Date(2013, 1, 1))
+            inside(ledgerEntries1) {
+              case Seq(LedgerExportEntry(acc1, expr1, None), LedgerExportEntry(acc2, expr2, None), LedgerExportEntry(acc3, expr3, Some(" result: 13000"))) =>
+                acc1 should be (expenseAccount)
+                acc2 should be (incomeAccount)
+                acc3 should be (AccountName(Seq("NewAccount")))
+                expr1 should be (-14000)
+                expr2 should be (1000)
+                expr3 should be (13000)
+            }
+        }
     }
   }
 

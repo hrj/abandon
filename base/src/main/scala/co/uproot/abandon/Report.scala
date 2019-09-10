@@ -259,9 +259,7 @@ object Reports {
         val destEntry =
           amounts.find { case (name, amount) => name.fullPathStr == closure.destination } match {
             case Some(entry) => entry
-            case None =>
-              val message = s"While exporting to ledger formt, didn't find a matching destination account named: ${closure.destination}"
-              throw new MissingDestinationError(message)
+            case None => (ASTHelper.parseAccountName(closure.destination), Zero)
           }
         if (srcEntries contains destEntry) {
           val message = s"Destination clashed with one of the sources: $destEntry"
