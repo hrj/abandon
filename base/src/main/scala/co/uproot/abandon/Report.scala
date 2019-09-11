@@ -16,6 +16,8 @@ case class LedgerExportData(date: Date, ledgerEntries: Seq[LedgerExportEntry]) {
   val maxAmountWidth = maxElseZero(ledgerEntries.map(_.amount.toString.length))
 }
 
+case class ClosureAccumulator(amounts: Seq[(AccountName, BigDecimal)], closureEntries: List[LedgerExportData])
+
 object Reports {
 
   def balanceReport(state: AppState, settings: Settings, reportSettings: BalanceReportSettings):BalanceReport = {
@@ -249,35 +251,42 @@ object Reports {
 
       checkSourceNames(reportSettings.closure, amounts.map(_._1.fullPathStr))
 
-      val closureEntries = reportSettings.closure map { closure =>
-        val srcEntries = amounts.filter { name => closure.sources.exists(name._1.fullPathStr matches _) }
-        val srcClosure = srcEntries.map {
-          case (accountName, amount) => LedgerExportEntry(accountName, -amount)
-        }
-        val srcClosureSorted = srcClosure.sortBy(_.accountName.toString)
-
-        val destEntry =
-          amounts.find { case (name, amount) => name.fullPathStr == closure.destination } match {
-            case Some(entry) => entry
-            case None => (ASTHelper.parseAccountName(closure.destination), Zero)
-          }
-        if (srcEntries contains destEntry) {
-          val message = s"Destination clashed with one of the sources: $destEntry"
-          throw new SourceDestinationClashError(message)
-        } else {
-          val destClosure = destEntry match {
-            case (accountName, amount) =>
-              val srcTotalNeg = srcClosure.map(_.amount).sum
-              val srcTotal = -srcTotalNeg
-              val resultAmt = srcTotal + amount
-              LedgerExportEntry(accountName, srcTotal, Some(" result: " + resultAmt.toString))
-          }
-          LedgerExportData(latestDate, srcClosureSorted :+ destClosure)
-        }
-
+      val closureAcc = reportSettings.closure.foldLeft(ClosureAccumulator(amounts, Nil)) { (acc, e) =>
+        mkClosure(acc, latestDate, e)
       }
-      balanceEntry +: closureEntries
+      balanceEntry +: closureAcc.closureEntries
     }
+  }
+
+  def mkClosure(accumulator: ClosureAccumulator, latestDate: Date, closure: ClosureExportSettings): ClosureAccumulator = {
+    val amounts = accumulator.amounts
+    val (srcEntries, otherEntries) = amounts.partition { name => closure.sources.exists(name._1.fullPathStr matches _) }
+    val destEntry =
+      amounts.find { case (name, amount) => name.fullPathStr == closure.destination } match {
+        case Some(entry) => entry
+        case None => (ASTHelper.parseAccountName(closure.destination), Zero)
+      }
+    if (srcEntries contains destEntry) {
+      val message = s"Destination clashed with one of the sources: $destEntry"
+      throw new SourceDestinationClashError(message)
+    } else {
+      val srcClosure = srcEntries.map {
+        case (accountName, amount) => LedgerExportEntry(accountName, -amount)
+      }
+      val srcClosureSorted = srcClosure.sortBy(_.accountName.toString)
+
+      val (destClosure, destResult) = destEntry match {
+        case (accountName, amount) =>
+          val srcTotalNeg = srcClosure.map(_.amount).sum
+          val srcTotal = -srcTotalNeg
+          val resultAmt = srcTotal + amount
+          (LedgerExportEntry(accountName, srcTotal, Some(" result: " + resultAmt.toString)), resultAmt)
+      }
+      ClosureAccumulator(
+        otherEntries :+ (destClosure.accountName, destResult),
+        accumulator.closureEntries :+ LedgerExportData(latestDate, srcClosureSorted :+ destClosure))
+    }
+
   }
 
   def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings, filterXML: Option[xml.Node]): xml.Node = {
