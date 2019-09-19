@@ -207,7 +207,7 @@ object Reports {
   /** Checks whether there are duplicate entries in closure sources.
     * Throws an exception when a duplicate is found
     */
-  private def checkSourceNames(closures: Seq[ClosureExportSettings], accountNames: Seq[String]) {
+  private def checkSourceNames(closures: Seq[ClosureExportSettings], accountNames: Seq[String]) = {
     var uniqueNames = Set[String]()
     closures foreach { closure =>
       val srcEntries = accountNames.filter { name => closure.sources.exists(name matches _) }

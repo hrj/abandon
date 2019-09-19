@@ -346,7 +346,7 @@ case class ScopedTxn(txn: Transaction, scope: Scope)
 case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEntry {
   private var includedScopes: List[Scope] = Nil
 
-  def addIncludedScope(i: Scope) {
+  def addIncludedScope(i: Scope) = {
     includedScopes :+= i
   }
 
@@ -367,7 +367,7 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
 
   def allTransactions:Seq[ScopedTxn] = allLocalTransactions ++ childScopes.flatMap(_.allTransactions)
 
-  def checkDupes() {
+  def checkDupes():Unit = {
     Helper.allUnique(localDefinitions.map(_.name)) match {
       case Some(nonUnique) =>
         throw new DupSymbolInScopeError(nonUnique, localDefinitions.find { _.name == nonUnique }.get.pos)
@@ -376,7 +376,7 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
     }
   }
 
-  def checkUnusedSymbols() {
+  def checkUnusedSymbols() : Unit = {
     def printUnusedDefinitionWarning(d: Definition) = {
       import Console.{YELLOW, BOLD, RESET}
       println(s"${YELLOW}${BOLD}symbol '${d.name}' defined in ${d.pos.filename} line ${d.pos.pos.line} but never used${RESET}")

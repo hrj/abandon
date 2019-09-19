@@ -250,7 +250,7 @@ object Processor {
         txScope.definitions.find { d => d.name equals "defaultAccount" } match {
           case Some(defaultAccountDef) => {
             val defaultAccount = evaluationContext.evaluateString(FunctionExpr("defaultAccount", Nil, Some(tx.pos)))
-            val fullDefaultAccount = transformAlias(AccountName(defaultAccount.split(":")))
+            val fullDefaultAccount = transformAlias(AccountName(defaultAccount.split(":").toSeq))
             val delta = -txTotal
             txTotal += delta
             detailedPosts :+= DetailedPost(fullDefaultAccount, delta, None)

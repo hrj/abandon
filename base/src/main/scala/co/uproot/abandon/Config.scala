@@ -7,7 +7,7 @@ import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import org.rogach.scallop.ScallopConf
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Holder for application's version identification
