@@ -305,7 +305,7 @@ trait SignChecker {
 
   def check(appState: AppState) = {
     val posts = appState.accState.posts.filter(_.name.fullPathStr == accName)
-    val dailyDeltas = posts.groupBy(_.date.toInt).mapValues(s => Helper.sumDeltas(s))
+    val dailyDeltas = posts.groupBy(_.date.toInt).view.mapValues(s => Helper.sumDeltas(s))
 
     var acc = Helper.Zero
     dailyDeltas.toSeq.sortBy(_._1).foreach {

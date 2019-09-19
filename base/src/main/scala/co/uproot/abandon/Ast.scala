@@ -382,6 +382,6 @@ case class Scope(entries: Seq[ASTEntry], parentOpt: Option[Scope]) extends ASTEn
       println(s"${YELLOW}${BOLD}symbol '${d.name}' defined in ${d.pos.filename} line ${d.pos.pos.line} but never used${RESET}")
     }
     localDefinitions.filterNot(_.isUsed).foreach(printUnusedDefinitionWarning)
-    (includedScopes union childScopes).foreach(_.checkUnusedSymbols())
+    (includedScopes concat childScopes).foreach(_.checkUnusedSymbols())
   }
 }

@@ -47,7 +47,7 @@ object Helper {
   // This function checks whether all elements are unique. If not it returns the first one that is not unique.
   def allUnique[A](to: IterableOnce[A]): Option[A] = {
     val set = scala.collection.mutable.Set[A]()
-    to.foreach { x =>
+    to.iterator.foreach { x =>
       if (set(x)) {
         return Some(x)
       } else {

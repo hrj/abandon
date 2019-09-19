@@ -64,8 +64,7 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
   def intList = (digit ~ ((comma ~> rep1sep(digit, comma?)) | repsep(digit, comma?))) ^^ { case x ~ y => (x :: y) mkString "" }
   def fracPart = '.' ~> rep(digit) ^^ { _ mkString "" }
   def expPart = exponent ~ opt(sign) ~ rep1(digit) ^^ {
-    case e ~ s ~ d =>
-      e + optString("", s) + d.mkString("")
+    case e ~ s ~ d => s"e${optString("", s)}${d.mkString("")}"
   }
 
   private def optString[A](pre: String, a: Option[A]) = a match {
