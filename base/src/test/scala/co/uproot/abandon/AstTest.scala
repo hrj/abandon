@@ -1,10 +1,10 @@
 package co.uproot.abandon
 
-import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
-import org.scalatest.Matchers
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AstTest extends FlatSpec with Matchers {
+class AstTest extends AnyFlatSpec with Matchers {
 
   "Date" should "convert to int" in {  
     val testDate = Date(2016, 1, 2)

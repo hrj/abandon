@@ -1,16 +1,16 @@
 package co.uproot.abandon
 
-import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
-import org.scalatest.Matchers
 import org.scalatest.Inside
 import ParserHelper._
 import TestHelper._
 import org.scalactic.Equality
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 // TODO: use "shouldEqual" when comparing expressions. It will ensure that the position is also checked as defined in ExprEquality
 
-class ParserTest extends FlatSpec with Matchers with Inside {
+class ParserTest extends AnyFlatSpec with Matchers with Inside {
   val parser = new AbandonParser(None)
 
   "Parser" should "parse empty file" in {

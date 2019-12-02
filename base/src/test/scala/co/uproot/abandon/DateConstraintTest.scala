@@ -4,8 +4,10 @@ import java.time.{LocalDate, Month}
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DateConstraintTest extends FlatSpec with Matchers with BeforeAndAfterEach with MockFactory with OneInstancePerTest {
+class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach with MockFactory with OneInstancePerTest {
 
   class MockableDetailedPost extends DetailedPost(new AccountName(Seq()), 0, None, None)
 

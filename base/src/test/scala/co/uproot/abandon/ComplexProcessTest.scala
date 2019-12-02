@@ -1,8 +1,6 @@
 package co.uproot.abandon
 
-import org.scalatest.FlatSpec
 import org.scalatest.matchers.Matcher
-import org.scalatest.Matchers
 import org.scalatest.Inside
 import java.lang.Exception
 
@@ -10,8 +8,10 @@ import org.scalatest.StreamlinedXmlEquality._
 
 import TestHelper._
 import ParserHelper._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ComplexProcessTest extends FlatSpec with Matchers with Inside {
+class ComplexProcessTest extends AnyFlatSpec with Matchers with Inside {
 	"Abandon" should "handle simple xml test case without configuration" in {
 
 		val quiet = true
