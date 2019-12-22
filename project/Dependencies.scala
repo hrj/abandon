@@ -10,7 +10,7 @@ object Dependencies {
   val scalaXMLVersion = "1.2.0"
   val scalaParserCombinatorsVersion = "1.1.2"
   val scalaFXVersion = "12.0.1-R17"
-  val dirSuiteVersion = "0.30.2"
+  val dirSuiteVersion = "0.31.0"
 
   // Libraries
   val scalatest = "org.scalatest" %% "scalatest" % scalatestVersion
