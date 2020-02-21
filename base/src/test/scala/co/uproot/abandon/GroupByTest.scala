@@ -1,8 +1,9 @@
 package co.uproot.abandon
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GroupByTest extends FlatSpec with Matchers {
+class GroupByTest extends AnyFlatSpec with Matchers {
 
   behavior of "GroupBy"
   it should "handle unknown groupBy" in {

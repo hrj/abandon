@@ -2,14 +2,14 @@ package co.uproot.abandon
 
 import java.io.ByteArrayOutputStream
 
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
 import org.scalatest.Inside
 
 import TestHelper._
 import ParserHelper._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ProcessorTest extends FlatSpec with Matchers with Inside {
+class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
   val parser = new AbandonParser(None)
 
   "Processor" should "export a simple transaction in ledger Format" in {
