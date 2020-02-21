@@ -1,8 +1,9 @@
 package co.uproot.abandon
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CLIMainTest extends FlatSpec with Matchers {
+class CLIMainTest extends AnyFlatSpec with Matchers {
 
   behavior of "Abandon CLI with no-op args"
   it should "handle version" in {

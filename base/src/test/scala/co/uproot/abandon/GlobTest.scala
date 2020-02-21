@@ -1,10 +1,10 @@
 package co.uproot.abandon
 
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
 import org.scalatest.Inside
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class BasepathGlobTest extends FlatSpec with Matchers with Inside {
+class BasepathGlobTest extends AnyFlatSpec with Matchers with Inside {
   val basepath = "/foo/bar/"
 
   "basepathGlob" should "leave abs path alone" in {
@@ -57,7 +57,7 @@ class BasepathGlobTest extends FlatSpec with Matchers with Inside {
   }
 }
 
-class BasepathRegexTest extends FlatSpec with Matchers with Inside {
+class BasepathRegexTest extends AnyFlatSpec with Matchers with Inside {
   val basepath = "/foo/bar/"
 
   "basepathRegex" should "leave abs path alone" in {
@@ -117,7 +117,7 @@ class BasepathRegexTest extends FlatSpec with Matchers with Inside {
 }
 
 
-class WildcardInputTest extends FlatSpec with Matchers with Inside {
+class WildcardInputTest extends AnyFlatSpec with Matchers with Inside {
 
   /*
    * This tests expect working directory to be top level project dir.
