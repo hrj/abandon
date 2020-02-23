@@ -13,7 +13,7 @@ class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEa
 
   var appState: AppState = null
 
-  override def beforeEach() {
+  override def beforeEach() = {
     setupMocks()
   }
 
@@ -87,7 +87,7 @@ class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEa
   }
 
 
-  def setupMocks() {
+  def setupMocks() = {
     val accState = stub[AccountState]
     appState = new AppState(accState)
 

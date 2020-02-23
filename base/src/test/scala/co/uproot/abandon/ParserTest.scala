@@ -18,7 +18,7 @@ class ParserTest extends AnyFlatSpec with Matchers with Inside {
     val parseResult = parser.abandon(scanner(testInput))
     inside(parseResult) {
       case parser.Success(result, _) =>
-        result.entries should be('empty)
+        result.entries should be(Symbol("empty"))
     }
   }
 

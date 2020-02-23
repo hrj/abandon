@@ -176,7 +176,7 @@ object CLIApp {
       "CLI: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "];"
   }
 
-  private def runApp(cliConf: AbandonCLIConf) {
+  private def runApp(cliConf: AbandonCLIConf):Unit = {
     val settingsResult = SettingsHelper.getCompleteSettings(cliConf, buildId)
     settingsResult match {
       case Left(errorMsg) => throw new SettingsError(errorMsg)
@@ -255,7 +255,7 @@ object CLIApp {
     * @param args cli arguments
     */
   def run(args: Array[String]): Unit = {
-    val cliConf = new AbandonCLIConf(args)
+    val cliConf = new AbandonCLIConf(args.toIndexedSeq)
     cliConf.version("Version: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "]")
 
     try {
