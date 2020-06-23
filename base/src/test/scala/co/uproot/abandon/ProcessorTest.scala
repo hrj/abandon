@@ -22,11 +22,11 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
     inside(parseResult) {
       case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil, None)
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, true, Nil)
 
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
-        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        val ledgerRep = Reports.balanceExport(appState, settings, balSettings)
         inside(ledgerRep) {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
@@ -53,10 +53,10 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
       case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil, None)
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, false, Nil)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
-        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        val ledgerRep = Reports.balanceExport(appState, settings, balSettings)
         inside(ledgerRep) {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
@@ -83,10 +83,10 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
       case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil, None)
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), true, Nil)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, true, Nil)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
-        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        val ledgerRep = Reports.balanceExport(appState, settings, balSettings)
         inside(ledgerRep) {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
@@ -111,10 +111,10 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
       case parser.Success(scope, _) =>
         val appState = Processor.process(scope, Nil, None)
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, true, Nil)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
-        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        val ledgerRep = Reports.balanceExport(appState, settings, balSettings)
         ledgerRep should be (Nil)
     }
   }
@@ -135,10 +135,10 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, true, closure)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
-        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        val ledgerRep = Reports.balanceExport(appState, settings, balSettings)
         inside(ledgerRep) {
           case Seq(LedgerExportData(date, ledgerEntries), LedgerExportData(date1, ledgerEntries1)) =>
             date should be(Date(2013, 1, 1))
@@ -188,12 +188,12 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
         val closure1 = Seq(ClosureExportSettings(source, destination))
         val closure2 = Seq(ClosureExportSettings(source1, destination1))
         val closure = closure1 ++ closure2
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, false, closure)
 
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
         val ledgerRep = intercept[InputError] {
-          Reports.ledgerExport(appState, settings, balSettings)
+          Reports.balanceExport(appState, settings, balSettings)
         }
     }
 
@@ -214,10 +214,10 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
         val destination = "NewAccount"
         val closure = Seq(ClosureExportSettings(source, destination))
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, false, closure)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
-        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        val ledgerRep = Reports.balanceExport(appState, settings, balSettings)
 
         inside(ledgerRep) {
           case Seq(LedgerExportData(date, ledgerEntries), LedgerExportData(date1, ledgerEntries1)) =>
@@ -260,11 +260,11 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
         val destination = "Equity"
         val closure = Seq(ClosureExportSettings(source, destination))
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, closure)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, false, closure)
         val settings = Settings(Nil, Nil, Nil, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
         val ledgerRep = intercept[SourceDestinationClashError] {
-          Reports.ledgerExport(appState, settings, balSettings)
+          Reports.balanceExport(appState, settings, balSettings)
         }
 
     }
@@ -285,12 +285,12 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
         val alias = "MyBank"
         val accounts = Seq(AccountSettings(name, Some(alias)))
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), false, Nil)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, true, Nil)
         val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None, false, None, None)
 
         val appState = Processor.process(scope, settings.accounts, None)
 
-        val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
+        val ledgerRep = Reports.balanceExport(appState, settings, balSettings)
         inside(ledgerRep) {
           case Seq(LedgerExportData(date, ledgerEntries)) =>
             date should be(Date(2013, 1, 1))
@@ -330,7 +330,7 @@ class ProcessorTest extends AnyFlatSpec with Matchers with Inside {
         val alias = "MyBank"
         val accounts = Seq(AccountSettings(name, Some(alias)))
 
-        val balSettings = LedgerExportSettings(None, Seq("balSheet12.txt"), showZeroAmountAccounts = false, Nil)
+        val balSettings = BalanceExportSettings(LedgerType, None, Seq("balSheet12.txt"), None, true, Nil)
         val settings = Settings(Nil, Nil, accounts, Nil, ReportOptions(Nil), Seq(balSettings), None, quiet = false, None, None)
 
         val myOut = new ByteArrayOutputStream()

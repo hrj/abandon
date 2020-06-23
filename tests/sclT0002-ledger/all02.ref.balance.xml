@@ -8,10 +8,6 @@
             <account sum="-4344.10" cumulative="-4344.10" name="Assets:Current:BankAccount:Account1"> </account>
           </account>
           <account sum="-4770" cumulative="-4770" name="Assets:Current:Cash"> </account>
-          <account sum="0" cumulative="0" name="Assets:Current:Sundry_Debtors">
-            <account sum="0" cumulative="0" name="Assets:Current:Sundry_Debtors:Greeks"> </account>
-            <account sum="0" cumulative="0" name="Assets:Current:Sundry_Debtors:Vikings"> </account>
-          </account>
           <account sum="-3500" cumulative="-3500" name="Assets:Current:TDS"> </account>
         </account>
         <account sum="0" cumulative="-12000" name="Assets:Fixed">
@@ -22,7 +18,6 @@
       <account sum="0" cumulative="8500" name="Capital">
         <account sum="-1500" cumulative="-1500" name="Capital:Reserves_And_Surplus"> </account>
         <account sum="0" cumulative="10000" name="Capital:Share">
-          <account sum="0" cumulative="0" name="Capital:Share:Amy"> </account>
           <account sum="4000" cumulative="4000" name="Capital:Share:Bailey"> </account>
           <account sum="6000" cumulative="6000" name="Capital:Share:Hary"> </account>
         </account>
