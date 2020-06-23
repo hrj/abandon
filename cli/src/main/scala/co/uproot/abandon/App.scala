@@ -5,6 +5,8 @@ import java.nio.file.{Files, Paths}
 
 import co.uproot.abandon.Helper.maxElseZero
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
+import scala.NotImplementedError
+import scala.xml.Elem
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
   val writesToScreen = settings.writesToScreen(outFiles)
@@ -114,6 +116,53 @@ object CLIApp {
     }
   }
 
+  private def exportAsXML(reportWriter: ReportWriter, ledgerData: Seq[LedgerExportData], txnFilters: Option[TxnFilterStack]) = {
+    if (ledgerData.length > 1) {
+      throw new NotImplementedError("Balance report with closures exported as XML is not implemented yet.")
+    }
+
+    val data = ledgerData.headOption match {
+      case Some(head) =>
+        head.ledgerEntries.map(e => e.accountName -> e.amount).toMap
+      case None => ???
+    }
+    val accountsByPathLengths = data.groupBy(_._1.fullPath.length)
+    val maxPathLength = maxElseZero(accountsByPathLengths.keys)
+    val topLevelAccounts = accountsByPathLengths.get(1).getOrElse(Map())
+    def mkTreeLevel(prefix: Seq[String], n: Int): Seq[AccountTreeState] = {
+      if (n <= maxPathLength) {
+        val children = (n to maxPathLength).flatMap(i => accountsByPathLengths.get(i).getOrElse(Map()).keys.map(_.fullPath).filter(_.startsWith(prefix)).map(_.drop(prefix.length))).toSet
+        val (directChildren, inferredChildren) = children.partition(_.length == 1)
+        val directChildrenNames = directChildren.map(_.head)
+        val inferredChildrenNames = inferredChildren.map(_.head) diff directChildrenNames
+        val inferredChildrenTrees = inferredChildrenNames.toSeq.map(x => AccountTreeState(AccountName(prefix :+ x), Helper.Zero, mkTreeLevel(prefix :+ x, n + 1)))
+        val directChildrenTrees = directChildren.toSeq.map(x => AccountTreeState(AccountName(prefix ++ x), data(AccountName(prefix ++ x)), mkTreeLevel(prefix ++ x, n + 1)))
+        (inferredChildrenTrees ++ directChildrenTrees)
+      } else {
+        Nil
+      }
+    }
+    val tree = AccountTreeState(AccountName(Nil), Helper.Zero, mkTreeLevel(Nil, 1))
+    val balance: Elem =
+      <abandon>
+        {
+        txnFilters match {
+          case Some(txnFilter) => {
+            <info>
+              { txnFilter.xmlDescription }
+            </info>
+          }
+          case None => ;
+        }
+        }
+        <balance>
+          {tree.toXML}
+        </balance>
+      </abandon>
+
+    reportWriter.printXml(balance)
+  }
+
   private def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
 
     if (txnFilterTxt.nonEmpty) {
@@ -196,11 +245,16 @@ object CLIApp {
               }
             }
             exportSettings match {
-              case balSettings: LedgerExportSettings =>
-                val ledgerRep = Reports.ledgerExport(appState, settings, balSettings)
-                exportAsLedger(reportWriter, ledgerRep, FilterStackHelper.getFilterWarnings(settings.txnFilters, " "))
-              case xmlSettings: XmlExportSettings =>
-                val xmlData = Reports.xmlExport(appState, xmlSettings, settings.txnFilters)
+              case balSettings: BalanceExportSettings =>
+                val balanceExp = Reports.balanceExport(appState, settings, balSettings)
+                balSettings.exportFormat match {
+                  case LedgerType =>
+                    exportAsLedger(reportWriter, balanceExp, FilterStackHelper.getFilterWarnings(settings.txnFilters, " "))
+                  case XMLType =>
+                    exportAsXML(reportWriter, balanceExp, settings.txnFilters)
+                }
+              case journalSettings: JournalExportSettings =>
+                val xmlData = Reports.xmlExport(appState, journalSettings, settings.txnFilters)
                 reportWriter.printXml(xmlData)
               case _ => ???
             }

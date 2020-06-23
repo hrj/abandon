@@ -227,9 +227,9 @@ object Reports {
     * If a separate closure transaction is requested, this function returns two instances of LedgerExportData.
     * Else, a single instance of LedgerExportData is returned.
     */
-  def ledgerExport(state: AppState, settings: Settings, reportSettings: LedgerExportSettings): Seq[LedgerExportData] = {
+  def balanceExport(state: AppState, settings: Settings, reportSettings: BalanceExportSettings): Seq[LedgerExportData] = {
     if (reportSettings.accountMatch.isDefined) {
-      throw new NotImplementedError("Filtering of accounts is not yet implemented in ledger export. See https://github.com/hrj/abandon/issues/11")
+      throw new NotImplementedError("Filtering of accounts is not yet implemented in balance export. See https://github.com/hrj/abandon/issues/11")
     }
     val sortedGroup = state.accState.postGroups.sortBy(_.date.toInt)
     if (sortedGroup.isEmpty) {
@@ -289,7 +289,7 @@ object Reports {
 
   }
 
-  def xmlBalanceExport(state: AppState, exportSettings: XmlExportSettings, filterXML: Option[xml.Node]): xml.Node = {
+  def xmlBalanceExport(state: AppState, exportSettings: BalanceExportSettings, filterXML: Option[xml.Node]): xml.Node = {
     val balance: Elem =
       <abandon>
         {
@@ -307,13 +307,13 @@ object Reports {
         </balance>
       </abandon>
 
-    exportSettings.version match {
+    exportSettings.appVersion match {
       case Some(version) => addAttribute(balance, "version", version.id)
       case None => balance
     }
   }
 
-  def xmlJournalExport(state: AppState, exportSettings: XmlExportSettings, filterXML: Option[xml.Node]): xml.Node = {
+  def xmlJournalExport(state: AppState, exportSettings: JournalExportSettings, filterXML: Option[xml.Node]): xml.Node = {
     val journal: Elem =
       <abandon>
         {
@@ -346,7 +346,7 @@ object Reports {
         </journal>
       </abandon>
 
-    exportSettings.version match {
+    exportSettings.appVersion match {
       case Some(version) => addAttribute(journal, "version", version.id)
       case None => journal
     }
@@ -354,15 +354,15 @@ object Reports {
 
   def addAttribute(n: Elem, k: String, v: String) = n % new xml.UnprefixedAttribute(k, v, xml.Null)
 
-  def xmlExport(state: AppState, exportSettings: XmlExportSettings, txnFilters: Option[TxnFilterStack]): xml.Node = {
+  def xmlExport(state: AppState, exportSettings: ExportSettings, txnFilters: Option[TxnFilterStack]): xml.Node = {
     val filterXML: Option[xml.Node] = txnFilters match {
       case Some(filters) => Option(filters.xmlDescription)
       case None => None
     }
 
-    exportSettings.exportType match {
-      case JournalType => xmlJournalExport(state, exportSettings, filterXML)
-      case BalanceType => xmlBalanceExport(state, exportSettings, filterXML)
+    exportSettings match {
+      case jes: JournalExportSettings => xmlJournalExport(state, jes, filterXML)
+      case bes: BalanceExportSettings => xmlBalanceExport(state, bes, filterXML)
     }
   }
 }
