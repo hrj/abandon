@@ -4,7 +4,7 @@ import Keys._
 object Dependencies {
   // Versions
   val scalatestVersion = "3.2.1"
-  val scallopVersion = "3.5.0"
+  val scallopVersion = "3.5.1"
   val scalaMockVersion = "5.0.0"
   val configVersion = "1.4.0"
   val scalaXMLVersion = "1.3.0"
