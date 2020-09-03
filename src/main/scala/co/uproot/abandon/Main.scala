@@ -2,13 +2,16 @@ package co.uproot.abandon
 
 import java.net.{URL, URLClassLoader}
 
-object Main extends App {
+// object Main extends App {
+object Main {
 
   // if(args.headOption.getOrElse("") equals "-g") {
     // ensureJFXIsAvailable()
     // AbandonUI.main(args.tail)
   // } else {
+  def main(args: Array[String]) = {
     CLIApp.main(args)
+  }
   // }
 
   /*
