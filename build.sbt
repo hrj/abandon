@@ -4,7 +4,7 @@ lazy val commonSettings = Seq(
 
   organization := "in.co.uproot",
   version := "0.7.0",
-  scalaVersion := "2.13.1",
+  scalaVersion := "2.13.5",
   scalacOptions := List("-deprecation", "-opt:_"),
   wartremoverWarnings ++= Warts.allBut(Wart.ToString, Wart.Throw),
 
@@ -15,7 +15,6 @@ lazy val commonSettings = Seq(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
-
 )
 
 lazy val abandon = (project in file(".")).
