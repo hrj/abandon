@@ -15,7 +15,6 @@ lazy val commonSettings = Seq(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
-
 )
 
 lazy val abandon = (project in file(".")).
