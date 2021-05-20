@@ -4,7 +4,7 @@ addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.0")
 
 // addSbtPlugin("com.typesafe.sbt" % "sbt-proguard" % "0.2.2")
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.8.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.8.1")
 
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.2.7")
 
