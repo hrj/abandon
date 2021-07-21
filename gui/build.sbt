@@ -9,4 +9,4 @@ assemblyExcludedJars in assembly := {
   cp filter {_.data.getName == "jfxrt.jar"}
 }
 
-fork in run := true
+run / fork := true

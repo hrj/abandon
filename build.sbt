@@ -23,7 +23,7 @@ lazy val abandon = (project in file(".")).
   settings(commonSettings: _*).
   settings(
     name := "abandon",
-    fork in run := true,
+    run /fork := true,
     nativeImageOptions ++= List("--initialize-at-build-time", "--no-fallback", "-O2")
   )
   .enablePlugins(NativeImagePlugin)
