@@ -1,6 +1,6 @@
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "1.1.0")
 
-addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.1")
+addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.2")
 
 // addSbtPlugin("com.typesafe.sbt" % "sbt-proguard" % "0.2.2")
 
