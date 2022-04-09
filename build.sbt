@@ -33,7 +33,7 @@ lazy val base = (project in file("base")).
   settings(commonSettings: _*).
   settings(
     name := "abandon-base",
-    fork in run := true,
+    run / fork := true,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoPackage := "co.uproot.abandon",
@@ -47,7 +47,7 @@ lazy val cli = (project in file("cli")).
   settings(commonSettings: _*).
   settings(
     name := "abandon-cli",
-    fork in run := true,
+    run / fork := true,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoPackage := "co.uproot.abandon",
