@@ -2,20 +2,13 @@ package co.uproot.abandon
 
 import java.time.{LocalDate, Month}
 
-import org.scalamock.scalatest.MockFactory
 import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach with MockFactory with OneInstancePerTest {
+class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach with OneInstancePerTest {
 
-  class MockableDetailedPost extends DetailedPost(new AccountName(Seq()), 0, None, None)
-
-  var appState: AppState = null
-
-  override def beforeEach() = {
-    setupMocks()
-  }
+  private val appState: AppState = mkAppState()
 
   it should "return true on valid posts" in {
     val constraint = new DateRangeConstraint(
@@ -87,9 +80,9 @@ class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEa
   }
 
 
-  def setupMocks() = {
-    val accState = stub[AccountState]
-    appState = new AppState(accState)
+  def mkAppState() = {
+    val accState = new AccountState()
+    val appState = new AppState(accState)
 
     val postGroups: Vector[PostGroup] = (1 to 12).map(month => {
       val date = new Date(2013, month, 1)
@@ -99,6 +92,10 @@ class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEa
       postGroup
     }).toVector
 
-    (accState.postGroups _).when().returns(postGroups)
+    postGroups.foreach {pg =>
+      accState.updateAmounts(pg)
+    }
+
+    appState
   }
 }
