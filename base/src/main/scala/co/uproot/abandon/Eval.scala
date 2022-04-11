@@ -65,7 +65,7 @@ class EvaluationContext(scope: Scope, localDefs: Seq[Definition]) {
     }
   }
 
-  def evaluate[T](e: Expr)(implicit m: Manifest[T]):T = {
+  def evaluate[T](e: Expr)(implicit m: scala.reflect.ClassTag[T]):T = {
     // TODO: Expression can also have a position, and we can throw InputPosError
     evaluateInternal(e) match {
       case t:T => t
