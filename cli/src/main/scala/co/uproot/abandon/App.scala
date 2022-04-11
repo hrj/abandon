@@ -97,10 +97,7 @@ object CLIApp {
     val maxLeftLength = maxElseZero(left.map(_.length))
 
     def renderBoth(l: String, r: String) = "%-" + (maxLeftLength + 2) + "s%s" format (l, r)
-    val balRender = lines map {
-      case (left, right) => renderBoth(left, right)
-      case _ => ???
-    }
+    val balRender = lines map { (left, right) => renderBoth(left, right) }
     reportWriter.println(balRender.mkString("\n"))
     val totalLine = renderBoth(balanceReport.totalLeft, balanceReport.totalRight)
     reportWriter.println("─" * maxElseZero((balRender :+ totalLine).map(_.length)))
@@ -298,7 +295,6 @@ object CLIApp {
         } else {
           throw new InputError("Couldn't parse input")
         }
-      case _ => ???
     }
   }
 
