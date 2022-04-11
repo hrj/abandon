@@ -3,14 +3,27 @@ package co.uproot.abandon
 import scala.language.postfixOps
 import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
+import scala.util.parsing.combinator.syntactical.StdTokenParsers
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.ImplicitConversions
 import scala.util.parsing.input.Position
 import scala.util.parsing.input.PagedSeqReader
 import scala.util.parsing.input.PagedSeq
 
-object AbandonLexer extends StdLexical with ImplicitConversions {
+trait AbandonTokens extends util.parsing.combinator.token.StdTokens {
+  case object EOL extends Token {
+    def chars = "<eol>"
+  }
+
+  case class CommentToken(commentContents: String) extends Token {
+    def chars = commentContents
+  }
+
+}
+
+object AbandonLexer extends StdLexical with AbandonTokens with ImplicitConversions {
   import scala.util.parsing.input.CharArrayReader.EofCh
+
   override def token: Parser[Token] =
     //( '\"' ~ rep(charSeq | letter) ~ '\"' ^^ lift(StringLit)
     (string ^^ StringLit
@@ -24,14 +37,6 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
       | '\"' ~> failure("Unterminated string")
       | rep(letter) ^^ checkKeyword
       | failure("Illegal character"))
-
-  case object EOL extends Token {
-    def chars = "<eol>"
-  }
-
-  case class CommentToken(commentContents: String) extends Token {
-    def chars = commentContents
-  }
 
   def checkKeyword(xs: List[Any]) = {
     val strRep = xs mkString ""
@@ -98,8 +103,15 @@ object AbandonLexer extends StdLexical with ImplicitConversions {
 
 }
 
-class AbandonParser(inputPathOpt: Option[String]) extends StandardTokenParsers with PackratParsers {
-  override val lexical = AbandonLexer
+class AbandonParser(inputPathOpt: Option[String]) extends StdTokenParsers with PackratParsers {
+  type Tokens = AbandonTokens
+  val lexical: AbandonLexer.type = AbandonLexer
+
+  //an implicit keyword function that gives a warning when a given word is not in the reserved/delimiters list
+  override implicit def keyword(chars : String): Parser[String] =
+    if(lexical.reserved.contains(chars) || lexical.delimiters.contains(chars)) super.keyword(chars)
+    else failure("You are trying to parse \""+chars+"\", but it is neither contained in the delimiters list, nor in the reserved keyword list of your lexical object")
+
   private val defKeyword = "def"
   private val accountKeyword = "account"
   private val includeKeyword = "include"
