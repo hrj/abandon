@@ -18,5 +18,5 @@ object Dependencies {
   val scalaXML = "org.scala-lang.modules" %% "scala-xml" % scalaXMLVersion
   val scalaParserCombinators = "org.scala-lang.modules" %% "scala-parser-combinators" % scalaParserCombinatorsVersion
   val scalaFX = "org.scalafx" %% "scalafx" % scalaFXVersion
-  val dirSuite = "fi.e257.testing" %% "dirsuite" % dirSuiteVersion
+  // val dirSuite = ("fi.e257.testing" %% "dirsuite" % dirSuiteVersion)
 }

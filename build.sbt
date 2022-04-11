@@ -4,8 +4,8 @@ lazy val commonSettings = Seq(
 
   organization := "in.co.uproot",
   version := "0.7.0",
-  scalaVersion := "2.13.8",
-  scalacOptions := List("-deprecation", "-opt:_"),
+  scalaVersion := "3.1.2",
+  scalacOptions := List("-deprecation"),
   wartremoverWarnings ++= Warts.allBut(Wart.ToString, Wart.Throw),
 
   publishTo := {
@@ -18,7 +18,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val abandon = (project in file(".")).
-  aggregate(base, cli).
+  aggregate(betterFilesCore, dirsuite, base, cli).
   dependsOn(base, cli).
   settings(commonSettings: _*).
   settings(
@@ -28,8 +28,23 @@ lazy val abandon = (project in file(".")).
   )
   .enablePlugins(NativeImagePlugin)
 
+lazy val betterFilesCore = (project in file("better-files-core")).
+  settings(commonSettings: _*).
+  settings(
+    name := "better-files",
+  )
+
+lazy val dirsuite = (project in file("dirsuite")).
+  dependsOn(betterFilesCore).
+  settings(commonSettings: _*).
+  settings(
+    name := "dirsuite",
+    libraryDependencies += Dependencies.scalatest
+  )
+
 lazy val base = (project in file("base")).
   enablePlugins(BuildInfoPlugin).
+  dependsOn(dirsuite).
   settings(commonSettings: _*).
   settings(
     name := "abandon-base",
