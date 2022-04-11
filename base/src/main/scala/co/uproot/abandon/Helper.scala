@@ -6,7 +6,7 @@ object Helper {
   def sum(s: Iterable[BigDecimal]) = s.foldLeft(Zero)(_ + _)
   def sumDeltas(s: Iterable[DetailedPost]) = s.foldLeft(Zero)(_ + _.delta)
 
-  def filterByType[T](s: Seq[_ >: T])(implicit m: Manifest[T]) = s.collect({ case t: T => t })
+  def filterByType[T](s: Seq[_ >: T])(implicit classTag: scala.reflect.ClassTag[T]) = s.collect({ case t: T => t })
 
   def bold(s: String) = Console.BOLD + s + Console.RESET
   def warn(s: String) = Console.RED + s + Console.RESET

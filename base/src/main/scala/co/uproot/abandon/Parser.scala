@@ -26,12 +26,12 @@ object AbandonLexer extends StdLexical with AbandonTokens with ImplicitConversio
 
   override def token: Parser[Token] =
     //( '\"' ~ rep(charSeq | letter) ~ '\"' ^^ lift(StringLit)
-    (string ^^ StringLit
+    (string ^^ { s => StringLit(s) }
       | identChar ~ rep(identChar | digit) ^^ { case first ~ rest => processIdent(first :: rest mkString "") }
       | number ~ letter ^^ { case n ~ l => ErrorToken("Invalid number format : " + n + l) }
-      | number ^^ NumericLit
+      | number ^^ {n => NumericLit(n)}
       | eol ^^^ EOL
-      | comment ^^ { case commentContents => CommentToken(commentContents.toString) }
+      | comment ^^ { commentContents => CommentToken(commentContents.toString) }
       | EofCh ^^^ EOF
       | delim
       | '\"' ~> failure("Unterminated string")

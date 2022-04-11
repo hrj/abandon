@@ -207,6 +207,7 @@ object SettingsHelper {
           case ParserHelper.parser.Success(dateBound, _) => Option(dateBound)
           case ParserHelper.parser.NoSuccess(_, _) =>
             throw new ConfigException.BadValue(config.origin, name, "expected a date bound of the form: <date> <inclusive|exclusive>")
+          case _ => ???
         }
       case None => None
     }
