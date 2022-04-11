@@ -17,7 +17,7 @@ class CliAppTests extends DefaultArgsDirSuite {
   /**
     * OK Cases (should succeed)
     */
-  runDirSuiteTestCases(basedir, Glob("sclT*/**.exec")) { args: Array[String] =>
+  runDirSuiteTestCases(basedir, Glob("sclT*/**.exec")) { (args: Array[String]) =>
     assertResult(CLIApp.SUCCEEDED) {
       CLIApp.mainStatus(args)
     }
@@ -27,7 +27,7 @@ class CliAppTests extends DefaultArgsDirSuite {
     * Error cases (should fail)
     * Pending bugs are kept inside bugs* so don't match that
     */
-  runDirSuiteTestCases(basedir, Glob("errors/[A-Z]*/**.exec")) { args: Array[String] =>
+  runDirSuiteTestCases(basedir, Glob("errors/[A-Z]*/**.exec")) { (args: Array[String]) =>
     assertResult(CLIApp.FAILED) {
       CLIApp.mainStatus(args)
     }
@@ -40,7 +40,7 @@ class CliStdoutTests extends StdoutArgsDirSuite {
   /**
     * OK Cases with stdout/stderr output (should succeed)
     */
-  runDirSuiteTestCases(basedir, Glob("sclX*/**.exec")) { args: Array[String] =>
+  runDirSuiteTestCases(basedir, Glob("sclX*/**.exec")) { (args: Array[String]) =>
     assertResult(CLIApp.SUCCEEDED) {
       Console.withOut(new FileOutputStream(args(0))) {
         Console.withErr(new FileOutputStream(args(1))) {
@@ -62,25 +62,25 @@ class CliAppErrors extends DefaultArgsDirSuite {
    * OK errors follows
    */
 
-  runDirSuiteTestCases(errorRoot, Glob("InputFileNotFoundError/**.exec")) { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("InputFileNotFoundError/**.exec")) { (args: Array[String]) =>
     assertThrows[InputFileNotFoundError] {
       CLIApp.run(args)
     }
   }
 
-  runDirSuiteTestCases(errorRoot, Glob("InputError/**.exec")) { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("InputError/**.exec")) { (args: Array[String]) =>
     assertThrows[InputError] {
       CLIApp.run(args)
     }
   }
 
-  runDirSuiteTestCases(errorRoot, Glob("SettingsError/**.exec")) { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("SettingsError/**.exec")) { (args: Array[String]) =>
     assertThrows[SettingsError] {
       CLIApp.run(args)
     }
   }
 
-  runDirSuiteTestCases(errorRoot, Glob("ConstraintError/**.exec")) { args: Array[String] =>
+  runDirSuiteTestCases(errorRoot, Glob("ConstraintError/**.exec")) { (args: Array[String]) =>
     assertThrows[ConstraintError] {
       CLIApp.run(args)
     }

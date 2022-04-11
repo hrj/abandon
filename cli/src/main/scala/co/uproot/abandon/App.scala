@@ -149,7 +149,7 @@ object CLIApp {
         txnFilters match {
           case Some(txnFilter) => {
             <info>
-              { txnFilter.xmlDescription }
+              { txnFilter.xmlDescription() }
             </info>
           }
           case None => ;
@@ -327,7 +327,7 @@ object CLIApp {
 
   def mainStatus(args: Array[String]): Int = {
     try {
-        co.uproot.abandon.CLIApp.run(args)
+      co.uproot.abandon.CLIApp.run(args)
       SUCCEEDED
     } catch {
       case ex: AssertionError =>

@@ -238,13 +238,13 @@ case class ANDTxnFilterStack(filterStack: Seq[TransactionFilter]) extends TxnFil
   }
   override def filterDescriptions() = {
     assert(!filterStack.isEmpty)
-    filterStack.map({case f => f.description})
+    filterStack.map({case f => f.description()})
   }
   override def xmlDescription(): xml.Node = {
     assert(!filterStack.isEmpty)
     <filters type="every">
     {
-      filterStack.map({ filt => filt.xmlDescription })
+      filterStack.map({ filt => filt.xmlDescription() })
     }
     </filters>
   }

@@ -356,7 +356,7 @@ object Reports {
 
   def xmlExport(state: AppState, exportSettings: ExportSettings, txnFilters: Option[TxnFilterStack]): xml.Node = {
     val filterXML: Option[xml.Node] = txnFilters match {
-      case Some(filters) => Option(filters.xmlDescription)
+      case Some(filters) => Option(filters.xmlDescription())
       case None => None
     }
 

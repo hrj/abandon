@@ -52,7 +52,7 @@ object FileUtils {
    */
   def basepathGlob(glob: String, basepath: String) = {
     // globStartChar := '*' | '?' | '{' | '[' | os.pathSep | '.'
-    val pathSepRgx = getEscapedFileSeparatorChar
+    val pathSepRgx = getEscapedFileSeparatorChar()
     val regex = "^glob:((\\*)|(\\?)|(\\{)|(\\[)|(" + pathSepRgx + ")|(\\.)).*"
 
     if (glob.matches(regex)) {
@@ -66,7 +66,7 @@ object FileUtils {
   def basepathRegex(pathRegex: String, basepath: String) = {
     // regexStartChar := '\' | '[' | '.' | '^' | '$' | '(' | os.pathSep
 
-    val pathSepRgx = getEscapedFileSeparatorChar
+    val pathSepRgx = getEscapedFileSeparatorChar()
     val regex = "^regex:((\\\\)|(\\[)|(\\.)|(\\^)|(\\$)|(\\()|(" + pathSepRgx + ")).*"
 
     if (pathRegex.matches(regex)) {

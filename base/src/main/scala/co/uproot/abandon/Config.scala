@@ -6,6 +6,10 @@ import java.time.format.DateTimeParseException
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import org.rogach.scallop.ScallopConf
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
+import org.rogach.scallop.stringListConverter
+import org.rogach.scallop.stringPropsConverter
+import org.rogach.scallop.flagConverter
+import org.rogach.scallop.stringConverter
 
 import scala.jdk.CollectionConverters._
 
@@ -18,15 +22,15 @@ case class VersionId(id: String)
 class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   override def onError(e: Throwable): Unit = e match {
     case ex: ScallopException => {
-      printHelp
+      printHelp()
       throw e
     }
     case Help("") => {
-      builder.printHelp
+      builder.printHelp()
       throw e
     }
     case Help(subname) => {
-      builder.findSubbuilder(subname).get.printHelp
+      builder.findSubbuilder(subname).get.printHelp()
       throw e
     }
     case Version => {
