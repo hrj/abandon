@@ -368,7 +368,7 @@ case class EqualsConstraint(val onDate: Date, val accName: String, val expr: Exp
   }
 
   def isNotLaterThan(post: DetailedPost, that: Date) = {
-    DateOrdering.compare(post.date, that) < 0
+    DateOrdering.compare(post.date, that) <= 0
   }
 }
 
