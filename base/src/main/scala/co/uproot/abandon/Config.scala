@@ -192,10 +192,37 @@ object SettingsHelper {
 
   // For now we only support simple constraints
   def makeEodConstraints(config: Config) = {
-    val accName = config.getString("expr")
+    val expr = config.getString("expr")
     config.getString("constraint") match {
-      case "positive" => PositiveConstraint(accName)
-      case "negative" => NegativeConstraint(accName)
+      case "positive" => PositiveConstraint(expr)
+      case "negative" => NegativeConstraint(expr)
+      case "equals" => {
+        val onDateStr = config.getString("onDate")
+        val accName = config.getString("account")
+        val onDate = parseDate(config, onDateStr)
+        val expression = parseExpr(config, expr)
+        EqualsConstraint(onDate, accName, expression)
+      }
+    }
+  }
+
+  private def parseExpr(config: Config, exprStr: String) = {
+    ParserHelper.parser.numericParser(ParserHelper.parser.scanner(exprStr)) match {
+      case ParserHelper.parser.Success(expr, _) => expr
+      case ParserHelper.parser.NoSuccess(_, _) =>
+        throw new ConfigException.BadValue(config.origin, "onDate", "expected a date")
+      case _ =>
+        throw new ConfigException.BadValue(config.origin, "onDate", "expected a date")
+    }
+  }
+
+  private def parseDate(config: Config, dateStr: String) = {
+    ParserHelper.parser.dateExpr(ParserHelper.scanner(dateStr)) match {
+      case ParserHelper.parser.Success(date, _) => date
+      case ParserHelper.parser.NoSuccess(_, _) =>
+        throw new ConfigException.BadValue(config.origin, "onDate", "expected a date")
+      case _ =>
+        throw new ConfigException.BadValue(config.origin, "onDate", "expected a date")
     }
   }
 
@@ -324,6 +351,25 @@ case class PositiveConstraint(val accName: String) extends Constraint with SignC
 case class NegativeConstraint(val accName: String) extends Constraint with SignChecker {
   val correctSign = (x: BigDecimal) => x <= Helper.Zero
   val signStr = "negative"
+}
+
+case class EqualsConstraint(val onDate: Date, val accName: String, val expr: Expr) extends Constraint {
+  def check(appState: AppState) = {
+    val posts = appState.accState.posts.filter(post => post.name.fullPathStr == accName && isNotLaterThan(post, onDate))
+    val sum = Helper.sumDeltas(posts)
+
+    val rootScope = Scope(Nil, None)
+    val context = new EvaluationContext(rootScope, Nil)
+    val exprValue = context.evaluateBD(expr)
+    if (sum != exprValue) {
+      throw new ConstraintError(s"$accName was not equal to ${exprValue} on $onDate. Was $sum")
+    }
+    true
+  }
+
+  def isNotLaterThan(post: DetailedPost, that: Date) = {
+    DateOrdering.compare(post.date, that) < 0
+  }
 }
 
 case class DateBound(date: Date, inclusive: Boolean) {
