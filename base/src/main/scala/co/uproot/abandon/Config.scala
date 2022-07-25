@@ -362,7 +362,7 @@ case class EqualsConstraint(val onDate: Date, val accName: String, val expr: Exp
     val context = new EvaluationContext(rootScope, Nil)
     val exprValue = context.evaluateBD(expr)
     if (sum != exprValue) {
-      throw new ConstraintError(s"$accName was not equal to ${exprValue} on $onDate. Was $sum")
+      throw new ConstraintError(s"$accName was not equal to ${exprValue} on $onDate. Was $sum. Difference = ${exprValue - sum}")
     }
     true
   }
