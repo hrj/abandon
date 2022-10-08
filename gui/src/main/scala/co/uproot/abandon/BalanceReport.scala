@@ -1,6 +1,7 @@
 package co.uproot.abandon
 
-import scalafx.Includes._
+import javafx.scene.control.TreeView
+import scalafx.Includes.*
 import scalafx.scene.layout.HBox
 import scalafx.scene.control.ListView
 import scalafx.scene.layout.Priority
@@ -18,7 +19,7 @@ object BalanceUIReport extends UIReport {
 
     class BalanceView(entries: Seq[BalanceReportEntry]) extends ListView(entries) {
       hgrow = Priority.Always
-      onKeyTyped = { e: KeyEvent =>
+      onKeyTyped = { (e: KeyEvent) =>
         // println ("Typed key", e.character, e.code, jfxKeyCode.ENTER, e.delegate.code)
         // if (e.code equals jfxKeyCode.ENTER) {
         if (e.character equals "\r") {
@@ -28,14 +29,14 @@ object BalanceUIReport extends UIReport {
           val regSettings =
             RegisterReportSettings(
               selectedAccountNames.map(_.fullPathStr).mkString(","),
-              Some(selectedAccountPatterns),
+              Some(selectedAccountPatterns.toSeq),
               Nil,
               GroupByMonth()
             )
           CurrReports.addReport(appState, settings, regSettings, canClose = true)
         }
       }
-      cellFactory = { v =>
+      cellFactory = { (v: ListView[BalanceReportEntry]) =>
         val delegate = new javafx.scene.control.ListCell[BalanceReportEntry]() {
           override def updateItem(t: BalanceReportEntry, empty: Boolean) = {
             super.updateItem(t, empty)
