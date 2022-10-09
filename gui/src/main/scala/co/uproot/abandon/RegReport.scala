@@ -46,7 +46,7 @@ object RegUIReport extends UIReport {
     val txns = selectedItemOpt.map(si => getNestedTxns(si)).getOrElse(Nil)
     txnRootSP.content = TxnUIReport.mkTxnView(txns)
     txStage.title = "Transactions for " + selectedFilterOpt.get.heading
-    txStage.show
+    txStage.show()
   }
 
   private def findMatchingEntry(entry: TreeItem[RegisterReportEntry], filter: SelectionFilter):Option[javafx.scene.control.TreeItem[RegisterReportEntry]] = {
@@ -77,7 +77,7 @@ object RegUIReport extends UIReport {
 
     new TreeView(reportRoot) {
       styleClass += styleClassName
-      onKeyTyped = { e: KeyEvent =>
+      onKeyTyped = { (e: KeyEvent) =>
         if (e.character equals "\r") {
           val selectedItemOpt = selectionModel().getSelectedItems().headOption
           selectedFilterOpt = selectedItemOpt map {selectedItem =>
@@ -91,7 +91,7 @@ object RegUIReport extends UIReport {
           showTransactions(selectedItemOpt)
         }
       }
-      cellFactory = { v =>
+      val callback: TreeView[RegisterReportEntry] => TreeCell[RegisterReportEntry] = { (v: TreeView[RegisterReportEntry]) =>
         val delegate = new javafx.scene.control.TreeCell[RegisterReportEntry]() {
           override def updateItem(t: RegisterReportEntry, empty: Boolean) = {
             super.updateItem(t, empty)
@@ -100,6 +100,8 @@ object RegUIReport extends UIReport {
         }
         new TreeCell(delegate)
       }
+
+      cellFactory = callback
     }
   }
 
