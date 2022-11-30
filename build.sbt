@@ -75,7 +75,7 @@ lazy val gui = (project in file("gui")).
   settings(commonSettings: _*).
   settings(
     name := "abandon-gui",
-    fork in run := true,
+    run / fork := true,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoPackage := "co.uproot.abandon",
