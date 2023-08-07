@@ -6,7 +6,7 @@ addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.4")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.8")
 
-addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.3.9")
+addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.3.10")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.1.3")
 
