@@ -16,3 +16,4 @@ project/target/
 /gui/.cache-tests
 /tests/**/out.*
 /**/.idea/
+/examples/complete/reports/
