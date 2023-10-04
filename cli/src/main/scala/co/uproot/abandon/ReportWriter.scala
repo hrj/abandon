@@ -5,9 +5,9 @@ import java.nio.file.{Files, Paths}
 
 
 final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
-  val writesToScreen = settings.writesToScreen(outFiles)
-  val filePaths = settings.getConfigRelativePaths(outFiles)
-  val fileWriters = filePaths.map(pathStr =>  {
+  val writesToScreen: Boolean = settings.writesToScreen(outFiles)
+  val filePaths: Seq[String] = settings.getConfigRelativePaths(outFiles)
+  private val fileWriters = filePaths.map(pathStr =>  {
     val path = Paths.get(pathStr).normalize
     val parentPath = path.getParent
     if (parentPath != null) {
@@ -27,19 +27,19 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
   })
 
-  def startCodeBlock() = {
+  def startCodeBlock(): Unit = {
     fileWriters foreach { fileWriter =>
       fileWriter.write("```\n")
     }
   }
 
-  def endCodeBlock() = {
+  def endCodeBlock(): Unit = {
     fileWriters foreach { fileWriter =>
       fileWriter.write("```\n")
     }
   }
 
-  def printHeading(head: String) = {
+  def printHeading(head: String): Unit = {
     fileWriters foreach { fileWriter =>
       fileWriter.write(head + "\n\n")
     }
@@ -49,7 +49,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
   }
 
-  def println(s: String*) = {
+  def println(s: String*): Unit = {
     fileWriters foreach { fileWriter =>
       s.foreach(str => fileWriter.write(str))
       fileWriter.write('\n')
@@ -61,7 +61,7 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
   }
 
-  def printXml(x: xml.Node) = {
+  def printXml(x: xml.Node): Unit = {
     val sb = new StringBuilder
     val pp = new xml.PrettyPrinter(120, 2)
     pp.format(x, sb)
@@ -76,9 +76,9 @@ final class ReportWriter(settings: Settings, outFiles: Seq[String]) {
     }
   }
 
-  def close = {
+  def close(): Unit = {
     fileWriters foreach { fileWriter =>
-      fileWriter.close
+      fileWriter.close()
     }
     Console.flush
   }

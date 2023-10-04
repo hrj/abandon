@@ -6,7 +6,7 @@ import scala.NotImplementedError
 import scala.xml.Elem
 
 object CLIApp {
-  private def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport) = {
+  private def printBalReport(reportWriter: ReportWriter, balanceReport: BalanceReport): Unit = {
     val left = balanceReport.leftEntries.map(_.render)
     val right = balanceReport.rightEntries.map(_.render)
 
@@ -21,7 +21,7 @@ object CLIApp {
     reportWriter.println(totalLine)
   }
 
-  private def printRegReport(reportWriter: ReportWriter, regReport: Seq[RegisterReportGroup]) = {
+  private def printRegReport(reportWriter: ReportWriter, regReport: Seq[RegisterReportGroup]): Unit = {
     regReport foreach { reportGroup =>
       reportWriter.println(reportGroup.groupTitle)
       reportGroup.entries foreach { e =>
@@ -30,7 +30,7 @@ object CLIApp {
     }
   }
 
-  private def exportAsXML(reportWriter: ReportWriter, ledgerData: Seq[LedgerExportData], txnFilters: Option[TxnFilterStack]) = {
+  private def exportAsXML(reportWriter: ReportWriter, ledgerData: Seq[LedgerExportData], txnFilters: Option[TxnFilterStack]): Unit = {
     if (ledgerData.length > 1) {
       throw new NotImplementedError("Balance report with closures exported as XML is not implemented yet.")
     }
@@ -42,7 +42,7 @@ object CLIApp {
     }
     val accountsByPathLengths = data.groupBy(_._1.fullPath.length)
     val maxPathLength = maxElseZero(accountsByPathLengths.keys)
-    val topLevelAccounts = accountsByPathLengths.get(1).getOrElse(Map())
+    // val topLevelAccounts = accountsByPathLengths.get(1).getOrElse(Map())
     def mkTreeLevel(prefix: Seq[String], n: Int): Seq[AccountTreeState] = {
       if (n <= maxPathLength) {
         val children = (n to maxPathLength).flatMap(i => accountsByPathLengths.get(i).getOrElse(Map()).keys.map(_.fullPath).filter(_.startsWith(prefix)).map(_.drop(prefix.length))).toSet
@@ -77,7 +77,7 @@ object CLIApp {
     reportWriter.printXml(balance)
   }
 
-  private def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]) = {
+  private def exportAsLedger(reportWriter: ReportWriter, ledgerRep: Seq[LedgerExportData], txnFilterTxt: List[String]): Unit = {
 
     if (txnFilterTxt.nonEmpty) {
       reportWriter.println("; ACTIVE FILTER")
@@ -96,7 +96,7 @@ object CLIApp {
     }
   }
 
-  private def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]) = {
+  private def printBookReport(reportWriter: ReportWriter, bookReportSettings: BookReportSettings, bookReport: Seq[RegisterReportGroup]): Unit = {
     val txnIndent = " " * 49
 
     reportWriter.println("Account Name: " + bookReportSettings.account + "\n")
@@ -134,7 +134,7 @@ object CLIApp {
     reportWriter.endCodeBlock()
   }
 
-  def buildId: String = {
+  private def buildId: String = {
     "Base: " + BaseBuildInfo.version + " [" + BaseBuildInfo.builtAtString + "];" +
       "CLI: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "];"
   }
@@ -147,7 +147,7 @@ object CLIApp {
         val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
         if (!parseError) {
           SettingsHelper.ensureInputProtection(processedFiles, settings)
-          val txnFilters = None
+          // val txnFilters = None
           val appState = Processor.process(astEntries,settings.accounts, settings.txnFilters)
           Processor.checkConstaints(appState, settings.constraints)
           settings.exports.foreach { exportSettings =>
@@ -172,7 +172,7 @@ object CLIApp {
                 reportWriter.printXml(xmlData)
               case _ => ???
             }
-            reportWriter.close
+            reportWriter.close()
           }
           settings.reports.foreach { reportSettings =>
             val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
@@ -207,7 +207,7 @@ object CLIApp {
               case _ => ???
             }
 
-            reportWriter.close
+            reportWriter.close()
           }
         } else {
           throw new InputError("Couldn't parse input")
@@ -270,7 +270,7 @@ object CLIApp {
     }
   }
 
-  def printErrAndFail(msg: String, exOpt: Option[Throwable]): Int = {
+  private def printErrAndFail(msg: String, exOpt: Option[Throwable]): Int = {
     println(Console.RED + Console.BOLD + msg + Console.RESET)
     exOpt match {
       case Some(ex) => ex.printStackTrace(Console.out)
