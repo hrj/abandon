@@ -186,7 +186,7 @@ object SettingsHelper {
         case e: ConfigException => Left(e.getMessage)
       }
     } else {
-      Left("Config file not found: " + configFileName)
+      Left(s"Config file not found: $configFileName. PWD is ${System.getProperty("user.dir")}")
     }
   }
 
