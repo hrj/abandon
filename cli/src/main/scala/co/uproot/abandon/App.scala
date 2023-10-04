@@ -240,7 +240,7 @@ object CLIApp {
 
   def mainStatus(args: Array[String]): Int = {
     try {
-      co.uproot.abandon.CLIApp.run(args)
+      run(args)
       SUCCEEDED
     } catch {
       case ex: AssertionError =>
