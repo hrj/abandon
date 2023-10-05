@@ -31,7 +31,7 @@ case class AccountBalance(name: AccountName, openingBalance: BigDecimal, closing
 }
 
 object WebAPI {
-  def execute(jes: JournalExportSettings, startDate: Date, appState: AppState, filterDescription: Option[String]): Unit = {
+  def execute(jes: JournalExportSettings, startDate: Date, appState: AppState, filterDescription: Option[String]): Array[Char] = {
     // TODO: show filterDescription in output
     val accState = appState.accState
     // TODO: Apply filter from settings, if not already applied
@@ -50,7 +50,7 @@ object WebAPI {
     execute(startDate, cookedPosts, accTree)
   }
 
-  private def execute(startDate: Date, posts: Seq[CookedPost], accTree: AccountTreeState): Unit = {
+  private def execute(startDate: Date, posts: Seq[CookedPost], accTree: AccountTreeState): Array[Char] = {
     val (currPosts, prevPosts) = posts.partition(_.date.toInt >= startDate.toInt)
     val allAccountNames = posts.map(_.name).toSet
     val sortedAllAccountNames = allAccountNames.toSeq.sorted
@@ -167,10 +167,7 @@ object WebAPI {
       "accountTxns" -> accTxnsReport
     )
 
-    val writer = FileWriter("web.json")
-    writer.write(serializeJSON(fullReport))
-    writer.close()
-
+    serializeJSON(fullReport)
   }
 
   private def serializeJSON(any: Any): Array[Char] = {

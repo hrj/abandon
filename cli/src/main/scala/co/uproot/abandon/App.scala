@@ -1,7 +1,11 @@
 package co.uproot.abandon
 
 import co.uproot.abandon.Helper.maxElseZero
+import co.uproot.abandon.web.WebAPI
+import org.limium.picoserve.{Handler, Server}
+import org.limium.picoserve.Server.{ByteResponse, StringResponse}
 import org.rogach.scallop.exceptions.{Help, ScallopException, Version}
+
 import scala.NotImplementedError
 import scala.xml.Elem
 
@@ -209,11 +213,59 @@ object CLIApp {
 
             reportWriter.close()
           }
+          // TODO: define separate settings for web, currently using journalExportSettings
+          settings.exports.foreach(_ match {
+            case jes: JournalExportSettings =>
+              val startDate = Date(2012,4,1)    // TODO
+              val filterDescription = settings.txnFilters.map(_.description())
+
+              val fullReportBytes = WebAPI.execute(jes, startDate, appState, filterDescription)
+
+              val server = Server.builder()
+                .port (9000)
+                .GET ("/api/", _ => {
+                  val msg = String(fullReportBytes)
+                  new StringResponse (200, msg)
+                })
+                .handle(staticHandler)
+                .build ()
+
+              server.start ()
+
+              var done = false
+              while (!done) {
+                val line = io.StdIn.readLine("Type [Q] or [quit] to exit: ")
+                done = (line == "Q") || (line.toLowerCase == "quit")
+              }
+              println ("Exiting")
+
+            case _ => false
+          })
         } else {
           throw new InputError("Couldn't parse input")
         }
     }
   }
+
+  private val staticHandler = Handler("/", "GET", request => {
+    val path = request.getPath()
+    val resName = "/frontend/build/" + (if (path == "/") "index.html" else path.tail)
+    val resourceStream = this.getClass.getResourceAsStream(resName)
+    if (resourceStream != null) {
+      val bytes = resourceStream.readAllBytes()
+      val contentType = if (resName.endsWith(".js")) {
+        "application/javascript"
+      } else if (resName.endsWith(".html")) {
+        "text/html"
+      } else if (resName.endsWith(".css")) {
+        "text/css"
+      } else "text/plain"
+
+      new ByteResponse(200, bytes, java.util.Map.of("Content-type", java.util.List.of(contentType)))
+    } else {
+      new StringResponse(404, """{ "error": "not found"} """)
+    }
+  })
 
   /**
     * This runs the app, and throws errors and exceptions in case of malfunction.
