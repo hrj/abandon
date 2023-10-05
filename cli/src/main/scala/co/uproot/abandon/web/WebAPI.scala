@@ -152,7 +152,6 @@ object WebAPI {
     updateAccTxnReport(accTree)
 
     val fullReport = Map(
-      "txns" -> Array[String](),
       "accountBalances" -> balReport,
       "accountTxns" -> accTxnsReport
     )
