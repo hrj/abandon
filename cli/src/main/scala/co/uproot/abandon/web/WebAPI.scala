@@ -17,6 +17,19 @@ case class AccountDetails(name: AccountName, openingBalance: BigDecimal, closing
 
 case class AccountSemiDetails(name: String, debitSubTotal: Option[BigDecimal], creditSubTotal: Option[BigDecimal])
 
+case class AccountBalance(name: AccountName, openingBalance: BigDecimal, closingBalance: BigDecimal, debitSubTotal: BigDecimal, creditSubTotal: BigDecimal, childBalances: Array[AccountBalance]) {
+  def toMap: Map[String, Any] = {
+    Map(
+      "name" -> name.name,
+      "opening" -> openingBalance,
+      "closing" -> closingBalance,
+      "debit" -> debitSubTotal,
+      "credit" -> creditSubTotal,
+      "children" -> childBalances.map(_.toMap).toArray,
+    )
+  }
+}
+
 object WebAPI {
   def execute(jes: JournalExportSettings, startDate: Date, appState: AppState, filterDescription: Option[String]): Unit = {
     // TODO: show filterDescription in output
@@ -61,17 +74,15 @@ object WebAPI {
       AccountDetails(AccountName(fullPath), openingBalance, closingBalance, debitSubTotal, creditSubTotal, gPosts)
     }
 
-    def mkBalanceReport(node: AccountTreeState): Map[String, Any] = {
+    def mkBalanceReport(node: AccountTreeState): AccountBalance = {
       val name = node.name
       val details = getDetails(name.fullPathStr)
-      Map(
-        "name" -> name.name,
-        "opening" -> details.openingBalance,
-        "closing" -> details.closingBalance,
-        "debit" -> details.debitSubTotal,
-        "credit" -> details.creditSubTotal,
-        "children" -> node.childStates.map(mkBalanceReport).toArray,
-      )
+      val childBalances = node.childStates.map(mkBalanceReport).toArray
+      val totalOpening = details.openingBalance + childBalances.map(_.openingBalance).sum
+      val totalClosing = details.closingBalance + childBalances.map(_.closingBalance).sum
+      val totalDebits = details.debitSubTotal + childBalances.map(_.debitSubTotal).sum
+      val totalCredits = details.creditSubTotal + childBalances.map(_.creditSubTotal).sum
+      AccountBalance(name, totalOpening, totalClosing, totalDebits, totalCredits, childBalances)
     }
 
     var accTxnsReport = Map[String, Any]()
@@ -147,7 +158,7 @@ object WebAPI {
       node.childStates.foreach(updateAccTxnReport)
     }
 
-    val balReport = if (accTree.name.fullPathStr.isEmpty) accTree.childStates.map(mkBalanceReport).toArray else mkBalanceReport(accTree)
+    val balReport = if (accTree.name.fullPathStr.isEmpty) accTree.childStates.map(mkBalanceReport(_).toMap).toArray else mkBalanceReport(accTree).toMap
 
     updateAccTxnReport(accTree)
 
