@@ -101,6 +101,7 @@ object WebAPI {
           Map(
             "date" -> p.date.formatYYYYMMDD,
             "indeterminate" -> p.isComplex,
+            "comments" -> p.comments.toArray,
             "selfPost" -> Map(
               "debit" -> (p.delta < Zero),
               "delta" -> p.delta,
@@ -110,7 +111,8 @@ object WebAPI {
               Map(
                 "debit" -> (o.delta < Zero),
                 "delta" -> o.delta,
-                "name" -> o.name
+                "name" -> o.name,
+                "comments" -> o.comments.toArray
               )
             ).toArray
           )
@@ -205,8 +207,54 @@ object WebAPI {
         sb.append(']')
         sb.toCharArray
       case b: Boolean => ("" + b).toCharArray
-      case s: String => ('"' + s + '"').toCharArray
-      case any: Any => ('"' + any.toString + '"').toCharArray
+      case s: String => escapeAsJSONString(s).toCharArray
+      case any: Any => escapeAsJSONString(any.toString).toCharArray
     }
+  }
+
+  private def escapeAsJSONString(string: String): String = {
+    if (string == null || string.length == 0) return "\"\""
+    val len = string.length
+    val sb = new StringBuilder(len + 4)
+    var t: String = null
+    sb.append('"')
+    string.foreach(c => {
+      c match {
+        case '\\' =>
+        case '"' =>
+          sb.append('\\')
+          sb.append(c)
+
+        case '/' =>
+          //                if (b == '<') {
+          sb.append('\\')
+          //                }
+          sb.append(c)
+
+        case '\b' =>
+          sb.append("\\b")
+
+        case '\t' =>
+          sb.append("\\t")
+
+        case '\n' =>
+          sb.append("\\n")
+
+        case '\f' =>
+          sb.append("\\f")
+
+        case '\r' =>
+          sb.append("\\r")
+
+        case _ =>
+          if (c < ' ') {
+            t = "000" + Integer.toHexString(c)
+            sb.append("\\u" + t.substring(t.length - 4))
+          }
+          else sb.append(c)
+      }
+    })
+    sb.append('"')
+    sb.toString
   }
 }
