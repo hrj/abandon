@@ -45,7 +45,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val config = opt[String]("config", short = 'c')
   val filters = propsLong[String]("filter", descr="Transaction filters", keyName=" name")
   val unversioned = opt[Boolean]("unversioned", short = 'X')
-  val webStartDate = opt[String]("web-start-date", short = 'w')
+  val webStartDate = opt[String]("web-start-date", short = 'w', descr = "start date used for web reports. specifying this starts the web server")
   val quiet = opt[Boolean]("quiet", short = 'q')
   val version = opt[Boolean]("version", noshort = true)
   val help = opt[Boolean]("help", short = 'h')
