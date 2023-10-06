@@ -1,14 +1,13 @@
 package co.uproot.abandon
 
-import java.util.TimerTask
-import java.util.Timer
+import java.util.{Timer, TimerTask}
 
 class FileWatcher(pollDelay: Long = 1000, triggerDelay: Long = 500) {
   case class FileProperties(lastModified: Long, size: Long)
   private var propertyCache = Map[String, FileProperties]()
 
   var paths = Set[String]()
-  def watch(pathsToWatch: Set[String], onChangeToCall: () => Unit) = {
+  def watch(pathsToWatch: Set[String], onChangeToCall: () => Option[Set[String]]) = {
     timer.cancel
     timer = mkTimer
     onChange = onChangeToCall
@@ -20,7 +19,7 @@ class FileWatcher(pollDelay: Long = 1000, triggerDelay: Long = 500) {
     runCheckTask
   }
 
-  private var onChange: () => Unit = _
+  private var onChange: () => Option[Set[String]] = _
 
   def stopWatch = {
     timer.cancel()
@@ -49,7 +48,7 @@ class FileWatcher(pollDelay: Long = 1000, triggerDelay: Long = 500) {
       // Sleep to avoid catching files in the middle of modifications
       Thread.sleep(triggerDelay)
       println("Triggering")
-      onChange()
+      onChange().foreach(paths = _)
     }
     runCheckTask
   }

@@ -143,107 +143,120 @@ object CLIApp {
       "CLI: " + CliBuildInfo.version + " [" + CliBuildInfo.builtAtString + "];"
   }
 
+  private def processInput(settings: Settings): (AppState, Set[String]) = {
+    val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
+    if (!parseError) {
+      SettingsHelper.ensureInputProtection(processedFiles, settings)
+      // val txnFilters = None
+      val appState = Processor.process(astEntries, settings.accounts, settings.txnFilters)
+      Processor.checkConstaints(appState, settings.constraints)
+      (appState, processedFiles)
+    } else {
+      throw new InputError("Couldn't parse input")
+    }
+  }
+
   private def runApp(cliConf: AbandonCLIConf):Unit = {
     val settingsResult = SettingsHelper.getCompleteSettings(cliConf, buildId)
     settingsResult match {
       case Left(errorMsg) => throw new SettingsError(errorMsg)
       case Right(settings) =>
-        val (parseError, astEntries, processedFiles) = Processor.parseAll(settings.inputs, settings.quiet)
-        if (!parseError) {
-          SettingsHelper.ensureInputProtection(processedFiles, settings)
-          // val txnFilters = None
-          val appState = Processor.process(astEntries,settings.accounts, settings.txnFilters)
-          Processor.checkConstaints(appState, settings.constraints)
-          settings.exports.foreach { exportSettings =>
-            val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
-            if (!settings.quiet) {
-              println()
-              reportWriter.filePaths foreach { filePath =>
-                println(s"Exporting to: $filePath")
-              }
+        val (appState, processedFiles) = processInput(settings)
+        settings.exports.foreach { exportSettings =>
+          val reportWriter = new ReportWriter(settings, exportSettings.outFiles)
+          if (!settings.quiet) {
+            println()
+            reportWriter.filePaths foreach { filePath =>
+              println(s"Exporting to: $filePath")
             }
-            exportSettings match {
-              case balSettings: BalanceExportSettings =>
-                val balanceExp = Reports.balanceExport(appState, settings, balSettings)
-                balSettings.exportFormat match {
-                  case LedgerType =>
-                    exportAsLedger(reportWriter, balanceExp, FilterStackHelper.getFilterWarnings(settings.txnFilters, " "))
-                  case XMLType =>
-                    exportAsXML(reportWriter, balanceExp, settings.txnFilters)
-                }
-              case journalSettings: JournalExportSettings =>
-                val xmlData = Reports.xmlExport(appState, journalSettings, settings.txnFilters)
-                reportWriter.printXml(xmlData)
-              case _ => ???
-            }
-            reportWriter.close()
           }
-          settings.reports.foreach { reportSettings =>
-            val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
-            if (!settings.quiet) {
-              println()
-              reportWriter.filePaths foreach { filePath =>
-                println(s"Writing ${reportSettings.title} to: $filePath")
+          exportSettings match {
+            case balSettings: BalanceExportSettings =>
+              val balanceExp = Reports.balanceExport(appState, settings, balSettings)
+              balSettings.exportFormat match {
+                case LedgerType =>
+                  exportAsLedger(reportWriter, balanceExp, FilterStackHelper.getFilterWarnings(settings.txnFilters, " "))
+                case XMLType =>
+                  exportAsXML(reportWriter, balanceExp, settings.txnFilters)
               }
-              if (reportWriter.writesToScreen) {
-                println()
-              }
-            }
-
-            reportWriter.printHeading(reportSettings.title)
-
-            if (settings.txnFilters.nonEmpty) {
-              reportWriter.println("ACTIVE FILTER")
-              FilterStackHelper.getFilterWarnings(settings.txnFilters, "  ").foreach { line => reportWriter.println(line)}
-              reportWriter.println("")
-            }
-
-            reportSettings match {
-              case balSettings: BalanceReportSettings =>
-                val balanceReport = Reports.balanceReport(appState, settings, balSettings)
-                printBalReport(reportWriter, balanceReport)
-              case regSettings: RegisterReportSettings =>
-                val regReport = Reports.registerReport(appState, regSettings)
-                printRegReport(reportWriter, regReport)
-              case bookSettings: BookReportSettings =>
-                val bookReport = Reports.bookReport(appState, bookSettings)
-                printBookReport(reportWriter, bookSettings, bookReport)
-              case _ => ???
-            }
-
-            reportWriter.close()
+            case journalSettings: JournalExportSettings =>
+              val xmlData = Reports.xmlExport(appState, journalSettings, settings.txnFilters)
+              reportWriter.printXml(xmlData)
+            case _ => ???
           }
-          // TODO: define separate settings for web, currently using journalExportSettings
-          settings.exports.foreach(_ match {
-            case jes: JournalExportSettings =>
-              val startDate = Date(2012,4,1)    // TODO
-              val filterDescription = settings.txnFilters.map(_.description())
-
-              val fullReportBytes = WebAPI.execute(jes, startDate, appState, filterDescription)
-
-              val server = Server.builder()
-                .port (9000)
-                .GET ("/api/", _ => {
-                  val msg = String(fullReportBytes)
-                  new StringResponse (200, msg)
-                })
-                .handle(staticHandler)
-                .build ()
-
-              server.start ()
-
-              var done = false
-              while (!done) {
-                val line = io.StdIn.readLine("Type [Q] or [quit] to exit: ")
-                done = (line == "Q") || (line.toLowerCase == "quit")
-              }
-              println ("Exiting")
-
-            case _ => false
-          })
-        } else {
-          throw new InputError("Couldn't parse input")
+          reportWriter.close()
         }
+        settings.reports.foreach { reportSettings =>
+          val reportWriter = new ReportWriter(settings, reportSettings.outFiles)
+          if (!settings.quiet) {
+            println()
+            reportWriter.filePaths foreach { filePath =>
+              println(s"Writing ${reportSettings.title} to: $filePath")
+            }
+            if (reportWriter.writesToScreen) {
+              println()
+            }
+          }
+
+          reportWriter.printHeading(reportSettings.title)
+
+          if (settings.txnFilters.nonEmpty) {
+            reportWriter.println("ACTIVE FILTER")
+            FilterStackHelper.getFilterWarnings(settings.txnFilters, "  ").foreach { line => reportWriter.println(line)}
+            reportWriter.println("")
+          }
+
+          reportSettings match {
+            case balSettings: BalanceReportSettings =>
+              val balanceReport = Reports.balanceReport(appState, settings, balSettings)
+              printBalReport(reportWriter, balanceReport)
+            case regSettings: RegisterReportSettings =>
+              val regReport = Reports.registerReport(appState, regSettings)
+              printRegReport(reportWriter, regReport)
+            case bookSettings: BookReportSettings =>
+              val bookReport = Reports.bookReport(appState, bookSettings)
+              printBookReport(reportWriter, bookSettings, bookReport)
+            case _ => ???
+          }
+
+          reportWriter.close()
+        }
+        // TODO: define separate settings for web, currently using journalExportSettings
+        settings.exports.foreach(_ match {
+          case jes: JournalExportSettings =>
+            val startDate = Date(2012,4,1)    // TODO
+            val filterDescription = settings.txnFilters.map(_.description())
+
+            var fullReportBytes = WebAPI.execute(jes, startDate, appState, filterDescription)
+
+            val server = Server.builder()
+              .port (9000)
+              .GET ("/api/", _ => {
+                val msg = String(fullReportBytes)
+                new StringResponse (200, msg)
+              })
+              .handle(staticHandler)
+              .build ()
+
+            println("Starting web server. Visit http://localhost:9000/ for web UI")
+
+            server.start ()
+
+            FileWatcher().watch(processedFiles, () => {
+              val (appState, newProcessedFiles) = processInput(settings)
+              fullReportBytes = WebAPI.execute(jes, startDate, appState, filterDescription)
+              Some(newProcessedFiles)
+            })
+
+            var done = false
+            while (!done) {
+              val line = io.StdIn.readLine("Type [Q] or [quit] to exit: ")
+              done = (line == "Q") || (line.toLowerCase == "quit")
+            }
+            println ("Exiting")
+
+          case _ => false
+        })
     }
   }
 

@@ -1,6 +1,6 @@
 package co.uproot.abandon.web
 
-import co.uproot.abandon.{AccountName, AccountTreeState, AppState, Date, JournalExportSettings}
+import co.uproot.abandon.{AccountName, AccountTreeState, AppState, Date, Helper, JournalExportSettings}
 
 import java.io.FileWriter
 
@@ -87,13 +87,12 @@ object WebAPI {
 
     var accTxnsReport = Map[String, Any]()
 
-    def getDetailsByMonth(accName: AccountName): Map[String, Any] = {
+    def getDetailsByMonth(accName: AccountName): Array[Map[String, Any]] = {
       val name = accName.fullPathStr
       val gPosts = currPosts.filter(_.name == name)
       val openingBalance = openingBalances.getOrElse(name, Zero)
       val closingBalance = openingBalance + sumDeltas(gPosts)
       val months = gPosts.map(p => Date(p.date.year, p.date.month, 1)).toSet.toArray
-      var allDetails = Map[String, Any]()
       var prevMonthClosingBalance = openingBalance
 
       def txnsToMap(posts: Seq[CookedPost], openingBalance: BigDecimal) = {
@@ -129,6 +128,7 @@ object WebAPI {
         prevMonthClosingBalance = monthClosingBalance
 
         Map(
+          "name" -> s"${Helper.getShortMonth(mDate.month)} ${mDate.year}",
           "opening" -> monthOpeningBalance,
           "closing" -> monthClosingBalance,
           "debit" -> debits,
@@ -137,21 +137,20 @@ object WebAPI {
         )
       }
 
-      months.sortBy(_.toInt).foreach(mDate =>
-        allDetails += s"${mDate.year} / ${mDate.month}" -> getDetailsForMonth(mDate)
-      )
+      val result = months.sortBy(_.toInt).map(getDetailsForMonth)
+
       assert(prevMonthClosingBalance == closingBalance, s"prev monthly closing bal = $prevMonthClosingBalance, acc closing: $closingBalance")
-      allDetails
+
+      result
     }
 
     def updateAccTxnReport(node: AccountTreeState): Unit = {
       val name = node.name.fullPathStr
       if (name.nonEmpty) {
-        val txnsByMonth = getDetailsByMonth(node.name)
         accTxnsReport ++= Map(
           name -> Map(
             "name" -> name,
-            "txnsByMonth" -> txnsByMonth
+            "txnsByMonth" -> getDetailsByMonth(node.name)
           )
         )
       }

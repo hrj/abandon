@@ -150,6 +150,7 @@ object AbandonUI extends JFXApp3 {
             }
             inputFileWatcher.watch(processedFiles, () => {
               Platform.runLater({ updateReports(false) })
+              None
             })
           }
 
