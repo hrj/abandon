@@ -9,6 +9,7 @@ object Helper {
   def filterByType[T](s: Seq[_ >: T])(implicit classTag: scala.reflect.ClassTag[T]) = s.collect({ case t: T => t })
 
   def bold(s: String) = Console.BOLD + s + Console.RESET
+  def info(s: String) = Console.CYAN + s + Console.RESET
   def warn(s: String) = Console.RED + s + Console.RESET
 
   val monthLabels = Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
@@ -56,6 +57,14 @@ object Helper {
       }
     }
     firstNonUnique
+  }
+
+  def parseDate(dateStr: String): Option[Date] = {
+    ParserHelper.parser.dateExpr(ParserHelper.scanner(dateStr)) match {
+      case ParserHelper.parser.Success(date, _) => Some(date)
+      case _ =>
+        None
+    }
   }
 }
 

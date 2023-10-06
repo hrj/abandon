@@ -45,6 +45,7 @@ class AbandonCLIConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val config = opt[String]("config", short = 'c')
   val filters = propsLong[String]("filter", descr="Transaction filters", keyName=" name")
   val unversioned = opt[Boolean]("unversioned", short = 'X')
+  val webStartDate = opt[String]("web-start-date", short = 'w')
   val quiet = opt[Boolean]("quiet", short = 'q')
   val version = opt[Boolean]("version", noshort = true)
   val help = opt[Boolean]("help", short = 'h')
@@ -217,11 +218,9 @@ object SettingsHelper {
   }
 
   private def parseDate(config: Config, dateStr: String) = {
-    ParserHelper.parser.dateExpr(ParserHelper.scanner(dateStr)) match {
-      case ParserHelper.parser.Success(date, _) => date
-      case ParserHelper.parser.NoSuccess(_, _) =>
-        throw new ConfigException.BadValue(config.origin, "onDate", "expected a date")
-      case _ =>
+    Helper.parseDate(dateStr) match {
+      case Some(date) => date
+      case None =>
         throw new ConfigException.BadValue(config.origin, "onDate", "expected a date")
     }
   }

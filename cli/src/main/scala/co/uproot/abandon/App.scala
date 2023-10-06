@@ -221,43 +221,46 @@ object CLIApp {
 
           reportWriter.close()
         }
-        // TODO: define separate settings for web, currently using journalExportSettings
-        settings.exports.foreach(_ match {
-          case jes: JournalExportSettings =>
-            val startDate = Date(2012,4,1)    // TODO
-            val filterDescription = settings.txnFilters.map(_.description())
 
-            var fullReportBytes = WebAPI.makeReport(startDate, appState, filterDescription)
-
-            val server = Server.builder()
-              .port (9000)
-              .GET ("/api/", _ => {
-                val msg = String(fullReportBytes)
-                new StringResponse (200, msg)
-              })
-              .handle(staticHandler)
-              .build ()
-
-            println("Starting web server. Visit http://localhost:9000/ for web UI")
-
-            server.start ()
-
-            FileWatcher().watch(processedFiles, () => {
-              val (appState, newProcessedFiles) = processInput(settings)
-              fullReportBytes = WebAPI.makeReport(startDate, appState, filterDescription)
-              Some(newProcessedFiles)
-            })
-
-            var done = false
-            while (!done) {
-              val line = io.StdIn.readLine("Type [Q] or [quit] to exit: ")
-              done = (line == "Q") || (line.toLowerCase == "quit")
-            }
-            println ("Exiting")
-
-          case _ => false
-        })
+        cliConf.webStartDate.foreach(startDateStr =>
+          val startDate = Helper.parseDate(startDateStr).get
+          startWebServer(settings, startDate, appState, processedFiles)
+        )
     }
+  }
+
+  private def startWebServer(settings: Settings, startDate: Date, initialAppState: AppState, initialProcessedFiles: Set[String]): Unit = {
+    println(Helper.info(s"Starting web server with start date: ${startDate.formatYYYYMMMDD}"))
+    val filterDescription = settings.txnFilters.map(_.description())
+
+    var fullReportBytes = WebAPI.makeReport(startDate, initialAppState, filterDescription)
+
+    val server = Server.builder()
+      .port(9000)
+      .GET("/api/", _ => {
+        val msg = String(fullReportBytes)
+        new StringResponse(200, msg)
+      })
+      .handle(staticHandler)
+      .build()
+
+    println(Helper.info("Visit http://localhost:9000/ for web UI"))
+
+    server.start()
+
+    FileWatcher().watch(initialProcessedFiles, () => {
+      val (appState, newProcessedFiles) = processInput(settings)
+      fullReportBytes = WebAPI.makeReport(startDate, appState, filterDescription)
+      Some(newProcessedFiles)
+    })
+
+    var done = false
+    while (!done) {
+      val line = io.StdIn.readLine("Type [Q] or [quit] to exit: ")
+      done = (line == "Q") || (line.toLowerCase == "quit")
+    }
+    println("Exiting")
+
   }
 
   private val staticHandler = Handler("/", "GET", request => {
