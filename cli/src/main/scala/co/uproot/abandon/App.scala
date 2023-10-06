@@ -227,7 +227,7 @@ object CLIApp {
             val startDate = Date(2012,4,1)    // TODO
             val filterDescription = settings.txnFilters.map(_.description())
 
-            var fullReportBytes = WebAPI.execute(jes, startDate, appState, filterDescription)
+            var fullReportBytes = WebAPI.makeReport(startDate, appState, filterDescription)
 
             val server = Server.builder()
               .port (9000)
@@ -244,7 +244,7 @@ object CLIApp {
 
             FileWatcher().watch(processedFiles, () => {
               val (appState, newProcessedFiles) = processInput(settings)
-              fullReportBytes = WebAPI.execute(jes, startDate, appState, filterDescription)
+              fullReportBytes = WebAPI.makeReport(startDate, appState, filterDescription)
               Some(newProcessedFiles)
             })
 

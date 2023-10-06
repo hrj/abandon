@@ -1,10 +1,8 @@
 package co.uproot.abandon.web
 
-import co.uproot.abandon.{AccountName, AccountTreeState, AppState, Date, Helper, JournalExportSettings}
+import co.uproot.abandon.{AccountName, AccountTreeState, AppState, Date, Helper}
 
-import java.io.FileWriter
-
-object Util {
+private object Util {
   val Zero = BigDecimal(0)
 
   def sumDeltas(s: Seq[WithDelta]) = s.foldLeft(Zero)(_ + _.delta)
@@ -15,7 +13,7 @@ import  Util._
 
 case class AccountDetails(name: AccountName, openingBalance: BigDecimal, closingBalance: BigDecimal, debitSubTotal: BigDecimal, creditSubTotal: BigDecimal, posts: Seq[CookedPost])
 
-case class AccountSemiDetails(name: String, debitSubTotal: Option[BigDecimal], creditSubTotal: Option[BigDecimal])
+// case class AccountSemiDetails(name: String, debitSubTotal: Option[BigDecimal], creditSubTotal: Option[BigDecimal])
 
 case class AccountBalance(name: AccountName, openingBalance: BigDecimal, closingBalance: BigDecimal, debitSubTotal: BigDecimal, creditSubTotal: BigDecimal, childBalances: Array[AccountBalance]) {
   def toMap: Map[String, Any] = {
@@ -31,7 +29,7 @@ case class AccountBalance(name: AccountName, openingBalance: BigDecimal, closing
 }
 
 object WebAPI {
-  def execute(jes: JournalExportSettings, startDate: Date, appState: AppState, filterDescription: Option[String]): Array[Char] = {
+  def makeReport(startDate: Date, appState: AppState, filterDescription: Option[String]): Array[Char] = {
     // TODO: show filterDescription in output
     val accState = appState.accState
     // TODO: Apply filter from settings, if not already applied
@@ -47,15 +45,15 @@ object WebAPI {
     })
     val cookedPosts = txns.flatMap(_.cookPosts)
 
-    execute(startDate, cookedPosts, accTree)
+    makeReport(startDate, cookedPosts, accTree)
   }
 
-  private def execute(startDate: Date, posts: Seq[CookedPost], accTree: AccountTreeState): Array[Char] = {
+  private def makeReport(startDate: Date, posts: Seq[CookedPost], accTree: AccountTreeState): Array[Char] = {
     val (currPosts, prevPosts) = posts.partition(_.date.toInt >= startDate.toInt)
     val allAccountNames = posts.map(_.name).toSet
     val sortedAllAccountNames = allAccountNames.toSeq.sorted
     val groupedPosts = currPosts.groupBy(_.name)
-    val openingBalances = prevPosts.groupBy(_.name).map { case (name, gPosts) => (name -> sumDeltas(gPosts)) }
+    val openingBalances = prevPosts.groupBy(_.name).map { case (name, gPosts) => name -> sumDeltas(gPosts) }
     val closingBalances = sortedAllAccountNames.map(name => {
       val openingBalance = openingBalances.getOrElse(name, Zero)
       val gposts = groupedPosts.getOrElse(name, Nil)
@@ -193,7 +191,7 @@ object WebAPI {
         sb.toCharArray
       case array: Array[Any] =>
         val sb = StringBuilder(1024)
-        val maxIndex = array.size - 1
+        val maxIndex = array.length - 1
         // test
         sb.append('[')
         array.zipWithIndex.foreach(vi => {
