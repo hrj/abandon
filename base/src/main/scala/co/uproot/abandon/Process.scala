@@ -58,7 +58,7 @@ class AccountState {
   def mkTree(nameMatcher: (String) => Boolean) = {
     val accountsByPathLengths = _amounts.filter(a => nameMatcher(a._1.fullPathStr)).groupBy(_._1.fullPath.length)
     val maxPathLength = maxElseZero(accountsByPathLengths.keys)
-    val topLevelAccounts = accountsByPathLengths.get(1).getOrElse(Map())
+    // val topLevelAccounts = accountsByPathLengths.get(1).getOrElse(Map())
     def mkTreeLevel(prefix: Seq[String], n: Int): Seq[AccountTreeState] = {
       if (n <= maxPathLength) {
         val children = (n to maxPathLength).flatMap(i => accountsByPathLengths.get(i).getOrElse(Map()).keys.map(_.fullPath).filter(_.startsWith(prefix)).map(_.drop(prefix.length))).toSet
