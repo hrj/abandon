@@ -149,7 +149,7 @@ object CLIApp {
       SettingsHelper.ensureInputProtection(processedFiles, settings)
       // val txnFilters = None
       val appState = Processor.process(astEntries, settings.accounts, settings.txnFilters)
-      Processor.checkConstaints(appState, settings.constraints)
+      Processor.checkConstraints(appState, settings.constraints)
       (appState, processedFiles)
     } else {
       throw new InputError("Couldn't parse input")
