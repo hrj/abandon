@@ -239,7 +239,7 @@ object CLIApp {
       .port(9000)
       .GET("/api/", _ => {
         val msg = String(fullReportBytes)
-        new StringResponse(200, msg)
+        new StringResponse(200, msg, java.util.Map.of("Content-type", java.util.List.of("application/json")))
       })
       .handle(staticHandler)
       .build()
