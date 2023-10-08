@@ -163,8 +163,48 @@ object WebAPI {
 
     updateAccTxnReport(accTree)
 
+    def makeMonthlyRegister(): Array[Map[String, Any]] = {
+      val months = currPosts.map(p => Date(p.date.year, p.date.month, 1)).toSet.toArray
+
+      months.sortBy(_.toInt).map(mDate =>
+        val currMonthPosts = currPosts.filter(p => p.date.month == mDate.month && p.date.year == mDate.year)
+        val closingBalance = sumDeltas(currMonthPosts)
+        assert(closingBalance == Zero)
+
+        val (debitPosts, creditPosts) = currMonthPosts.partition(_.delta < Zero)
+        val debitSubTotal = sumDeltas(debitPosts)
+        val creditSubTotal = sumDeltas(creditPosts)
+
+        val accountSummaries = currMonthPosts.groupBy(_.name).toArray.sortBy(_._1).map((name, posts) =>
+          val priorPosts = currPosts.filter(p => p.date.toIntYYYYMM < mDate.toIntYYYYMM && p.name == name)
+          val accOpeningBalance = openingBalances.getOrElse(name, Zero) + sumDeltas(priorPosts)
+          val (accDebitPosts, accCreditPosts) = posts.partition(_.delta < Zero)
+          val accDebitSubTotal = sumDeltas(accDebitPosts)
+          val accCreditSubTotal = sumDeltas(accCreditPosts)
+          val accClosingBalance = accOpeningBalance + accDebitSubTotal + accCreditSubTotal
+          Map(
+            "name" -> name,
+            "opening" -> accOpeningBalance,
+            "debit" -> accDebitSubTotal,
+            "credit" -> accCreditSubTotal,
+            "closing" -> accClosingBalance,
+          )
+        )
+
+        Map(
+            "month" -> s"${Helper.getShortMonth(mDate.month)} ${mDate.year}",
+            "opening" -> Zero,
+            "closing" -> closingBalance,
+            "debit" -> debitSubTotal,
+            "credit" -> creditSubTotal,
+            "accountSummaries" -> accountSummaries
+          )
+        )
+    }
+
     val fullReport = Map(
       "accountBalances" -> balReport,
+      "monthlySummaries" -> makeMonthlyRegister(),
       "accountTxns" -> accTxnsReport
     )
 
