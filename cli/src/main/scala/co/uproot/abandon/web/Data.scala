@@ -15,7 +15,7 @@ case class Transaction(
                         comments: Seq[String],
                         posts: Seq[Post]) {
 
-  def splitPostsByCount = {
+  private def splitPostsByCount = {
     val (posPosts, negPosts) = posts.partition(_.delta > Zero)
     if (posPosts.length > negPosts.length) {
       (posPosts, negPosts)
@@ -24,7 +24,7 @@ case class Transaction(
     }
   }
 
-  def demuxPosts = {
+  def demuxPosts: Transaction = {
     val (majorityPosts, minorityPosts) = splitPostsByCount
     val minorityAccountNames = minorityPosts.map(_.name).toSet
     // assert(minorityAccountNames.size == 1, "Currently, minority Post can only be from one account. MinorityAccountNames: " + minorityAccountNames.mkString(", "))
@@ -55,7 +55,7 @@ case class Transaction(
         val oppOtherPosts = majorityPosts.map { mt =>
           CookedOtherPost(minorityCookedTxn.name, -mt.delta, mt.splitComments)
         }
-        val majorityCookedTxn = CookedPost(date, majorityAccountName, sumDeltas(majorityPosts), comments.toSeq, oppOtherPosts, Nil)
+        val majorityCookedTxn = CookedPost(date, majorityAccountName, sumDeltas(majorityPosts), comments, oppOtherPosts, Nil)
         Seq(majorityCookedTxn, minorityCookedTxn)
       } else {
         posts.map { _.simpleCook }
@@ -81,20 +81,20 @@ case class Post(
   var other: Seq[Post] = Nil
   var txn: Transaction = null
 
-  val isPositive = delta > Zero
+  private val isPositive = delta > Zero
 
-  def getBalancedOther = {
+  private def getBalancedOther = {
     other.partition(isPositive == _.isPositive)
   }
 
   val splitComments:Seq[String] = commentOpt.map(_.split(";").toList).getOrElse(Nil)
 
   // TODO: All annotations should not be prefixed by "Chq #". Should be a config setting either here or in abandon
-  def comments = txn.annotationOpt.map("Chq #" + _) ++ txn.payeeOpt ++ splitComments ++ txn.comments
+  def comments: Iterable[String] = txn.annotationOpt.map("Chq #" + _) ++ txn.payeeOpt ++ splitComments ++ txn.comments
 
-  def date = txn.date
+  def date: Date = txn.date
 
-  def simpleCook = {
+  def simpleCook: CookedPost = {
     val (similarOther, oppOther) = getBalancedOther
     val oppOtherCooked = oppOther.map(o => CookedOtherPost(o.name, o.delta, o.splitComments))
     val similarOtherCooked = similarOther.map(o => CookedOtherPost(o.name, o.delta, o.splitComments))
@@ -105,7 +105,7 @@ case class Post(
 /** A transaction that is ready to be reported as the other entry of a transaction.
  * All the analysis has to be done previously */
 case class CookedOtherPost(name: String, delta: BigDecimal, comments: Seq[String]) extends WithDelta {
-  override def toString = {
+  override def toString: String = {
     name + ": " + delta
   }
 }
@@ -113,8 +113,8 @@ case class CookedOtherPost(name: String, delta: BigDecimal, comments: Seq[String
 /** A post that is ready to be reported.
  * All the analysis has to be done previously */
 case class CookedPost(date: Date, name: String, delta: BigDecimal, comments: Seq[String], oppositeOthers: Seq[CookedOtherPost], similarOthers: Seq[CookedOtherPost]) extends WithDelta {
-  val isComplex = math.min(oppositeOthers.length, similarOthers.length + 1) > 1
-  override def toString = {
+  val isComplex: Boolean = math.min(oppositeOthers.length, similarOthers.length + 1) > 1
+  override def toString: String = {
     "" + date + " " + name + ": " + delta + "\n  Opposites: " + oppositeOthers + "\n  similars: " + similarOthers
   }
 }
