@@ -2,6 +2,8 @@ package co.uproot.abandon.web
 
 import co.uproot.abandon.{AccountName, AccountTreeState, AppState, Date, Helper}
 
+import java.text.DecimalFormat
+
 private object Util {
   val Zero: BigDecimal = BigDecimal(0)
 
@@ -169,6 +171,8 @@ object WebAPI {
     serializeJSON(fullReport)
   }
 
+  private val decimalFormat = new DecimalFormat("##,##,##,##,##,##,##0.00")
+
   private def serializeJSON(any: Any): Array[Char] = {
     any match {
       case map: Map[String, Any] =>
@@ -207,6 +211,7 @@ object WebAPI {
         sb.append(']')
         sb.toCharArray
       case b: Boolean => ("" + b).toCharArray
+      case bd: BigDecimal => escapeAsJSONString(decimalFormat.format(bd.toDouble)).toCharArray
       case s: String => escapeAsJSONString(s).toCharArray
       case any: Any => escapeAsJSONString(any.toString).toCharArray
     }
