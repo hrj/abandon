@@ -3,10 +3,10 @@ package co.uproot.abandon.web
 import co.uproot.abandon.{AccountName, AccountTreeState, AppState, Date, Helper}
 
 private object Util {
-  val Zero = BigDecimal(0)
+  val Zero: BigDecimal = BigDecimal(0)
 
-  def sumDeltas(s: Seq[WithDelta]) = s.foldLeft(Zero)(_ + _.delta)
-  def except[T](a: Seq[T], i: Int) = a.slice(0, i) ++ a.slice(i + 1, a.length)
+  def sumDeltas(s: Seq[WithDelta]): BigDecimal = s.foldLeft(Zero)(_ + _.delta)
+  def except[T](a: Seq[T], i: Int): Seq[T] = a.slice(0, i) ++ a.slice(i + 1, a.length)
 }
 
 import  Util._
@@ -23,7 +23,7 @@ case class AccountBalance(name: AccountName, openingBalance: BigDecimal, closing
       "closing" -> closingBalance,
       "debit" -> debitSubTotal,
       "credit" -> creditSubTotal,
-      "children" -> childBalances.map(_.toMap).toArray,
+      "children" -> childBalances.map(_.toMap),
     )
   }
 }
@@ -213,47 +213,45 @@ object WebAPI {
   }
 
   private def escapeAsJSONString(string: String): String = {
-    if (string == null || string.length == 0) return "\"\""
+    if (string == null || string.isEmpty) return "\"\""
     val len = string.length
     val sb = new StringBuilder(len + 4)
     var t: String = null
     sb.append('"')
-    string.foreach(c => {
-      c match {
-        case '\\' =>
-        case '"' =>
-          sb.append('\\')
-          sb.append(c)
+    string.foreach {
+      case '\\' =>
+      case c@'"' =>
+        sb.append('\\')
+        sb.append(c)
 
-        case '/' =>
-          //                if (b == '<') {
-          sb.append('\\')
-          //                }
-          sb.append(c)
+      case c@'/' =>
+        //                if (b == '<') {
+        sb.append('\\')
+        //                }
+        sb.append(c)
 
-        case '\b' =>
-          sb.append("\\b")
+      case '\b' =>
+        sb.append("\\b")
 
-        case '\t' =>
-          sb.append("\\t")
+      case '\t' =>
+        sb.append("\\t")
 
-        case '\n' =>
-          sb.append("\\n")
+      case '\n' =>
+        sb.append("\\n")
 
-        case '\f' =>
-          sb.append("\\f")
+      case '\f' =>
+        sb.append("\\f")
 
-        case '\r' =>
-          sb.append("\\r")
+      case '\r' =>
+        sb.append("\\r")
 
-        case _ =>
-          if (c < ' ') {
-            t = "000" + Integer.toHexString(c)
-            sb.append("\\u" + t.substring(t.length - 4))
-          }
-          else sb.append(c)
-      }
-    })
+      case c =>
+        if (c < ' ') {
+          t = "000" + Integer.toHexString(c)
+          sb.append("\\u" + t.substring(t.length - 4))
+        }
+        else sb.append(c)
+    }
     sb.append('"')
     sb.toString
   }
