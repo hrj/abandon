@@ -1,5 +1,9 @@
 package co.uproot.abandon
 
+import java.util.zip.{ZipEntry, ZipInputStream}
+import java.io.{ByteArrayOutputStream, BufferedInputStream, FileInputStream}
+import scala.collection.mutable.Map
+
 import co.uproot.abandon.Helper.maxElseZero
 import co.uproot.abandon.web.WebAPI
 import org.limium.picoserve.{Handler, Server}
@@ -263,23 +267,28 @@ object CLIApp {
 
   }
 
+  private val resourceFileMap = {
+    val resourceStream = this.getClass.getResourceAsStream("/frontend/build.zip")
+    val zipInputStream = new ZipInputStream(new BufferedInputStream(resourceStream))
+    ZipFileReader.readZipFile(zipInputStream)
+  }
+
   private val staticHandler = Handler("/", "GET", request => {
     val path = request.getPath()
-    val resName = "/frontend/build/" + (if (path == "/") "index.html" else path.tail)
-    val resourceStream = this.getClass.getResourceAsStream(resName)
-    if (resourceStream != null) {
-      val bytes = resourceStream.readAllBytes()
-      val contentType = if (resName.endsWith(".js")) {
+    val fileName = (if (path == "/") "index.html" else path.tail)
+    val bytes = resourceFileMap("build/" + fileName)
+    if (bytes != null) {
+      val contentType = if (fileName.endsWith(".js")) {
         "application/javascript"
-      } else if (resName.endsWith(".html")) {
+      } else if (fileName.endsWith(".html")) {
         "text/html"
-      } else if (resName.endsWith(".css")) {
+      } else if (fileName.endsWith(".css")) {
         "text/css"
       } else "text/plain"
 
       new ByteResponse(200, bytes, java.util.Map.of("Content-type", java.util.List.of(contentType)))
     } else {
-      new StringResponse(404, """{ "error": "not found"} """)
+      new StringResponse(404, s"""{ "error": "not found $fileName"} """)
     }
   })
 
@@ -351,3 +360,32 @@ object CLIApp {
     System.exit(co.uproot.abandon.CLIApp.mainStatus(args))
   }
 }
+
+object ZipFileReader {
+
+  def readZipFile(zipInputStream: ZipInputStream): Map[String, Array[Byte]] = {
+    val fileMap = Map[String, Array[Byte]]()
+
+    var entry: ZipEntry = null
+
+    try {
+      while ({ entry = zipInputStream.getNextEntry; entry != null }) {
+        if (!entry.isDirectory) {
+          val bos = new ByteArrayOutputStream()
+          val buf = new Array[Byte](1024)
+          var len = 0
+          while ({ len = zipInputStream.read(buf); len > 0 }) {
+            bos.write(buf, 0, len)
+          }
+          fileMap.put(entry.getName, bos.toByteArray)
+          bos.close()
+        }
+      }
+    } finally {
+      zipInputStream.close()
+    }
+
+    fileMap
+  }
+}
+
