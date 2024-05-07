@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 1.11
+    - uses: actions/checkout@v4
+    - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: 1.11
+        distribution: 'temurin'
+        java-version: '21'
     - name: Run tests
       run: sbt test
