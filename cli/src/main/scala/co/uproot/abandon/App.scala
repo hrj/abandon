@@ -2,7 +2,6 @@ package co.uproot.abandon
 
 import java.util.zip.{ZipEntry, ZipInputStream}
 import java.io.{ByteArrayOutputStream, BufferedInputStream, FileInputStream}
-import scala.collection.mutable.Map
 
 import co.uproot.abandon.Helper.maxElseZero
 import co.uproot.abandon.web.WebAPI
@@ -362,6 +361,7 @@ object CLIApp {
 }
 
 object ZipFileReader {
+  import scala.collection.mutable.Map
 
   def readZipFile(zipInputStream: ZipInputStream): Map[String, Array[Byte]] = {
     val fileMap = Map[String, Array[Byte]]()
