@@ -8,7 +8,7 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.1.0")
 
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.3.11")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.1.6")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.1.8")
 
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.0")
 
