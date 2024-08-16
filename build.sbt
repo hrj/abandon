@@ -6,8 +6,9 @@ lazy val commonSettings = Seq(
   version := "0.8.0",
   scalaVersion := "3.4.2",
   scalacOptions := List("-deprecation"),
-  wartremoverWarnings ++= Warts.allBut(Wart.ToString, Wart.Throw),
+  // wartremoverWarnings ++= Warts.allBut(Wart.ToString, Wart.Throw),
 
+  /*
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
@@ -15,6 +16,7 @@ lazy val commonSettings = Seq(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
+  */
 )
 
 lazy val abandon = (project in file(".")).
