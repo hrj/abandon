@@ -12,4 +12,4 @@ addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.4")
 
 // addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.2")
 
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.12.0")
+addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.13.0")
