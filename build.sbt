@@ -4,7 +4,7 @@ lazy val commonSettings = Seq(
 
   organization := "in.co.uproot",
   version := "0.8.0",
-  scalaVersion := "3.7.3",
+  scalaVersion := "3.7.4",
   scalacOptions := List("-deprecation"),
   // wartremoverWarnings ++= Warts.allBut(Wart.ToString, Wart.Throw),
 
