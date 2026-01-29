@@ -76,7 +76,7 @@ class AstTest extends AnyFlatSpec with Matchers {
       }) should be(true)
 
     // verify that DateOrdering.compare semantic is same as Ordering.compare
-    Sorting.quickSort(datesArr)(DateOrdering)
+    Sorting.quickSort(datesArr)
 
     (datesArr.toList).zip(refDates).forall({
         case (date, refDate) => date.toInt == refDate
