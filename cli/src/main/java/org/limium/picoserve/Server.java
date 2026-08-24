@@ -115,7 +115,7 @@ public final class Server {
                 response = handler.processor.process(new Request(exchange));
               } catch (final Exception e) {
                 e.printStackTrace();
-                response = new StringResponse(500, "Error: " + e);
+                response = new StringResponse(500, "Internal Server Error");
               }
             }
             final var headersToSend = response.getResponseHeaders();
