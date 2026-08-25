@@ -370,22 +370,34 @@ object CLIApp {
 
 object ZipFileReader {
   import scala.collection.mutable.Map
+  import java.nio.file.Paths
 
   def readZipFile(zipInputStream: ZipInputStream): Map[String, Array[Byte]] = {
     val fileMap = Map[String, Array[Byte]]()
+    val targetDir = Paths.get("base").toAbsolutePath.normalize()
 
     var entry: ZipEntry = null
 
     try {
       while ({ entry = zipInputStream.getNextEntry; entry != null }) {
         if (!entry.isDirectory) {
+          val rawName = entry.getName
+          val normalizedPath = rawName.replace('\\', '/')
+          val resolvedPath = targetDir.resolve(normalizedPath).normalize()
+
+          if (!resolvedPath.startsWith(targetDir)) {
+            throw new IllegalArgumentException(s"Zip entry contains path traversal: $rawName")
+          }
+
+          val key = targetDir.relativize(resolvedPath).toString.replace('\\', '/')
+
           val bos = new ByteArrayOutputStream()
           val buf = new Array[Byte](1024)
           var len = 0
           while ({ len = zipInputStream.read(buf); len > 0 }) {
             bos.write(buf, 0, len)
           }
-          fileMap.put(entry.getName, bos.toByteArray)
+          fileMap.put(key, bos.toByteArray)
           bos.close()
         }
       }
