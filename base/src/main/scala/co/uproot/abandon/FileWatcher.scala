@@ -33,24 +33,30 @@ class FileWatcher(pollDelay: Long = 1000, triggerDelay: Long = 500) {
   }
 
   private def checkAndUpdate = {
-    var change = false
-    paths.foreach { path =>
-      val properties = getProperties(path)
-      propertyCache.get(path) match {
-        case Some(oldProperties) if (oldProperties `equals` properties) =>
-        case _ =>
-          propertyCache += (path -> properties)
-          change = true
+    try {
+      var change = false
+      paths.foreach { path =>
+        val properties = getProperties(path)
+        propertyCache.get(path) match {
+          case Some(oldProperties) if (oldProperties `equals` properties) =>
+          case _ =>
+            propertyCache += (path -> properties)
+            change = true
+        }
       }
+      if (change) {
+        println("Change detected")
+        // Sleep to avoid catching files in the middle of modifications
+        Thread.sleep(triggerDelay)
+        println("Triggering")
+        onChange().foreach(paths = _)
+      }
+    } catch {
+      case e: Throwable =>
+        println(s"Error in file watcher: ${e.getMessage}")
+    } finally {
+      runCheckTask
     }
-    if (change) {
-      println("Change detected")
-      // Sleep to avoid catching files in the middle of modifications
-      Thread.sleep(triggerDelay)
-      println("Triggering")
-      onChange().foreach(paths = _)
-    }
-    runCheckTask
   }
 
   private def getProperties(path: String) = {

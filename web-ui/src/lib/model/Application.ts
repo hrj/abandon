@@ -52,5 +52,6 @@ export interface MonthlySummary extends TxnGroup {
 export type Application = {
   accountBalances: AccountBalance[],
   monthlySummaries: MonthlySummary[],
-  accountTxns: Record<string, AccountTransactions>
+  accountTxns: Record<string, AccountTransactions>,
+  error?: string
 }

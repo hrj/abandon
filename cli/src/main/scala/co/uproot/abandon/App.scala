@@ -236,8 +236,21 @@ object CLIApp {
     println(Helper.info(s"Starting web server with start date: ${startDate.formatYYYYMMMDD}"))
     val filterDescription = settings.txnFilters.map(_.description())
 
+    @volatile var lastError: Option[String] = None
+
     var fullReportBytesActiveOnly = WebAPI.makeReport(startDate, initialAppState, filterDescription, showInactiveAccounts = false)
     var fullReportBytesAll = WebAPI.makeReport(startDate, initialAppState, filterDescription, showInactiveAccounts = true)
+
+    def formatJsonResponse(bytesToUse: Array[Char]): String = {
+      val jsonStr = String(bytesToUse)
+      lastError match {
+        case Some(err) =>
+          val escapedError = String(co.uproot.abandon.web.JsonUtils.serializeJSON(err))
+          jsonStr.substring(0, jsonStr.length - 1) + s""","error":$escapedError}"""
+        case None =>
+          jsonStr
+      }
+    }
 
     val server = Server.builder()
       .port(9000)
@@ -248,7 +261,7 @@ object CLIApp {
             queryParams.get("showInactiveAccounts").contains("true")
         }
         val bytesToUse = if (showInactive) fullReportBytesAll else fullReportBytesActiveOnly
-        val msg = String(bytesToUse)
+        val msg = formatJsonResponse(bytesToUse)
         new StringResponse(200, msg, java.util.Map.of("Content-type", java.util.List.of("application/json")))
       })
       .handle(staticHandler)
@@ -259,10 +272,19 @@ object CLIApp {
     server.start()
 
     FileWatcher().watch(initialProcessedFiles, () => {
-      val (appState, newProcessedFiles) = processInput(settings)
-      fullReportBytesActiveOnly = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = false)
-      fullReportBytesAll = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = true)
-      Some(newProcessedFiles)
+      try {
+        val (appState, newProcessedFiles) = processInput(settings)
+        fullReportBytesActiveOnly = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = false)
+        fullReportBytesAll = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = true)
+        lastError = None
+        Some(newProcessedFiles)
+      } catch {
+        case e: Throwable =>
+          val msg = if (e.getMessage != null) e.getMessage else e.toString
+          println(s"Error processing files: $msg")
+          lastError = Some(msg)
+          None
+      }
     })
 
     var done = false

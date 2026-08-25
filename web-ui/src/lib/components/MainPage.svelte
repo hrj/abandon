@@ -66,6 +66,13 @@
 </script>
 
 <div>
+  {#if application.error}
+    <div class="error-banner">
+      <span class="error-icon">⚠️</span>
+      <span class="error-message">{application.error}</span>
+    </div>
+  {/if}
+
   <div class="header">
     <ul>
       {#each tabs as tab, index}
@@ -183,6 +190,21 @@
     font-size: .8em;
     opacity: 0.7;
     font-family:sans-serif;
+  }
+  .error-banner {
+    background-color: #d32f2f;
+    color: #ffffff;
+    padding: 0.75em 1.25em;
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    font-family: sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+  .error-icon {
+    font-size: 1.2em;
   }
   .contents {
     padding: 1em;
