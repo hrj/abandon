@@ -290,7 +290,9 @@ object CLIApp {
     var done = false
     while (!done) {
       val line = io.StdIn.readLine("Type [Q] or [quit] to exit: ")
-      done = (line == "Q") || (line.toLowerCase == "quit")
+      if (line != null) {
+        done = (line == "Q") || (line.toLowerCase == "quit")
+      }
     }
     println("Exiting")
 
