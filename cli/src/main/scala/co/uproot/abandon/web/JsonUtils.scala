@@ -57,15 +57,27 @@ private[web] object JsonUtils {
     sb.append('"')
     string.foreach {
       case '\\' =>
+        sb.append("\\\\")
+
       case c@'"' =>
         sb.append('\\')
         sb.append(c)
 
       case c@'/' =>
-        //                if (b == '<') {
         sb.append('\\')
-        //                }
         sb.append(c)
+
+      case '<' =>
+        sb.append("\\u003c")
+
+      case '>' =>
+        sb.append("\\u003e")
+
+      case '&' =>
+        sb.append("\\u0026")
+
+      case '\'' =>
+        sb.append("\\u0027")
 
       case '\b' =>
         sb.append("\\b")

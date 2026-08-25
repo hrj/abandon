@@ -17,16 +17,18 @@ class JsonUtilsTest extends AnyFlatSpec with Matchers {
 
   it should "handle special characters" in {
     JsonUtils.escapeAsJSONString("hello\"world") shouldEqual "\"hello\\\"world\""
-    // Note: there is no case for '\\' in the original escapeAsJSONString method
-    // wait, case '\\' => does nothing, so it drops the character!
-    // But let's check what it actually outputs
-    JsonUtils.escapeAsJSONString("hello\\world") shouldEqual "\"helloworld\""
+    JsonUtils.escapeAsJSONString("hello\\world") shouldEqual "\"hello\\\\world\""
     JsonUtils.escapeAsJSONString("hello/world") shouldEqual "\"hello\\/world\""
     JsonUtils.escapeAsJSONString("hello\bworld") shouldEqual "\"hello\\bworld\""
     JsonUtils.escapeAsJSONString("hello\tworld") shouldEqual "\"hello\\tworld\""
     JsonUtils.escapeAsJSONString("hello\nworld") shouldEqual "\"hello\\nworld\""
     JsonUtils.escapeAsJSONString("hello\fworld") shouldEqual "\"hello\\fworld\""
     JsonUtils.escapeAsJSONString("hello\rworld") shouldEqual "\"hello\\rworld\""
+  }
+
+  it should "escape HTML special characters for XSS safety" in {
+    JsonUtils.escapeAsJSONString("<script>alert('xss')&</script>") shouldEqual
+      "\"\\u003cscript\\u003ealert(\\u0027xss\\u0027)\\u0026\\u003c\\/script\\u003e\""
   }
 
   it should "handle control characters" in {
