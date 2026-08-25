@@ -41,8 +41,8 @@ package object files extends Implicits {
     new Dispose(resource).apply(f)
 
   // Some utils:
-  private[files] def newMultiMap[A, B]: mutable.MultiMap[A, B] =
-    new mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
+  private[files] def newMultiMap[A, B]: mutable.Map[A, mutable.Set[B]] =
+    mutable.Map.empty[A, mutable.Set[B]].withDefault(_ => mutable.Set.empty[B])
 
   @inline private[files] def when[A](condition: Boolean)(f: => A): Option[A] = if (condition) Some(f) else None
 

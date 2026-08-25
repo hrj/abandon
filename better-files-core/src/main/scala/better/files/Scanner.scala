@@ -138,7 +138,7 @@ object Scannable {
 }
 
 trait StringSplitter {
-  def split(s: String): TraversableOnce[String]
+  def split(s: String): IterableOnce[String]
 }
 object StringSplitter {
   val Default = StringSplitter.anyOf(" \t\t\n\r")

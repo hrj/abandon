@@ -9,7 +9,7 @@ import scalafx.Includes._
 object TxnUIReport extends UIReport {
   private def mkTxnGroupViews(posts: Seq[DetailedPost]) = {
     val groups = posts.map(t => new RefWrap(t.parentOpt.get)).distinct.map(_.t)
-    val sortedGroups = groups.sortBy(_.date)(DateOrdering)
+    val sortedGroups = groups.sortBy(_.date)(using DateOrdering)
 
     sortedGroups.map(grp => new VBox {
       private val grpLabel = {

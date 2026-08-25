@@ -25,7 +25,7 @@ abstract class FileMonitor(val root: File, maxDepth: Int) extends File.Monitor {
   protected def process(key: WatchKey) = {
     val path = key.watchable().asInstanceOf[Path]
 
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     key.pollEvents().asScala foreach {
       case event: WatchEvent[Path] @unchecked if (event.context() != null) =>
         val target: File = path.resolve(event.context())

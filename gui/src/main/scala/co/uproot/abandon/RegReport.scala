@@ -9,6 +9,7 @@ import scalafx.stage.Stage
 import scalafx.scene.Scene
 import scalafx.scene.control.ScrollPane
 import scalafx.stage.Modality
+import scala.compiletime.uninitialized
 
 object RegUIReport extends UIReport {
   private def getNestedTxns(item: TreeItem[RegisterReportEntry]): Seq[DetailedPost] = {
@@ -29,7 +30,7 @@ object RegUIReport extends UIReport {
 
   }
 
-  private var transactionViewRegTitle: String = _
+  private var transactionViewRegTitle: String = uninitialized
   private var selectedFilterOpt: Option[SelectionFilter] = None
 
   private val txnRootSP: ScrollPane = new ScrollPane { }
@@ -78,7 +79,7 @@ object RegUIReport extends UIReport {
     new TreeView(reportRoot) {
       styleClass += styleClassName
       onKeyTyped = { (e: KeyEvent) =>
-        if (e.character equals "\r") {
+        if (e.character.equals("\r")) {
           val selectedItemOpt = selectionModel().getSelectedItems().headOption
           selectedFilterOpt = selectedItemOpt map {selectedItem =>
             if (selectedItem.getValue.accountName == null) {
