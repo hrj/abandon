@@ -281,21 +281,29 @@ object CLIApp {
   }
 
   private val staticHandler = Handler("/", "GET", request => {
-    val path = request.getPath()
-    val fileName = (if (path == "/") "index.html" else path.tail)
-    val bytes = resourceFileMap("build/" + fileName)
-    if (bytes != null) {
-      val contentType = if (fileName.endsWith(".js")) {
-        "application/javascript"
-      } else if (fileName.endsWith(".html")) {
-        "text/html"
-      } else if (fileName.endsWith(".css")) {
-        "text/css"
-      } else "text/plain"
+    val rawPath = request.getPath()
+    val rawFileName = if (rawPath == null || rawPath.isEmpty || rawPath == "/") "index.html" else rawPath.tail
+    val basePath = java.nio.file.Paths.get("build").normalize()
+    val targetPath = basePath.resolve(rawFileName).normalize()
 
-      new ByteResponse(200, bytes, java.util.Map.of("Content-type", java.util.List.of(contentType)))
+    if (targetPath.startsWith(basePath)) {
+      val normalizedKey = targetPath.toString.replace('\\', '/')
+      val bytes = resourceFileMap.get(normalizedKey).orNull
+      if (bytes != null) {
+        val contentType = if (normalizedKey.endsWith(".js")) {
+          "application/javascript"
+        } else if (normalizedKey.endsWith(".html")) {
+          "text/html"
+        } else if (normalizedKey.endsWith(".css")) {
+          "text/css"
+        } else "text/plain"
+
+        new ByteResponse(200, bytes, java.util.Map.of("Content-type", java.util.List.of(contentType)))
+      } else {
+        new StringResponse(404, s"""{ "error": "not found $rawFileName"} """)
+      }
     } else {
-      new StringResponse(404, s"""{ "error": "not found $fileName"} """)
+      new StringResponse(404, s"""{ "error": "not found $rawFileName"} """)
     }
   })
 
