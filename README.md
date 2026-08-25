@@ -59,7 +59,7 @@ The last line shows the total of the top level accounts, which in this case is `
 * Input is through plain-text files. The syntax is well defined and yet human friendly, just like `ledger`'s.
 * Portable across many operating systems; based on the Java platform.
 * Reporting: supports both textual and web-based graphical reports.
-* Includes a modern Web UI (`web-ui`) built with Svelte and Vite for interactively exploring financial reports.
+* Includes a modern Web UI (`web-ui`) built with Svelte and Vite for interactively exploring financial reports. The web server monitors input files for changes and updates the Web UI automatically.
 
 
 ### Differences from Ledger
