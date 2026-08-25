@@ -5,21 +5,16 @@ favorite text editor to edit these files, and can use your favorite [VCS](http:/
 and collaboration.
 
 From these input text files, Abandon can present textual reports
-or graphical reports. The graphical reports are useful when you need to interactively explore the data.
+or web-based graphical reports. The web reports are useful when you need to interactively explore the data.
 
 In addition, PDF reports can be generated using [abandon-reports](https://github.com/hrj/abandon-reports). PDFs are useful
 when you need to print the report or share it with someone by email, etc.
 
-Abandon is inspired by [Ledger](http://ledger-cli.org/) but is simpler to use, has a more regular syntax, has a GUI
+Abandon is inspired by [Ledger](http://ledger-cli.org/) but is simpler to use, has a more regular syntax, includes a Web UI
 and is cross-platform. Abandon tries to maintain syntax compatibility with Ledger whenever possible.
 
 #### Sample Text report
 ![Abandon Text output Screenshot](http://i.imgur.com/3n3GmdE.png)
-
-#### Sample Graphical report
-![Abandon Screenshot](http://i.imgur.com/9mTthiH.png)
-
-[(Screenshot Gallery)](http://imgur.com/a/GLhV5#0)
 
 ### Quick start
 If we enter this into a text file:
@@ -63,8 +58,8 @@ The last line shows the total of the top level accounts, which in this case is `
 * Infinite precision arithmetic
 * Input is through plain-text files. The syntax is well defined and yet human friendly, just like `ledger`'s.
 * Portable across many operating systems; based on the Java platform.
-* Reporting: supports both textual and interactive, graphical reports.
-  The GUI watches for changes in input files and automatically refreshes when it detects a change.
+* Reporting: supports both textual and web-based graphical reports.
+* Includes a modern Web UI (`web-ui`) built with Svelte and Vite for interactively exploring financial reports.
 
 
 ### Differences from Ledger
@@ -72,11 +67,10 @@ The last line shows the total of the top level accounts, which in this case is `
 * Cross-platform. This was a major consideration to be able to collaborate with external auditors, accountants, etc. While, in theory, the existing implementations of Ledger are cross-platform, they need to be compiled and packaged separately for each platform.
 * Simpler and more regular syntax. Some of the simplicity is because of missing features. But, in general, I want to cut the flab and keep things simple and regular.
   For example, identifiers can have numbers in them. Although this might sound trivial, the language has to be carefully designed for this. In `ledger`, this doesn't work because it messes up with the syntax for currencies.
-* An interactive GUI for viewing reports. 
+* An interactive Web UI for viewing reports.
 
 ### Installation
-* If you only need the CLI version, install **Java 8** from any provider. OpenJDK works fine.
-  The GUI version requires JavaFX, which is bundled by the Oracle 8 JRE and available as a separate package in other JREs.
+* Install **Java 8** (or later) from any provider. OpenJDK works fine.
 * Download and extract the `Abandon` binaries from [here](https://github.com/hrj/abandon/releases)
 * Use the `*.sh` files to run on `*nix` and `Mac` or the `*.bat` files to run on `Windows`.
 
@@ -86,7 +80,10 @@ The command line options are:
 ```
    -c <config-file-path>        Specifies the path to a config file
    -i <input-file-path>         Specifies the path to an input file
+   -w <start-date>              Starts the web server with specified start date (e.g., -w 2020/01/01)
 ```
+
+To run the Web UI, use the `-w` / `--web-start-date` option when launching Abandon (e.g. `abandon -c accounts.conf -w 2020/01/01`). The Web UI is bundled directly with the Abandon binary and will be accessible at `http://localhost:9000/`.
 
 The config file can specify which reports to generate and how. Some of these options are available as command line parameters too.
 
