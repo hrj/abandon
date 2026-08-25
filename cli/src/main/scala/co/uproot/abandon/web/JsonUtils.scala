@@ -2,7 +2,7 @@ package co.uproot.abandon.web
 
 import java.text.DecimalFormat
 
-private[web] object JsonUtils {
+object JsonUtils {
   private val decimalFormat = new DecimalFormat("##,##,##,##,##,##,##0.00")
 
   def serializeJSON(any: Any): Array[Char] = {
