@@ -11,7 +11,7 @@ import java.util.stream.{Stream => JStream}
 import java.util.zip._
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import java.net.URL
 import java.net.URI
 
@@ -270,8 +270,8 @@ trait Implicits extends Dispose.FlatMap.Implicits with Scanner.Read.Implicits wi
   }
 
   implicit class PrintWriterExtensions(pw: PrintWriter) {
-    def printLines(lines: TraversableOnce[?]): PrintWriter = {
-      lines.foreach(pw.println)
+    def printLines(lines: IterableOnce[?]): PrintWriter = {
+      lines.iterator.foreach(pw.println)
       pw
     }
   }

@@ -5,7 +5,7 @@ import javafx.stage.WindowEvent
 
 import org.rogach.scallop.exceptions.{Help, Version}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scalafx.Includes._
 import scalafx.application.JFXApp3.PrimaryStage
 import scalafx.application.{JFXApp3, Platform}
@@ -73,7 +73,7 @@ object AbandonUI extends JFXApp3 {
       })
 
     def addOrSetTab(tab: Tab): Unit = {
-      val existingOpt = tabs.iterator.find(_.getText equals tab.getText)
+      val existingOpt = tabs.iterator.find(_.getText.equals(tab.getText))
       existingOpt match {
         case Some(existingTab) =>
           existingTab.setContent(tab.getContent)

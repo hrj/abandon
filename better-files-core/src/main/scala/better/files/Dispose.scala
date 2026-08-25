@@ -2,7 +2,6 @@ package better.files
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import scala.collection.GenTraversableOnce
 import scala.util.Try
 import scala.util.control.NonFatal
 
@@ -31,7 +30,7 @@ object Disposable {
   implicit val closableDisposer: Disposable[AutoCloseable] =
     Disposable(_.close())
 
-  implicit def traversableDisposer[A](implicit disposer: Disposable[A]): Disposable[Traversable[A]] =
+  implicit def traversableDisposer[A](implicit disposer: Disposable[A]): Disposable[Iterable[A]] =
     Disposable(_.foreach(disposer.dispose))
 
   val fileDisposer: Disposable[File] =
@@ -125,12 +124,12 @@ object Dispose {
       }
 
       /** Use the current managed resource as a generator needed to create another sequence */
-      implicit object traversableFlatMap extends FlatMap[GenTraversableOnce] {
+      implicit object traversableFlatMap extends FlatMap[IterableOnce] {
         override type Output[X] = Iterator[X]
-        override def apply[A, B](m: Dispose[A])(f: A => GenTraversableOnce[B]) = {
+        override def apply[A, B](m: Dispose[A])(f: A => IterableOnce[B]) = {
           val it =
             try {
-              f(m.resource).toIterator
+              f(m.resource).iterator
             } catch {
               case NonFatal(e) => m.disposeOnceAndThrow(e)
             }

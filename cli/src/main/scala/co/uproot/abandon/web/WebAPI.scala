@@ -71,7 +71,7 @@ object WebAPI {
       val debitSubTotal = sumDeltas(debitPosts)
       val creditSubTotal = sumDeltas(creditPosts)
       val fullPath = name.split(':')
-      AccountDetails(AccountName(fullPath), openingBalance, closingBalance, debitSubTotal, creditSubTotal, gPosts)
+      AccountDetails(AccountName(fullPath.toIndexedSeq), openingBalance, closingBalance, debitSubTotal, creditSubTotal, gPosts)
     }
 
     // Determine active accounts: An account is active if it has transactions in the period,

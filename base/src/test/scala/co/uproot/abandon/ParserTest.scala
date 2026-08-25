@@ -38,7 +38,7 @@ class ParserTest extends AnyFlatSpec with Matchers with Inside {
               if (!posMatch) {
                 println("Failed to match positions: " + ae.pos + " and " + be.pos)
               }
-              (ae equals be) && posMatch
+              (ae.equals(be)) && posMatch
             case _ =>
               false
           }
@@ -383,9 +383,9 @@ class ParserTest extends AnyFlatSpec with Matchers with Inside {
 
   it should "parse simple numeric expression" in {
     val tests = Map(
-      "0001" -> (bd("1") -> nlit(1, 0)("0001")),
-      "000" -> (bd("0") -> nlit(0, 0)("000")),
-      "0" -> (bd("0") -> nlit(0, 0)("0")),
+      "0001" -> (bd("1") -> nlit(1, 0)(using "0001")),
+      "000" -> (bd("0") -> nlit(0, 0)(using "000")),
+      "0" -> (bd("0") -> nlit(0, 0)(using "0")),
       "-20" -> (bd("-20") -> unaryNegExpr(nlit(20)))
     )
 

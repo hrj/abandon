@@ -22,9 +22,9 @@ object BalanceUIReport extends UIReport {
       onKeyTyped = { (e: KeyEvent) =>
         // println ("Typed key", e.character, e.code, jfxKeyCode.ENTER, e.delegate.code)
         // if (e.code equals jfxKeyCode.ENTER) {
-        if (e.character equals "\r") {
+        if (e.character.equals("\r")) {
           val selectedItems = selectionModel().getSelectedItems()
-          val selectedAccountNames = selectedItems.flatMap(_.accName.toIterable)
+          val selectedAccountNames = selectedItems.flatMap(_.accName)
           val selectedAccountPatterns = selectedAccountNames.map("^" + _.fullPathStr + ".*")
           val regSettings =
             RegisterReportSettings(

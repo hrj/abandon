@@ -3,7 +3,7 @@ package better.files
 import java.nio.charset._
 import java.nio.{BufferOverflowException, ByteBuffer, CharBuffer}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** A Unicode charset that handles byte-order markers
   *

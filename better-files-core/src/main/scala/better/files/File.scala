@@ -12,7 +12,7 @@ import java.util.function.BiPredicate
 import java.util.regex.Pattern
 import java.util.zip._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
 import scala.util.Properties
 import scala.util.matching.Regex
@@ -280,7 +280,7 @@ class File private (val path: Path)(implicit val fileSystem: FileSystem = path.g
     * @param charset
     * @return all lines in this file
     */
-  def lines(implicit charset: Charset = DefaultCharset): Traversable[String] =
+  def lines(implicit charset: Charset = DefaultCharset): Iterable[String] =
     Files.readAllLines(path, charset).asScala
 
   def lineCount(implicit charset: Charset = DefaultCharset): Long =
@@ -307,7 +307,7 @@ class File private (val path: Path)(implicit val fileSystem: FileSystem = path.g
     new String(byteArray, charset)
 
   def printLines(
-      lines: TraversableOnce[?]
+      lines: IterableOnce[?]
   )(implicit
       openOptions: File.OpenOptions = File.OpenOptions.append
   ): this.type = {
@@ -1482,13 +1482,13 @@ object File {
     val glob: PathMatcherSyntax = new PathMatcherSyntax("glob") {
       override def escapePath(path: String) =
         path
-          .replaceAllLiterally("\\", "\\\\")
-          .replaceAllLiterally("*", "\\*")
-          .replaceAllLiterally("?", "\\?")
-          .replaceAllLiterally("{", "\\{")
-          .replaceAllLiterally("}", "\\}")
-          .replaceAllLiterally("[", "\\[")
-          .replaceAllLiterally("]", "\\]")
+          .replace("\\", "\\\\")
+          .replace("*", "\\*")
+          .replace("?", "\\?")
+          .replace("{", "\\{")
+          .replace("}", "\\}")
+          .replace("[", "\\[")
+          .replace("]", "\\]")
     }
 
     val regex: PathMatcherSyntax = new PathMatcherSyntax("regex") {
