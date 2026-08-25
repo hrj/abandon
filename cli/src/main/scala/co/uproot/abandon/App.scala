@@ -238,16 +238,21 @@ object CLIApp {
 
     var fullReportBytesActiveOnly = WebAPI.makeReport(startDate, initialAppState, filterDescription, showInactiveAccounts = false)
     var fullReportBytesAll = WebAPI.makeReport(startDate, initialAppState, filterDescription, showInactiveAccounts = true)
+    var currentError: Option[String] = None
 
     val server = Server.builder()
       .port(9000)
       .GET("/api/", request => {
-        val showInactive = {
-          val queryParams = request.getQueryParams
-          queryParams != null && queryParams.containsKey("showInactiveAccounts") &&
-            queryParams.get("showInactiveAccounts").contains("true")
+        val bytesToUse = currentError match {
+          case Some(err) => WebAPI.makeErrorReport(err)
+          case None =>
+            val showInactive = {
+              val queryParams = request.getQueryParams
+              queryParams != null && queryParams.containsKey("showInactiveAccounts") &&
+                queryParams.get("showInactiveAccounts").contains("true")
+            }
+            if (showInactive) fullReportBytesAll else fullReportBytesActiveOnly
         }
-        val bytesToUse = if (showInactive) fullReportBytesAll else fullReportBytesActiveOnly
         val msg = String(bytesToUse)
         new StringResponse(200, msg, java.util.Map.of("Content-type", java.util.List.of("application/json")))
       })
@@ -259,10 +264,18 @@ object CLIApp {
     server.start()
 
     FileWatcher().watch(initialProcessedFiles, () => {
-      val (appState, newProcessedFiles) = processInput(settings)
-      fullReportBytesActiveOnly = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = false)
-      fullReportBytesAll = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = true)
-      Some(newProcessedFiles)
+      try {
+        val (appState, newProcessedFiles) = processInput(settings)
+        fullReportBytesActiveOnly = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = false)
+        fullReportBytesAll = WebAPI.makeReport(startDate, appState, filterDescription, showInactiveAccounts = true)
+        currentError = None
+        Some(newProcessedFiles)
+      } catch {
+        case e: Throwable =>
+          println(Console.RED + Console.BOLD + e.getMessage + Console.RESET)
+          currentError = Some(e.getMessage)
+          None
+      }
     })
 
     var done = false

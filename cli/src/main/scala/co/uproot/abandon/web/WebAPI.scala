@@ -232,4 +232,11 @@ object WebAPI {
 
     JsonUtils.serializeJSON(fullReport)
   }
+
+  def makeErrorReport(errorMsg: String): Array[Char] = {
+    val errorReport = Map(
+      "error" -> errorMsg
+    )
+    JsonUtils.serializeJSON(errorReport)
+  }
 }
