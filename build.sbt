@@ -89,3 +89,5 @@ lazy val gui = (project in file("gui")).
 concurrentRestrictions in Global := Seq(
   Tags.limit(Tags.Test, 1)
 )
+
+ThisBuild / strykerIsSupported := true

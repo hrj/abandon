@@ -21,3 +21,5 @@ jobs:
     - uses: sbt/setup-sbt@v1
     - name: Run tests
       run: sbt test
+    - name: Run mutation tests
+      run: sbt base/stryker

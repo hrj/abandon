@@ -118,6 +118,37 @@ Join us in the chat room here: [![Gitter chat room](https://badges.gitter.im/hrj
 
 Or raise an issue in GitHub.
 
+### Mutation Testing
+
+Mutation testing is powered by [Stryker4s](https://stryker-mutator.io/docs/stryker4s/introduction/).
+
+To run mutation tests:
+```bash
+sbt stryker
+```
+Or to run mutation tests specifically on the core `base` project:
+```bash
+sbt base/stryker
+```
+
+Reports (HTML and console) are generated in the `target/stryker4s-report/` directory.
+
+To control the scope and execution time of mutation testing, modify the `mutate` globs or excluded mutators in `stryker4s.conf`:
+```hocon
+stryker4s {
+  mutate: [
+    "base/src/main/scala/**/*.scala"
+  ]
+  scala-dialect: "scala3"
+  reporters: ["html", "console"]
+  thresholds {
+    high = 80
+    low = 60
+    break = 0
+  }
+}
+```
+
 ### Build & Coverage status
 [![Build Status](https://travis-ci.org/hrj/abandon.svg?branch=master)](https://travis-ci.org/hrj/abandon)
 [![Coverage Status](https://img.shields.io/coveralls/hrj/abandon.svg)](https://coveralls.io/r/hrj/abandon?branch=master)
