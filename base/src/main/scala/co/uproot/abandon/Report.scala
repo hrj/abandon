@@ -23,7 +23,7 @@ object Reports {
   def balanceReport(state: AppState, settings: Settings, reportSettings: BalanceReportSettings):BalanceReport = {
     def show(width: Int, a: AccountTreeState, maxNameLength: Int, treePrefix: String = "", isLastChild: Boolean = false, isParentLastChild: Boolean = false, prefix: Option[String] = None, forceIndent: Option[Int] = None): Seq[BalanceReportEntry] = {
       val indent = forceIndent.getOrElse(a.name.depth)
-      val amountIsZero = a.amount equals Zero
+      val amountIsZero = a.amount == Zero
       val hideAccount = (!reportSettings.showZeroAmountAccounts) && amountIsZero
       val renderableChildren = a.childrenNonZero
       val onlyChildren = (renderableChildren.length == 1) && hideAccount
@@ -79,7 +79,7 @@ object Reports {
     }
 
     val filteredAccountTree = state.accState.mkTree(reportSettings.isAccountMatching)
-    assert(reportSettings.accountMatch.isDefined || (filteredAccountTree.total equals Zero), "The Account tree doesn't balance!")
+    assert(reportSettings.accountMatch.isDefined || (filteredAccountTree.total == Zero), "The Account tree doesn't balance!")
 
     val rightAccNames = settings.reportOptions.isRight
     val (rightAccs, leftAccs) = filteredAccountTree.childStates.partition(at => rightAccNames.contains(at.name.name))
@@ -97,7 +97,7 @@ object Reports {
     val rightTotal = rightAccs.map(_.total).sum
     val total = leftTotal + rightTotal
     val totalStr =
-      if (total equals Zero) {
+      if (total == Zero) {
         "Zero"
       } else {
         total.toString
@@ -164,7 +164,7 @@ object Reports {
 
         val totalDeltasPerAccount = matchingAmounts.map {
           case (accountName, amount) =>
-            val myPostings = txnGroup.flatMap(_.children).filter(_.name `equals` accountName)
+            val myPostings = txnGroup.flatMap(_.children).filter(_.name == accountName)
             val render = "%-50s %20.2f %20.2f" format (accountName, sumDeltas(myPostings), amount)
             RegisterReportEntry(accountName.toString, myPostings, render)
         }
@@ -192,7 +192,7 @@ object Reports {
 
         val totalDeltasPerAccount = matchingAmounts.map {
           case (accountName, amount) =>
-            val myTxns = monthlyGroup.flatMap(_.children).filter(_.name `equals` accountName)
+            val myTxns = monthlyGroup.flatMap(_.children).filter(_.name == accountName)
             val render = "%-50s %20.2f %20.2f" format (accountName, myTxns.foldLeft(Zero)(_ + _.delta), amount)
             RegisterReportEntry(accountName.toString, myTxns, render)
         }
@@ -210,7 +210,7 @@ object Reports {
   private def checkSourceNames(closures: Seq[ClosureExportSettings], accountNames: Seq[String]) = {
     var uniqueNames = Set[String]()
     closures foreach { closure =>
-      val srcEntries = accountNames.filter { name => closure.sources.exists(name `matches` _) }
+      val srcEntries = accountNames.filter { name => closure.sources.exists(pattern => name.matches(pattern)) }
       srcEntries foreach { srcName =>
         if (uniqueNames.contains(srcName)) {
           throw new InputError("Found duplicate source entry in closures: " + srcName)
@@ -260,7 +260,7 @@ object Reports {
 
   def mkClosure(accumulator: ClosureAccumulator, latestDate: Date, closure: ClosureExportSettings): ClosureAccumulator = {
     val amounts = accumulator.amounts
-    val (srcEntries, otherEntries) = amounts.partition { name => closure.sources.exists(name._1.fullPathStr `matches` _) }
+    val (srcEntries, otherEntries) = amounts.partition { name => closure.sources.exists(pattern => name._1.fullPathStr.matches(pattern)) }
     val destEntry =
       amounts.find { case (name, amount) => name.fullPathStr == closure.destination } match {
         case Some(entry) => entry
@@ -329,7 +329,7 @@ object Reports {
         <journal>
           <transactions>{
             val sortedGroups = state.accState.postGroups.sortBy(_.date.toInt)
-            sortedGroups.map { txnGroup =>
+            sortedGroups.map { (txnGroup: PostGroup) =>
               <txn date={ txnGroup.date.formatISO8601Ext }>
                 { txnGroup.payeeOpt.map(payee => <payee>{ payee }</payee>).getOrElse(xml.Null) }
                 { txnGroup.annotationOpt.map(annotation => <annotation>{ annotation }</annotation>).getOrElse(xml.Null) }

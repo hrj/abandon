@@ -81,9 +81,9 @@ case class AccountTreeState(name: AccountName, amount: BigDecimal, childStates: 
   assert(amount != null)
   assert(childStates != null)
   lazy val total: BigDecimal = amount + childStates.foldLeft(Zero)(_ + _.total)
-  lazy val childrenNonZero: Seq[AccountTreeState] = childStates.filter(c => (!(c.total equals Zero)) || c.childrenNonZero.nonEmpty)
+  lazy val childrenNonZero: Seq[AccountTreeState] = childStates.filter(c => (!(c.total == Zero)) || c.childrenNonZero.nonEmpty)
   def countRenderableChildren(isRenderable: (AccountTreeState) => Boolean): Int = {
-    childStates.count(c => (!(c.total equals Zero)) || (c.countRenderableChildren(isRenderable) != 0))
+    childStates.count(c => (!(c.total == Zero)) || (c.countRenderableChildren(isRenderable) != 0))
   }
   override def toString = {
     val indent = name.depth * 2
@@ -246,8 +246,8 @@ object Processor {
         txTotal += delta
         detailedPosts :+= DetailedPost(transformAlias(p.accName), delta, p.commentOpt)
       }
-      if (!(txTotal `equals` Zero)) {
-        txScope.definitions.find { d => d.name `equals` "defaultAccount" } match {
+      if (txTotal != Zero) {
+        txScope.definitions.find { d => d.name == "defaultAccount" } match {
           case Some(defaultAccountDef) => {
             val defaultAccount = evaluationContext.evaluateString(FunctionExpr("defaultAccount", Nil, Some(tx.pos)))
             val fullDefaultAccount = transformAlias(AccountName(defaultAccount.split(":").toSeq))
@@ -258,7 +258,7 @@ object Processor {
           case None =>
         }
       }
-      if (!(txTotal `equals` Zero)) {
+      if (txTotal != Zero) {
         throw new ConstraintPosError(s"Transaction does not balance. Unbalanced amount: $txTotal", tx.pos)
       }
       accState.updateAmounts(new PostGroup(detailedPosts, tx, tx.date, tx.annotationOpt, tx.payeeOpt, tx.comments))

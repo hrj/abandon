@@ -430,7 +430,7 @@ case class Settings(
     configFileOpt.map(configFile => Processor.mkRelativeFileName(path, configFile.getAbsolutePath)).getOrElse(path)
   }
   def getConfigRelativePaths(paths: Seq[String]): Seq[String] = {
-    paths filterNot (_ `equals` "-") map getConfigRelativePath
+    paths filterNot (_ == "-") map getConfigRelativePath
   }
   def getOutputFiles: Set[Path] = {
     (reports.map(_.outFiles) ++ exports.map(_.outFiles)).flatMap(getConfigRelativePaths).map(Processor.mkPath).toSet
@@ -440,7 +440,7 @@ case class Settings(
 trait AccountMatcher {
   val accountMatch: Option[Seq[String]]
   def isAccountMatching(name: String) = {
-    accountMatch.map(patterns => patterns.exists(name `matches` _)).getOrElse(true)
+    accountMatch.map(patterns => patterns.exists(pattern => name.matches(pattern))).getOrElse(true)
   }
 }
 

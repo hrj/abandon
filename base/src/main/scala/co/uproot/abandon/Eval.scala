@@ -5,7 +5,7 @@ case class Ref(name: String, argCount: Int, pos: Option[InputPosition])
 object EvaluationContext {
   private def ensureUnique(defs: Seq[Definition]):Unit = {
     if (defs.toSet.size != defs.size) {
-      val duplicate = defs.map(_.name).combinations(2).find(e => e.head `equals` e.tail.head)
+      val duplicate = defs.map(_.name).combinations(2).find(e => e.head == e.tail.head)
       val dupName = duplicate.get.head
       throw new InputPosError("Attempt to redefine symbol: " + dupName, defs.find(_.name == dupName).get.pos)
     }

@@ -250,7 +250,7 @@ case class ANDTxnFilterStack(filterStack: Seq[TransactionFilter]) extends TxnFil
   }
 }
 
-given DateOrdering: Ordering[Date] with {
+implicit object DateOrdering extends Ordering[Date] {
   def compare(x: Date, y: Date) = {
     x.toInt - y.toInt
   }
