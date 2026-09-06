@@ -22,4 +22,4 @@ jobs:
     - name: Run tests
       run: sbt test
     - name: Run mutation tests
-      run: sbt base/stryker
+      run: sbt "project base" stryker

@@ -124,11 +124,11 @@ Mutation testing is powered by [Stryker4s](https://stryker-mutator.io/docs/stryk
 
 To run mutation tests:
 ```bash
-sbt stryker
+sbt "project base" stryker
 ```
-Or to run mutation tests specifically on the core `base` project:
+Or using the alias:
 ```bash
-sbt base/stryker
+sbt stryker
 ```
 
 Reports (HTML and console) are generated in the `target/stryker4s-report/` directory.
@@ -137,7 +137,8 @@ To control the scope and execution time of mutation testing, modify the `mutate`
 ```hocon
 stryker4s {
   mutate: [
-    "base/src/main/scala/**/*.scala"
+    "**/src/main/scala/co/uproot/abandon/Ast.scala",
+    "**/src/main/scala/co/uproot/abandon/Eval.scala"
   ]
   scala-dialect: "scala3"
   reporters: ["html", "console"]

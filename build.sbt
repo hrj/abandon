@@ -92,4 +92,4 @@ concurrentRestrictions in Global := Seq(
 
 ThisBuild / strykerIsSupported := true
 
-addCommandAlias("stryker", "base/stryker")
+addCommandAlias("stryker", "project base; stryker")
