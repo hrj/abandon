@@ -11,6 +11,7 @@ project/target/
 /cli/bin/
 /cli/.cache-main
 /cli/.cache-tests
+/cli/src/main/resources/frontend/build.zip
 /gui/bin/
 /gui/.cache-main
 /gui/.cache-tests
