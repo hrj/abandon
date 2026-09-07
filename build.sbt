@@ -28,10 +28,9 @@ lazy val mutationTestSettings = Seq(
   strykerTimeout := 30.seconds,
   strykerTimeoutFactor := 2.0,
   strykerExcludedMutations := Seq("MethodExpression", "StringLiteral"),
-  // Configuration boundary regression tests raise the full-base score to 34.67%.
-  // Fail below 34% while allowing normal rounding variance around that baseline.
-  strykerThresholdsLow := 35,
-  strykerThresholdsBreak := 34
+  // Focused evaluation and report tests keep the full-base score above 45%.
+  strykerThresholdsLow := 56,
+  strykerThresholdsBreak := 55
 )
 
 lazy val abandon = (project in file(".")).
@@ -79,11 +78,13 @@ lazy val base = (project in file("base")).
       "co.uproot.abandon.AstTest",
       "co.uproot.abandon.ConfigTest",
       "co.uproot.abandon.DateConstraintTest",
+      "co.uproot.abandon.EvaluationContextTest",
       "co.uproot.abandon.GlobTest",
       "co.uproot.abandon.GroupByTest",
       "co.uproot.abandon.HelperTest",
       "co.uproot.abandon.ParserTest",
-      "co.uproot.abandon.ProcessorTest"
+      "co.uproot.abandon.ProcessorTest",
+      "co.uproot.abandon.ReportsTest"
     ),
     run / fork := true,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
