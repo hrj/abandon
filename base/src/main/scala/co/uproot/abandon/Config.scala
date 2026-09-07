@@ -174,8 +174,12 @@ object SettingsHelper {
           case Some(txnfs) => Option(txnfs)
           case None =>
             try {
-              val txnfs = config.getStringList("filters").asScala.toSeq.map(s => s.split("=", 2)).
-                  map({ case Array(k, v) => createTxnFilter(k, v) })
+              val txnfs = config.getStringList("filters").asScala.toSeq.map { filter =>
+                filter.split("=", 2) match {
+                  case Array(k, v) => createTxnFilter(k, v)
+                  case _ => throw new SettingsError(s"Invalid filter '$filter'; expected name=value")
+                }
+              }
               Option(ANDTxnFilterStack(txnfs))
             } catch {
               case e: ConfigException.Missing => None
@@ -185,6 +189,7 @@ object SettingsHelper {
         Right(Settings(inputs, eodConstraints ++ dateConstraints, accounts, reports, ReportOptions(isRight), exports, Some(file), quiet, version, txnFilters))
       } catch {
         case e: ConfigException => Left(e.getMessage)
+        case e: SettingsError => Left(e.getMessage)
       }
     } else {
       Left(s"Config file not found: $configFileName. PWD is ${System.getProperty("user.dir")}")
@@ -204,6 +209,12 @@ object SettingsHelper {
         val expression = parseExpr(config, expr)
         EqualsConstraint(onDate, accName, expression)
       }
+      case other =>
+        throw new ConfigException.BadValue(
+          config.origin,
+          "constraint",
+          s"Found '$other'; expected 'positive', 'negative' or 'equals'."
+        )
     }
   }
 
