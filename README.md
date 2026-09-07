@@ -110,6 +110,28 @@ If you need to use abandon as a library, you can use the following maven depende
 
 The library jars can be downloaded from [ Sonatype](https://oss.sonatype.org/content/repositories/releases/in/co/uproot/).
 
+### Mutation testing
+
+The Scala code uses [Stryker4s](https://stryker-mutator.io/docs/stryker4s/getting-started) to check whether the test suite detects changes in production code.
+
+Run the checked-in mutation-testing baseline for the `base` and `cli` modules:
+
+```sh
+sbt mutationTest
+```
+
+Each module writes timestamped HTML and JSON reports below its `target/` directory. The console summary and reports classify mutants as killed, surviving, timed out, or uncovered. Since `target/` is ignored, generated reports are not committed.
+
+The baseline mutates the tested Scala sources in `base` except `FileWatcher.scala`, whose asynchronous test does not terminate cleanly in Stryker4s's reusable runner. In `cli`, it mutates `JsonUtils.scala`; the other CLI sources depend on the separately generated frontend bundle or do not yet have isolated mutation-test coverage. Method-expression and string-literal mutations are disabled because Stryker4s 1.1.1 cannot reliably roll back their Scala 3.8 compiler errors in a multi-file mutation batch.
+
+To iterate on a smaller area, run one module and pass a source glob:
+
+```sh
+sbt 'base/stryker --mutate "src/main/scala/**/Parser.scala"'
+```
+
+The initial configuration reports the mutation score without enforcing a minimum. A full mutation run is intentionally separate from the normal `sbt test` and CI workflows because it is substantially slower.
+
 ### License
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0)
 

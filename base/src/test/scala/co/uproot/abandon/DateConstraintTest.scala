@@ -79,6 +79,24 @@ class DateConstraintTest extends AnyFlatSpec with Matchers with BeforeAndAfterEa
     constraintWithoutTo.check(appState) should be(true)
   }
 
+  "DateBound" should "distinguish inclusive and exclusive lower boundaries" in {
+    val boundary = Date(2013, 6, 1)
+
+    DateBound(boundary, inclusive = true).isNotEarlierThan(boundary) should be(false)
+    DateBound(boundary, inclusive = true).isNotEarlierThan(Date(2013, 5, 31)) should be(true)
+    DateBound(boundary, inclusive = false).isNotEarlierThan(boundary) should be(true)
+    DateBound(boundary, inclusive = false).isNotEarlierThan(Date(2013, 6, 2)) should be(false)
+  }
+
+  it should "distinguish inclusive and exclusive upper boundaries" in {
+    val boundary = Date(2013, 6, 1)
+
+    DateBound(boundary, inclusive = true).isNotLaterThan(boundary) should be(false)
+    DateBound(boundary, inclusive = true).isNotLaterThan(Date(2013, 6, 2)) should be(true)
+    DateBound(boundary, inclusive = false).isNotLaterThan(boundary) should be(true)
+    DateBound(boundary, inclusive = false).isNotLaterThan(Date(2013, 5, 31)) should be(false)
+  }
+
 
   def mkAppState() = {
     val accState = new AccountState()

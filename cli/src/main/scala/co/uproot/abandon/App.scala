@@ -252,8 +252,9 @@ object CLIApp {
       }
     }
 
+    val serverPort = sys.env.get("PORT").flatMap(_.toIntOption).getOrElse(9000)
     val server = Server.builder()
-      .port(9000)
+      .port(serverPort)
       .GET("/api/", request => {
         val showInactive = {
           val queryParams = request.getQueryParams
@@ -267,7 +268,7 @@ object CLIApp {
       .handle(staticHandler)
       .build()
 
-    println(Helper.info("Visit http://localhost:9000/ for web UI"))
+    println(Helper.info(s"Visit http://localhost:$serverPort/ for web UI"))
 
     server.start()
 
@@ -292,6 +293,9 @@ object CLIApp {
       val line = io.StdIn.readLine("Type [Q] or [quit] to exit: ")
       if (line != null) {
         done = (line == "Q") || (line.toLowerCase == "quit")
+      } else {
+        // Keep serving when launched without an interactive stdin, as in Replit workflows.
+        Thread.sleep(1000)
       }
     }
     println("Exiting")
