@@ -1,0 +1,1 @@
+- [Stryker4s on Scala 3.8](stryker4s-scala-3-8.md) — multi-file runs require mutator exclusions until rollback handling supports Scala 3.8 diagnostics.
