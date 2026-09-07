@@ -71,20 +71,20 @@ lazy val base = (project in file("base")).
       "src/main/scala/**/*.scala",
       "!src/main/scala/**/FileWatcher.scala"
     ),
-    // These asynchronous/integration-style suites do not terminate cleanly in
-    // Stryker4s's reusable test runner. Their production code is still covered
-    // by the remaining processor and parser suites where applicable.
+    // FileWatcherTest and ComplexProcessTest do not terminate cleanly in Stryker4s's reusable runner.
     strykerTestFilter := Seq(
       "co.uproot.abandon.AstTest",
       "co.uproot.abandon.ConfigTest",
       "co.uproot.abandon.DateConstraintTest",
       "co.uproot.abandon.EvaluationContextTest",
-      "co.uproot.abandon.GlobTest",
+      "co.uproot.abandon.BasepathGlobTest",
+      "co.uproot.abandon.BasepathRegexTest",
       "co.uproot.abandon.GroupByTest",
       "co.uproot.abandon.HelperTest",
       "co.uproot.abandon.ParserTest",
       "co.uproot.abandon.ProcessorTest",
-      "co.uproot.abandon.ReportsTest"
+      "co.uproot.abandon.ReportsTest",
+      "co.uproot.abandon.WildcardInputTest"
     ),
     run / fork := true,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),

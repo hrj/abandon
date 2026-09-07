@@ -1,8 +1,13 @@
 package co.uproot.abandon
 
+import java.nio.file.{Files, Path}
+
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.jdk.CollectionConverters._
 
 class BasepathGlobTest extends AnyFlatSpec with Matchers with Inside {
   val basepath = "/foo/bar/"
@@ -117,12 +122,31 @@ class BasepathRegexTest extends AnyFlatSpec with Matchers with Inside {
 }
 
 
-class WildcardInputTest extends AnyFlatSpec with Matchers with Inside {
+class WildcardInputTest extends AnyFlatSpec with Matchers with Inside with BeforeAndAfterAll {
+  private val fixtureRoot = Files.createTempDirectory("abandon-wildcard-input")
+  private val testDir = fixtureRoot.resolve("globtree")
+  private val testDirPath = testDir.toString
 
-  /*
-   * This tests expect working directory to be top level project dir.
-   * Take this into account, If you are running these test from IDE.
-   */
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    Seq("a/a2", "b", "c").foreach(path => Files.createDirectories(testDir.resolve(path)))
+    Seq(
+      "one.txt", "two.txt", "three.txt", "readme.md",
+      "a/a.txt", "a/x.txt", "a/a.not", "a/a2/x.txt", "a/a2/a2.txt",
+      "b/b.txt", "c/c.txt", "c/x.txt"
+    ).foreach(path => Files.createFile(testDir.resolve(path)))
+  }
+
+  override protected def afterAll(): Unit = {
+    try {
+      val paths = Files.walk(fixtureRoot)
+      try paths.iterator.asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(Files.deleteIfExists)
+      finally paths.close()
+    } finally {
+      super.afterAll()
+    }
+  }
+
   private def verify(paths: List[String], refPaths: List[String], baseDir: String) = {
 
     (paths.length == refPaths.length) && !paths.isEmpty &&
@@ -131,12 +155,6 @@ class WildcardInputTest extends AnyFlatSpec with Matchers with Inside {
           path == refPath
       })
   }
-
-  private def printpaths(ps: List[String]) = {
-    for (p <- ps) println(p)
-  }
-
-  val testDirPath = "tests/globtree"
 
   "glob" should "match plain file (e.g. 'file.ext')" in {
     val refPaths = List(
