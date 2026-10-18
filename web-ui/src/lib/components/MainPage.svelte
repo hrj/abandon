@@ -1,10 +1,10 @@
 <script lang="ts">
   import AccountTab from './AccountTab.svelte';
   import BalanceTab from './BalanceTab.svelte';
-  import type { Application } from "$lib/model/Application";
-  import { TabType, BalanceTabInfo, type TabInfo, AccountTabInfo, MonthlyRegisterTabInfo } from '$lib/model/Tabs';
+  import type { Application } from "#lib/model/Application";
+  import { TabType, BalanceTabInfo, type TabInfo, AccountTabInfo, MonthlyRegisterTabInfo } from '#lib/model/Tabs';
   import MonthlyRegisterView from './MonthlyRegisterView.svelte';
-  import { selectedAmounts } from '$lib/stores';
+  import { selectedAmounts } from '#lib/stores';
 
   export let application: Application
 

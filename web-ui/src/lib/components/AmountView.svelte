@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { selectedAmounts } from '$lib/stores';
+  import { selectedAmounts } from '#lib/stores';
 
   export let amount: string
 

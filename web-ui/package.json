@@ -18,5 +18,9 @@
 		"typescript": "^6.0.3",
 		"vite": "^8.1.5"
 	},
-	"type": "module"
+	"type": "module",
+	"imports": {
+		"#lib": "./src/lib",
+		"#lib/*": "./src/lib/*"
+	}
 }

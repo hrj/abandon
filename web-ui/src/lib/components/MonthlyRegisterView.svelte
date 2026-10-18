@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { MonthlySummary } from "$lib/model/Application";
+  import type { MonthlySummary } from "#lib/model/Application";
   import AmountView from "./AmountView.svelte";
 
   export let monthlySummaries: MonthlySummary[]

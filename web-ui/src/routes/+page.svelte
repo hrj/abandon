@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { dev } from "$app/environment";
-  import MainPage from "$lib/components/MainPage.svelte";
-  import type { Application } from "$lib/model/Application";
+  import { dev } from "$app/env";
+  import MainPage from "#lib/components/MainPage.svelte";
+  import type { Application } from "#lib/model/Application";
   import { onMount, onDestroy } from "svelte";
-  import { selectedAmounts } from "$lib/stores";
+  import { selectedAmounts } from "#lib/stores";
   import { get } from "svelte/store";
 
   let application: Application | null = null
