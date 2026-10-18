@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { AccountTransactions } from '$lib/model/Application';
+  import type { AccountTransactions } from '#lib/model/Application';
   import TxnGroupView from './TxnGroupView.svelte';
   import AmountView from './AmountView.svelte';
 

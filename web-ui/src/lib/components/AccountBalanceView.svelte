@@ -1,6 +1,6 @@
 <script lang="ts">
   import AccountBalanceView from './AccountBalanceView.svelte';
-  import type { AccountBalance } from "$lib/model/Application";
+  import type { AccountBalance } from "#lib/model/Application";
   import { fade } from 'svelte/transition';
   import AmountView from './AmountView.svelte';
 

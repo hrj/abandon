@@ -1,6 +1,6 @@
 <script lang="ts">
   import AccountBalanceView from './AccountBalanceView.svelte';
-  import type { AccountBalance } from "$lib/model/Application";
+  import type { AccountBalance } from "#lib/model/Application";
 
   export let accountBalances: AccountBalance[]
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Transaction, TxnGroup } from "$lib/model/Application";
+  import type { Transaction, TxnGroup } from "#lib/model/Application";
   import AmountView from "./AmountView.svelte";
 
   export let name: string | null
