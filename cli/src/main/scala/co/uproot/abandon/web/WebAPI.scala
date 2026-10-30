@@ -108,7 +108,7 @@ object WebAPI {
 
     def getDetailsByMonth(accName: AccountName): Array[Map[String, Any]] = {
       val name = accName.fullPathStr
-      val gPosts = currPosts.filter(_.name == name)
+      val gPosts = groupedPosts.getOrElse(name, Nil)
       val openingBalance = openingBalances.getOrElse(name, Zero)
       val closingBalance = openingBalance + sumDeltas(gPosts)
       val months = gPosts.map(p => Date(p.date.year, p.date.month, 1)).toSet.toArray
@@ -187,10 +187,14 @@ object WebAPI {
     updateAccTxnReport(accTree)
 
     def makeMonthlyRegister(): Array[Map[String, Any]] = {
-      val months = currPosts.map(p => Date(p.date.year, p.date.month, 1)).toSet.toArray
+      val postsByMonth = currPosts.groupBy(p => Date(p.date.year, p.date.month, 1))
+      val months = postsByMonth.keys.toArray.sortBy(_.toInt)
 
-      months.sortBy(_.toInt).map(mDate =>
-        val currMonthPosts = currPosts.filter(p => p.date.month == mDate.month && p.date.year == mDate.year)
+      val runningBalances = scala.collection.mutable.Map[String, BigDecimal]()
+      openingBalances.foreach { case (k, v) => runningBalances(k) = v }
+
+      months.map(mDate => {
+        val currMonthPosts = postsByMonth(mDate)
         val closingBalance = sumDeltas(currMonthPosts)
         assert(closingBalance == Zero)
 
@@ -198,13 +202,13 @@ object WebAPI {
         val debitSubTotal = sumDeltas(debitPosts)
         val creditSubTotal = sumDeltas(creditPosts)
 
-        val accountSummaries = currMonthPosts.groupBy(_.name).toArray.sortBy(_._1).map((name, posts) =>
-          val priorPosts = currPosts.filter(p => p.date.toIntYYYYMM < mDate.toIntYYYYMM && p.name == name)
-          val accOpeningBalance = openingBalances.getOrElse(name, Zero) + sumDeltas(priorPosts)
+        val accountSummaries = currMonthPosts.groupBy(_.name).toArray.sortBy(_._1).map((name, posts) => {
+          val accOpeningBalance = runningBalances.getOrElse(name, Zero)
           val (accDebitPosts, accCreditPosts) = posts.partition(_.delta < Zero)
           val accDebitSubTotal = sumDeltas(accDebitPosts)
           val accCreditSubTotal = sumDeltas(accCreditPosts)
           val accClosingBalance = accOpeningBalance + accDebitSubTotal + accCreditSubTotal
+          runningBalances(name) = accClosingBalance
           Map(
             "name" -> name,
             "opening" -> accOpeningBalance,
@@ -212,16 +216,16 @@ object WebAPI {
             "credit" -> accCreditSubTotal,
             "closing" -> accClosingBalance,
           )
-        )
+        })
         Map(
-            "month" -> s"${Helper.getShortMonth(mDate.month)} ${mDate.year}",
-            "opening" -> Zero,
-            "closing" -> closingBalance,
-            "debit" -> debitSubTotal,
-            "credit" -> creditSubTotal,
-            "accountSummaries" -> accountSummaries
-          )
+          "month" -> s"${Helper.getShortMonth(mDate.month)} ${mDate.year}",
+          "opening" -> Zero,
+          "closing" -> closingBalance,
+          "debit" -> debitSubTotal,
+          "credit" -> creditSubTotal,
+          "accountSummaries" -> accountSummaries
         )
+      })
     }
 
     val fullReport = Map(
